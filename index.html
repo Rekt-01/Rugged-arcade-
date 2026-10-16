@@ -3,116 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rugged Arcade - Enter</title>
+  <title>Welcome to Rugged Orphans</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #06020f;
-      color: #fff;
-      font-family: 'Press Start 2P', monospace;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    body, html {
+      width: 100vw;
       height: 100vh;
       height: 100dvh;
+      background: #070312;
       overflow: hidden;
-      text-align: center;
+      font-family: 'Press Start 2P', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    /* Ambient Neon Glow */
-    .glow-bg {
+    /* Mobile Frame Container */
+    .screen-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      max-width: 460px;
+      overflow: hidden;
+      background: #070312;
+    }
+
+    /* ==========================================
+       1. THREE.JS SPLASH & CHARACTER OVERLAY
+    ========================================== */
+    #intro-layer {
       position: absolute;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(255, 42, 133, 0.15) 0%, rgba(53, 212, 255, 0.15) 50%, rgba(0,0,0,0) 100%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
+      inset: 0;
+      z-index: 10;
+      transition: opacity 0.6s ease;
+    }
+    #intro-layer.fade-out {
+      opacity: 0;
       pointer-events: none;
     }
 
-    .container {
-      z-index: 2;
+    #three-canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Pop-up Character & Speech Box */
+    #char-popup {
+      position: absolute;
+      bottom: -350px;
+      left: 0;
+      width: 100%;
+      padding: 15px;
+      z-index: 5;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 30px;
-      padding: 20px;
+      transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #char-popup.show {
+      bottom: 20px;
     }
 
-    h1 {
-      font-size: 1.5rem;
-      line-height: 1.5;
-      color: #35d4ff;
-      text-shadow: 0 0 10px #35d4ff, 0 0 20px #ff2a85;
-      animation: flicker 3s infinite alternate;
+    /* Animated Sprite Wrapper */
+    .sprite-stage {
+      position: relative;
+      width: 155px;
+      height: 155px;
+      margin-bottom: -8px;
+      z-index: 2;
+      filter: drop-shadow(0 0 12px #35d4ff);
+      animation: spriteMove 0.65s infinite alternate ease-in-out;
     }
 
-    .coin-prompt {
-      font-size: 0.8rem;
-      color: #ffd966;
-      text-shadow: 0 0 5px #ff9900;
-      margin-top: 10px;
+    /* Fast chatter bounce while talking */
+    .sprite-stage.talking {
+      animation: spriteTalk 0.16s infinite alternate ease-in-out;
     }
 
-    /* Interactive "Coin" button to enter */
-    .insert-coin-btn {
+    #char-canvas {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    @keyframes spriteMove {
+      0%   { transform: translateY(0px) rotate(-3deg) scale(1); }
+      50%  { transform: translateY(-10px) rotate(0deg) scale(1.03); }
+      100% { transform: translateY(0px) rotate(3deg) scale(1); }
+    }
+
+    @keyframes spriteTalk {
+      0%   { transform: translateY(0px) rotate(-4deg) scaleY(0.96) scaleX(1.04); }
+      100% { transform: translateY(-12px) rotate(4deg) scaleY(1.06) scaleX(0.96); }
+    }
+
+    /* Retro Arcade Dialogue Box */
+    .speech-bubble {
+      width: 94%;
+      background: rgba(16, 8, 38, 0.95);
+      border: 3px solid #35d4ff;
+      box-shadow: 0 0 18px rgba(255, 42, 133, 0.6), inset 0 0 10px rgba(53, 212, 255, 0.4);
+      border-radius: 8px;
+      padding: 16px 14px;
+      color: #fff;
+      font-size: 0.68rem;
+      line-height: 1.65;
+      text-align: left;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .speaker-tag {
       display: inline-block;
-      margin-top: 20px;
-      padding: 18px 24px;
       background: #ff2a85;
       color: #fff;
-      border: 4px solid #fff;
-      box-shadow: 0 0 15px #ff2a85, inset 0 0 5px #fff;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      animation: pulse 1.5s infinite;
-      transition: transform 0.1s ease;
+      padding: 4px 8px;
+      font-size: 0.55rem;
+      margin-bottom: 10px;
+      border: 2px solid #fff;
     }
 
-    .insert-coin-btn:active {
-      transform: scale(0.95);
-      background: #35d4ff;
-      box-shadow: 0 0 15px #35d4ff;
+    #dialogue-text {
+      min-height: 78px;
+      color: #ffd966;
+      text-shadow: 1px 1px 0px #000;
     }
 
-    footer {
+    .tap-continue {
+      margin-top: 12px;
+      text-align: right;
+      font-size: 0.55rem;
+      color: #35d4ff;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* ==========================================
+       2. VIDEO LAYER & HIDDEN "INSERT COIN" BUTTON
+    ========================================== */
+    #video-layer {
       position: absolute;
-      bottom: 20px;
-      font-size: 0.5rem;
-      color: #4a3e6e;
+      inset: 0;
+      z-index: 2;
+      background: #000;
     }
 
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; filter: saturate(1); }
-      20%, 24%, 55% { opacity: 0.8; filter: saturate(0.8); }
+    #entrance-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    /* Hidden clickable button over "INSERT COIN" that unlocks ONLY when video ends */
+    .hidden-coin-btn {
+      position: absolute;
+      bottom: 5%;
+      left: 8%;
+      width: 84%;
+      height: 16%;
+      z-index: 6;
+      display: none;
+      cursor: pointer;
+      background: transparent;
+      -webkit-tap-highlight-color: rgba(255, 217, 102, 0.25);
+    }
+
+    /* Secondary hidden hitbox over the arcade front door */
+    .hidden-door-btn {
+      position: absolute;
+      top: 33%;
+      left: 60%;
+      width: 32%;
+      height: 35%;
+      z-index: 6;
+      display: none;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .unlocked {
+      display: block !important;
     }
   </style>
 </head>
 <body>
 
-  <div class="glow-bg"></div>
+  <div class="screen-wrapper">
 
-  <div class="container">
-    <h1>RUGGED<br>ARCADE</h1>
-    <p class="coin-prompt">INSERT COIN TO PLAY</p>
-    
-    <!-- This links right to the main arcade image page -->
-    <a href="main.html" class="insert-coin-btn">START GAME</a>
+    <!-- STAGE 1 & 2: THREE.JS PIXEL INTRO + MOVING GUY POPUP -->
+    <div id="intro-layer">
+      <div id="three-canvas-container"></div>
+
+      <div id="char-popup">
+        <div class="sprite-stage" id="sprite-stage">
+          <canvas id="char-canvas" width="200" height="200"></canvas>
+        </div>
+
+        <div class="speech-bubble" id="start-video-trigger">
+          <div class="speaker-tag">ORPHAN #001</div>
+          <div id="dialogue-text"></div>
+          <div class="tap-continue" id="tap-prompt" style="visibility:hidden;">
+            TAP TO ROLL IN ▶
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 3 & 4: SINGLE-PLAY VIDEO + HIDDEN INSERT COIN BUTTON -->
+    <div id="video-layer">
+      <video id="entrance-video" playsinline webkit-playsinline preload="auto">
+        <source src="gemini_generated_video_7F077754.mp4" type="video/mp4">
+      </video>
+
+      <!-- Hidden button over "PRESS START / INSERT COIN TO ENTER" -->
+      <a href="main.html" id="coin-hotspot" class="hidden-coin-btn" title="Insert Coin"></a>
+      <!-- Backup hidden button over the Arcade Front Door -->
+      <a href="main.html" id="door-hotspot" class="hidden-door-btn" title="Enter Arcade"></a>
+    </div>
+
   </div>
 
-  <footer>© 2026 RUGGED ARCADE COLLECTIVE</footer>
+  <script>
+    /* =====================================================
+       PART 1: LOAD IMG_5633.png & AUTO-REMOVE WHITE BACKGROUND
+    ===================================================== */
+    const charCanvas = document.getElementById('char-canvas');
+    const charCtx = charCanvas.getContext('2d');
+    const charImg = new Image();
+    charImg.crossOrigin = "anonymous";
+    charImg.src = 'IMG_5633.png'; // Updated to your exact GitHub filename
 
+    charImg.onload = () => {
+      charCanvas.width = charImg.width;
+      charCanvas.height = charImg.height;
+      charCtx.drawImage(charImg, 0, 0);
+
+      // Strip solid white background pixels so he pops out cleanly
+      try {
+        const imgData = charCtx.getImageData(0, 0, charCanvas.width, charCanvas.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
+            data[i + 3] = 0;
+          }
+        }
+        charCtx.putImageData(imgData, 0, 0);
+      } catch (e) {
+        // Fallback if run locally without server CORS
+      }
+    };
+
+    /* =====================================================
+       PART 2: THREE.JS 3D PIXEL FORMATION ("WELCOME TO RUGGED ORPHANS")
+    ===================================================== */
+    const container = document.getElementById('three-canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.z = 110;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const textCanvas = document.createElement('canvas');
+    const tCtx = textCanvas.getContext('2d');
+    textCanvas.width = 160;
+    textCanvas.height = 100;
+
+    tCtx.fillStyle = '#000';
+    tCtx.fillRect(0, 0, textCanvas.width, textCanvas.height);
+    tCtx.font = 'bold 15px monospace';
+    tCtx.textAlign = 'center';
+
+    tCtx.fillStyle = '#35d4ff';
+    tCtx.fillText('WELCOME TO', 80, 22);
+    tCtx.font = 'bold 22px monospace';
+    tCtx.fillStyle = '#ff2a85';
+    tCtx.fillText('RUGGED', 80, 48);
+    tCtx.fillStyle = '#ffd966';
+    tCtx.fillText('ORPHANS', 80, 74);
+
+    const imageData = tCtx.getImageData(0, 0, textCanvas.width, textCanvas.height).data;
+    const targetPositions = [];
+    const colors = [];
+
+    for (let y = 0; y < textCanvas.height; y += 1) {
+      for (let x = 0; x < textCanvas.width; x += 1) {
+        const idx = (y * textCanvas.width + x) * 4;
+        const r = imageData[idx];
+        const g = imageData[idx + 1];
+        const b = imageData[idx + 2];
+        if (r + g + b > 50) {
+          targetPositions.push({
+            x: (x - textCanvas.width / 2) * 0.85,
+            y: (textCanvas.height / 2 - y) * 0.85 + 22,
+            z: 0
+          });
+          colors.push(new THREE.Color(`rgb(${r},${g},${b})`));
+        }
+      }
+    }
+
+    const count = targetPositions.length;
+    const geometry = new THREE.BoxGeometry(0.78, 0.78, 0.78);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+
+    const dummy = new THREE.Object3D();
+    const startPositions = [];
+
+    for (let i = 0; i < count; i++) {
+      const sx = (Math.random() - 0.5) * 350;
+      const sy = (Math.random() - 0.5) * 350;
+      const sz = (Math.random() - 0.5) * 300 + 80;
+      startPositions.push({ x: sx, y: sy, z: sz });
+
+      dummy.position.set(sx, sy, sz);
+      dummy.updateMatrix();
+      instancedMesh.setMatrixAt(i, dummy.matrix);
+      instancedMesh.setColorAt(i, colors[i]);
+    }
+    scene.add(instancedMesh);
+
+    let startTime = performance.now();
+    let popupTriggered = false;
+
+    function animateThree(now) {
+      requestAnimationFrame(animateThree);
+      const elapsed = (now - startTime) / 1000;
+      const progress = Math.min(elapsed / 2.0, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      for (let i = 0; i < count; i++) {
+        const s = startPositions[i];
+        const t = targetPositions[i];
+
+        const cx = s.x + (t.x - s.x) * ease;
+        const cy = s.y + (t.y - s.y) * ease + Math.sin(elapsed * 3 + i * 0.05) * 0.35;
+        const cz = s.z + (t.z - s.z) * ease;
+
+        dummy.position.set(cx, cy, cz);
+        dummy.rotation.x = (1 - ease) * 4;
+        dummy.rotation.y = (1 - ease) * 4;
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+      }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+
+      if (progress === 1) {
+        instancedMesh.rotation.y = Math.sin(elapsed * 1.5) * 0.14;
+      }
+
+      if (elapsed > 1.7 && !popupTriggered) {
+        popupTriggered = true;
+        triggerCharacterPopup();
+      }
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animateThree);
+
+    /* =====================================================
+       PART 3: FUNNY DEV DIALOGUE
+    ===================================================== */
+    const devJokes = [
+      "YO! Welcome to Rugged Orphans! Our dev promised a AAA metaverse, spent the mint funds on gas fees & Taco Bell, and locked us inside this arcade... Tap here to skate in before he rugs the front door too!"
+    ];
+
+    function triggerCharacterPopup() {
+      const popup = document.getElementById('char-popup');
+      const spriteStage = document.getElementById('sprite-stage');
+      const dialogueEl = document.getElementById('dialogue-text');
+      const tapPrompt = document.getElementById('tap-prompt');
+
+      popup.classList.add('show');
+      spriteStage.classList.add('talking');
+
+      const message = devJokes[0];
+      let charIndex = 0;
+
+      const typeInterval = setInterval(() => {
+        dialogueEl.textContent += message[charIndex];
+        charIndex++;
+
+        if (charIndex >= message.length) {
+          clearInterval(typeInterval);
+          spriteStage.classList.remove('talking');
+          tapPrompt.style.visibility = 'visible';
+        }
+      }, 32);
+    }
+
+    /* =====================================================
+       PART 4: PLAY VIDEO ONCE & UNLOCK HIDDEN "INSERT COIN"
+    ===================================================== */
+    const introLayer = document.getElementById('intro-layer');
+    const video = document.getElementById('entrance-video');
+    const coinHotspot = document.getElementById('coin-hotspot');
+    const doorHotspot = document.getElementById('door-hotspot');
+    let videoStarted = false;
+
+    function startEntranceVideo() {
+      if (videoStarted) return;
+      videoStarted = true;
+
+      introLayer.classList.add('fade-out');
+
+      video.currentTime = 0;
+      video.loop = false;
+      video.play().catch(() => {
+        video.muted = true;
+        video.play();
+      });
+    }
+
+    document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
+
+    video.addEventListener('ended', () => {
+      video.pause();
+      coinHotspot.classList.add('unlocked');
+      doorHotspot.classList.add('unlocked');
+    });
+  </script>
 </body>
 </html>
-
