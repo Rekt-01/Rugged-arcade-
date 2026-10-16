@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rugged Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d061a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    /* Viewport Wrapper to maintain natural iPhone aspect ratio */
+    .arcade-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      max-width: 460px; /* Standard portrait screen width limit */
+      /* Uses your GitHub asset: IMG_5664.jpeg */
+      background: url('IMG_5664.jpeg') no-repeat center center;
+      background-size: cover;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* Invisible, Responsive Clickable Mapping boxes over the scene */
+    .hotspot {
+      position: absolute;
+      display: block;
+      cursor: pointer;
+      border-radius: 6px;
+      -webkit-tap-highlight-color: rgba(255, 42, 133, 0.3); /* Tap glow for mobile */
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    
+    .hotspot:active {
+      box-shadow: 0 0 15px rgba(53, 212, 255, 0.7);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Responsive Percentages map perfectly to targets in IMG_5664.jpeg */
+    .hs-leaderboard { top: 21%; left: 3%; width: 22%; height: 22%; }
+    .hs-toilets     { top: 38%; left: 43%; width: 13%; height: 15%; } /* <-- Pointing to toilet.html */
+    .hs-roadmap     { top: 39%; left: 64%; width: 10%; height: 7%; }
+    .hs-shop        { top: 29%; left: 75%; width: 24%; height: 28%; }
+    .hs-play        { top: 50%; left: 1%; width: 29%; height: 32%; }
+    .hs-gallery     { top: 53%; left: 75%; width: 24%; height: 35%; }
+  </style>
+</head>
+<body>
+
+  <div class="arcade-wrapper">
+    <!-- Clickable Links & Targets -->
+    <a href="#leaderboard" class="hotspot hs-leaderboard" title="Leaderboard"></a>
+    
+    <!-- Toilets hotspot links directly to toilet.html -->
+    <a href="toilet.html"   class="hotspot hs-toilets"     title="Go To Toilets"></a>
+    
+    <a href="#roadmap"     class="hotspot hs-roadmap"     title="Info / Roadmap"></a>
+    <a href="#shop"        class="hotspot hs-shop"        title="Prizes & Shop"></a>
+    <a href="#play"        class="hotspot hs-play"        title="Play Arcade"></a>
+    <a href="#nfts"        class="hotspot hs-gallery"     title="NFTs & Gallery"></a>
+  </div>
+
+</body>
+</html>
