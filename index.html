@@ -13,7 +13,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      background: #070312;
+      background: #05010d;
       overflow: hidden;
       font-family: 'Press Start 2P', monospace;
       display: flex;
@@ -21,14 +21,27 @@
       align-items: center;
     }
 
-    /* Mobile Frame Container */
+    /* iPhone Full-Screen Container */
     .screen-wrapper {
       position: relative;
       width: 100vw;
       height: 100dvh;
       max-width: 460px;
       overflow: hidden;
-      background: #070312;
+      background: radial-gradient(circle at 50% 30%, #1a0938 0%, #05010d 75%);
+    }
+
+    /* Subtle CRT Scanline Overlay */
+    .crt-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.22) 50%
+      );
+      background-size: 100% 4px;
     }
 
     /* ==========================================
@@ -38,7 +51,7 @@
       position: absolute;
       inset: 0;
       z-index: 10;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.65s ease;
     }
     #intro-layer.fade-out {
       opacity: 0;
@@ -54,64 +67,53 @@
     /* Pop-up Character & Speech Box */
     #char-popup {
       position: absolute;
-      bottom: -350px;
+      bottom: 18px;
       left: 0;
       width: 100%;
-      padding: 15px;
+      padding: 0 14px;
       z-index: 5;
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      transform: translateY(40px);
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     #char-popup.show {
-      bottom: 20px;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
-    /* Animated Sprite Wrapper */
+    /* Still Sprite Stage (No bouncing!) */
     .sprite-stage {
       position: relative;
-      width: 155px;
-      height: 155px;
-      margin-bottom: -8px;
+      width: 145px;
+      height: 145px;
+      margin-bottom: -6px;
       z-index: 2;
-      filter: drop-shadow(0 0 12px #35d4ff);
-      animation: spriteMove 0.65s infinite alternate ease-in-out;
-    }
-
-    /* Fast chatter bounce while talking */
-    .sprite-stage.talking {
-      animation: spriteTalk 0.16s infinite alternate ease-in-out;
+      filter: drop-shadow(0 0 10px rgba(53, 212, 255, 0.55));
     }
 
     #char-canvas {
       width: 100%;
       height: 100%;
       image-rendering: pixelated;
-    }
-
-    @keyframes spriteMove {
-      0%   { transform: translateY(0px) rotate(-3deg) scale(1); }
-      50%  { transform: translateY(-10px) rotate(0deg) scale(1.03); }
-      100% { transform: translateY(0px) rotate(3deg) scale(1); }
-    }
-
-    @keyframes spriteTalk {
-      0%   { transform: translateY(0px) rotate(-4deg) scaleY(0.96) scaleX(1.04); }
-      100% { transform: translateY(-12px) rotate(4deg) scaleY(1.06) scaleX(0.96); }
+      display: block;
     }
 
     /* Retro Arcade Dialogue Box */
     .speech-bubble {
-      width: 94%;
-      background: rgba(16, 8, 38, 0.95);
+      width: 100%;
+      background: rgba(12, 5, 28, 0.94);
       border: 3px solid #35d4ff;
-      box-shadow: 0 0 18px rgba(255, 42, 133, 0.6), inset 0 0 10px rgba(53, 212, 255, 0.4);
+      box-shadow: 0 0 20px rgba(255, 42, 133, 0.45), inset 0 0 12px rgba(53, 212, 255, 0.25);
       border-radius: 8px;
-      padding: 16px 14px;
+      padding: 16px 14px 14px;
       color: #fff;
-      font-size: 0.68rem;
-      line-height: 1.65;
+      font-size: 0.66rem;
+      line-height: 1.7;
       text-align: left;
       position: relative;
       cursor: pointer;
@@ -122,28 +124,40 @@
       background: #ff2a85;
       color: #fff;
       padding: 4px 8px;
-      font-size: 0.55rem;
+      font-size: 0.52rem;
       margin-bottom: 10px;
       border: 2px solid #fff;
+      box-shadow: 2px 2px 0 #000;
     }
 
     #dialogue-text {
-      min-height: 78px;
+      min-height: 82px;
       color: #ffd966;
       text-shadow: 1px 1px 0px #000;
     }
 
+    /* Blinking cursor at the end of typing text */
+    #dialogue-text::after {
+      content: '▋';
+      color: #35d4ff;
+      margin-left: 2px;
+      animation: blink 0.6s infinite;
+    }
+    #dialogue-text.done::after {
+      display: none;
+    }
+
     .tap-continue {
-      margin-top: 12px;
+      margin-top: 10px;
       text-align: right;
-      font-size: 0.55rem;
+      font-size: 0.54rem;
       color: #35d4ff;
       animation: blink 0.8s infinite;
     }
 
     @keyframes blink {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
+      50% { opacity: 0.15; }
     }
 
     /* ==========================================
@@ -198,14 +212,15 @@
 <body>
 
   <div class="screen-wrapper">
+    <div class="crt-overlay"></div>
 
-    <!-- STAGE 1 & 2: THREE.JS PIXEL INTRO + MOVING GUY POPUP -->
+    <!-- STAGE 1 & 2: THREE.JS 3D ARCADE INTRO + TALKING CHARACTER -->
     <div id="intro-layer">
       <div id="three-canvas-container"></div>
 
       <div id="char-popup">
-        <div class="sprite-stage" id="sprite-stage">
-          <canvas id="char-canvas" width="200" height="200"></canvas>
+        <div class="sprite-stage">
+          <canvas id="char-canvas" width="256" height="256"></canvas>
         </div>
 
         <div class="speech-bubble" id="start-video-trigger">
@@ -229,111 +244,321 @@
       <!-- Backup hidden button over the Arcade Front Door -->
       <a href="main.html" id="door-hotspot" class="hidden-door-btn" title="Enter Arcade"></a>
     </div>
-
   </div>
 
   <script>
     /* =====================================================
-       PART 1: LOAD IMG_5633.png & AUTO-REMOVE WHITE BACKGROUND
+       PART 1: LOAD IMG_5633.png & BUILD LIP-SYNC MOUTH FRAMES
     ===================================================== */
     const charCanvas = document.getElementById('char-canvas');
     const charCtx = charCanvas.getContext('2d');
-    const charImg = new Image();
-    charImg.crossOrigin = "anonymous";
-    charImg.src = 'IMG_5633.png'; // Updated to your exact GitHub filename
+    charCtx.imageSmoothingEnabled = false;
 
-    charImg.onload = () => {
-      charCanvas.width = charImg.width;
-      charCanvas.height = charImg.height;
-      charCtx.drawImage(charImg, 0, 0);
-
-      // Strip solid white background pixels so he pops out cleanly
-      try {
-        const imgData = charCtx.getImageData(0, 0, charCanvas.width, charCanvas.height);
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
-            data[i + 3] = 0;
-          }
-        }
-        charCtx.putImageData(imgData, 0, 0);
-      } catch (e) {
-        // Fallback if run locally without server CORS
-      }
+    const mouthFrames = {
+      closed: null,
+      half: null,
+      open: null
     };
 
+    const charImg = new Image();
+    charImg.crossOrigin = "anonymous";
+    charImg.src = 'IMG_5633.png';
+
+    charImg.onload = () => {
+      const W = charImg.width;
+      const H = charImg.height;
+      charCanvas.width = W;
+      charCanvas.height = H;
+      charCtx.imageSmoothingEnabled = false;
+
+      // 1. Create clean base frame with white background removed
+      const baseCanvas = document.createElement('canvas');
+      baseCanvas.width = W;
+      baseCanvas.height = H;
+      const bCtx = baseCanvas.getContext('2d');
+      bCtx.imageSmoothingEnabled = false;
+      bCtx.drawImage(charImg, 0, 0);
+
+      // Default proportional mouth coordinates for IMG_5633.png (32x32 pixel grid)
+      let mouthBox = {
+        x: Math.round(W * 0.53125),
+        y: Math.round(H * 0.5625),
+        w: Math.round(W * 0.15625),
+        h: Math.max(2, Math.round(H * 0.03125))
+      };
+
+      try {
+        const imgData = bCtx.getImageData(0, 0, W, H);
+        const data = imgData.data;
+
+        let minX = W, maxX = 0, minY = H, maxY = 0, foundMouth = false;
+
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4;
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+
+            // Strip solid white background
+            if (r > 240 && g > 240 && b > 240) {
+              data[i + 3] = 0;
+            }
+
+            // Detect pink mouth pixels in the lower-middle face region
+            if (x > W * 0.48 && x < W * 0.73 && y > H * 0.53 && y < H * 0.62) {
+              if (r > 175 && g > 60 && g < 120 && b > 70 && b < 135) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+                foundMouth = true;
+              }
+            }
+          }
+        }
+        bCtx.putImageData(imgData, 0, 0);
+
+        if (foundMouth && (maxX - minX) > 4) {
+          mouthBox = {
+            x: minX,
+            y: minY,
+            w: maxX - minX + 1,
+            h: Math.max(2, maxY - minY + 1)
+          };
+        }
+      } catch (e) {
+        // Fallback if local file CORS blocks getImageData
+      }
+
+      mouthFrames.closed = baseCanvas;
+
+      // Helper to build pixel-accurate open/half-open talking frames
+      function createTalkingFrame(openMultiplier) {
+        const c = document.createElement('canvas');
+        c.width = W;
+        c.height = H;
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(baseCanvas, 0, 0);
+
+        const pxUnit = mouthBox.h; // 1 pixel-art block height
+        const jawDrop = Math.round(pxUnit * (openMultiplier * 0.45));
+        const openH = Math.round(pxUnit * openMultiplier);
+
+        // Shift chin/jaw slightly downward when mouth opens wide
+        const jawX = Math.round(W * 0.40);
+        const jawY = mouthBox.y + pxUnit;
+        const jawW = Math.round(W * 0.32);
+        const jawH = Math.round(H * 0.11);
+
+        const jawSlice = document.createElement('canvas');
+        jawSlice.width = jawW;
+        jawSlice.height = jawH;
+        jawSlice.getContext('2d').drawImage(baseCanvas, jawX, jawY, jawW, jawH, 0, 0, jawW, jawH);
+
+        ctx.drawImage(jawSlice, jawX, jawY + jawDrop);
+
+        // Draw dark pixel mouth interior
+        ctx.fillStyle = '#1c0b19';
+        ctx.fillRect(mouthBox.x, mouthBox.y + Math.round(pxUnit * 0.35), mouthBox.w, openH);
+
+        // Draw upper & lower pixel lips
+        ctx.fillStyle = '#cf5763';
+        ctx.fillRect(mouthBox.x, mouthBox.y, mouthBox.w, Math.max(2, Math.round(pxUnit * 0.45)));
+        ctx.fillRect(mouthBox.x, mouthBox.y + openH, mouthBox.w, Math.max(2, Math.round(pxUnit * 0.45)));
+
+        // Draw pixel tongue inside wide-open mouth
+        if (openMultiplier > 1.1) {
+          ctx.fillStyle = '#ff5c77';
+          const tongueW = Math.round(mouthBox.w * 0.55);
+          const tongueX = mouthBox.x + Math.round((mouthBox.w - tongueW) * 0.4);
+          ctx.fillRect(tongueX, mouthBox.y + Math.round(openH * 0.6), tongueW, Math.max(2, Math.round(openH * 0.4)));
+        }
+
+        return c;
+      }
+
+      mouthFrames.half = createTalkingFrame(0.85);
+      mouthFrames.open = createTalkingFrame(1.45);
+
+      // Render initial closed mouth state
+      setMouthState('closed');
+    };
+
+    function setMouthState(state) {
+      if (!mouthFrames[state]) return;
+      charCtx.clearRect(0, 0, charCanvas.width, charCanvas.height);
+      charCtx.drawImage(mouthFrames[state], 0, 0);
+    }
+
     /* =====================================================
-       PART 2: THREE.JS 3D PIXEL FORMATION ("WELCOME TO RUGGED ORPHANS")
+       PART 2: REDESIGNED MOBILE-COMPATIBLE THREE.JS INTRO
     ===================================================== */
     const container = document.getElementById('three-canvas-container');
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.z = 110;
+    scene.fog = new THREE.FogExp2(0x05010d, 0.0065);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    const textCanvas = document.createElement('canvas');
-    const tCtx = textCanvas.getContext('2d');
-    textCanvas.width = 160;
-    textCanvas.height = 100;
+    // Dynamic 3D Lighting for depth on the voxel cubes
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
 
-    tCtx.fillStyle = '#000';
-    tCtx.fillRect(0, 0, textCanvas.width, textCanvas.height);
-    tCtx.font = 'bold 15px monospace';
-    tCtx.textAlign = 'center';
+    const cyanLight = new THREE.PointLight(0x35d4ff, 2.2, 250);
+    cyanLight.position.set(-40, 50, 60);
+    scene.add(cyanLight);
 
-    tCtx.fillStyle = '#35d4ff';
-    tCtx.fillText('WELCOME TO', 80, 22);
-    tCtx.font = 'bold 22px monospace';
-    tCtx.fillStyle = '#ff2a85';
-    tCtx.fillText('RUGGED', 80, 48);
-    tCtx.fillStyle = '#ffd966';
-    tCtx.fillText('ORPHANS', 80, 74);
+    const pinkLight = new THREE.PointLight(0xff2a85, 2.2, 250);
+    pinkLight.position.set(40, -20, 60);
+    scene.add(pinkLight);
 
-    const imageData = tCtx.getImageData(0, 0, textCanvas.width, textCanvas.height).data;
-    const targetPositions = [];
-    const colors = [];
+    // 3D Retro Arcade Perspective Grid Floor
+    const gridHelper = new THREE.GridHelper(320, 32, 0xff2a85, 0x2d1259);
+    gridHelper.position.y = -36;
+    scene.add(gridHelper);
 
-    for (let y = 0; y < textCanvas.height; y += 1) {
-      for (let x = 0; x < textCanvas.width; x += 1) {
-        const idx = (y * textCanvas.width + x) * 4;
-        const r = imageData[idx];
-        const g = imageData[idx + 1];
-        const b = imageData[idx + 2];
-        if (r + g + b > 50) {
-          targetPositions.push({
-            x: (x - textCanvas.width / 2) * 0.85,
-            y: (textCanvas.height / 2 - y) * 0.85 + 22,
-            z: 0
-          });
-          colors.push(new THREE.Color(`rgb(${r},${g},${b})`));
-        }
-      }
+    // Floating 3D Arcade Starfield Particles
+    const starCount = 180;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i += 3) {
+      starPos[i]     = (Math.random() - 0.5) * 180;
+      starPos[i + 1] = (Math.random() - 0.5) * 180;
+      starPos[i + 2] = (Math.random() - 0.5) * 160 - 20;
     }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0x35d4ff, size: 1.4, transparent: true, opacity: 0.75 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
 
-    const count = targetPositions.length;
-    const geometry = new THREE.BoxGeometry(0.78, 0.78, 0.78);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+    // Crisp 5x5 Pixel Bitmap Font Dictionary for Perfect Mobile Voxel Text
+    const PIXEL_FONT = {
+      'W': ["10001","10001","10101","11011","10001"],
+      'E': ["11111","10000","11110","10000","11111"],
+      'L': ["10000","10000","10000","10000","11111"],
+      'C': ["01111","10000","10000","10000","01111"],
+      'O': ["01110","10001","10001","10001","01110"],
+      'M': ["10001","11011","10101","10001","10001"],
+      'T': ["11111","00100","00100","00100","00100"],
+      'R': ["11110","10001","11110","10010","10001"],
+      'U': ["10001","10001","10001","10001","01110"],
+      'G': ["01111","10000","10011","10001","01111"],
+      'D': ["11110","10001","10001","10001","11110"],
+      'P': ["11110","10001","11110","10000","10000"],
+      'H': ["10001","10001","11111","10001","10001"],
+      'A': ["01110","10001","11111","10001","10001"],
+      'N': ["10001","11001","10101","10011","10001"],
+      'S': ["01111","10000","01110","00001","11110"],
+      ' ': ["000","000","000","000","000"]
+    };
+
+    const lines = [
+      { text: "WELCOME TO", yOffset: 31, scale: 1.0,  color: 0x35d4ff, shade: 0x0b4f6c },
+      { text: "RUGGED",     yOffset: 19, scale: 1.42, color: 0xff2a85, shade: 0x6b0937 },
+      { text: "ORPHANS",    yOffset: 6,  scale: 1.32, color: 0xffd966, shade: 0x805300 }
+    ];
+
+    const voxels = [];
+
+    lines.forEach((line) => {
+      // Calculate total pixel width of the line
+      let totalUnits = 0;
+      for (let ch of line.text) {
+        const glyph = PIXEL_FONT[ch] || PIXEL_FONT[' '];
+        totalUnits += glyph[0].length + 1;
+      }
+      totalUnits -= 1;
+
+      let cursorX = -totalUnits / 2;
+
+      for (let ch of line.text) {
+        const glyph = PIXEL_FONT[ch] || PIXEL_FONT[' '];
+        const gWidth = glyph[0].length;
+
+        for (let row = 0; row < 5; row++) {
+          for (let col = 0; col < gWidth; col++) {
+            if (glyph[row][col] === '1') {
+              const px = (cursorX + col) * line.scale;
+              const py = (2 - row) * line.scale + line.yOffset;
+
+              // Front neon voxel face
+              voxels.push({
+                tx: px, ty: py, tz: 0,
+                scale: line.scale * 0.92,
+                color: new THREE.Color(line.color)
+              });
+
+              // Extruded 3D shadow layer behind each pixel for true 3D depth
+              voxels.push({
+                tx: px, ty: py, tz: -line.scale * 0.95,
+                scale: line.scale * 0.92,
+                color: new THREE.Color(line.shade)
+              });
+            }
+          }
+        }
+        cursorX += gWidth + 1;
+      }
+    });
+
+    // Build InstancedMesh for 60fps mobile performance
+    const voxelCount = voxels.length;
+    const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+    const boxMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.25,
+      metalness: 0.35
+    });
+    const voxelMesh = new THREE.InstancedMesh(boxGeo, boxMat, voxelCount);
+    scene.add(voxelMesh);
 
     const dummy = new THREE.Object3D();
-    const startPositions = [];
 
-    for (let i = 0; i < count; i++) {
-      const sx = (Math.random() - 0.5) * 350;
-      const sy = (Math.random() - 0.5) * 350;
-      const sz = (Math.random() - 0.5) * 300 + 80;
-      startPositions.push({ x: sx, y: sy, z: sz });
+    // Assign swirling vortex start positions & individual arrival delays
+    voxels.forEach((v, i) => {
+      const angle = (i / voxelCount) * Math.PI * 14;
+      const radius = 25 + Math.random() * 55;
+      v.sx = Math.cos(angle) * radius;
+      v.sy = Math.sin(angle) * radius + 15;
+      v.sz = 95 + Math.random() * 80;
+      v.delay = (v.tx + 35) * 0.008 + Math.random() * 0.25;
 
-      dummy.position.set(sx, sy, sz);
+      dummy.position.set(v.sx, v.sy, v.sz);
+      dummy.scale.set(v.scale, v.scale, v.scale);
       dummy.updateMatrix();
-      instancedMesh.setMatrixAt(i, dummy.matrix);
-      instancedMesh.setColorAt(i, colors[i]);
+      voxelMesh.setMatrixAt(i, dummy.matrix);
+      voxelMesh.setColorAt(i, v.color);
+    });
+
+    // Responsive camera distance so text always fits any mobile screen width
+    function updateCameraForMobile() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+
+      // Ensure 68 world units of horizontal width always fit inside the screen
+      const fovRad = (camera.fov * Math.PI) / 180;
+      const requiredZ = (68 / 2) / (Math.tan(fovRad / 2) * camera.aspect);
+      camera.position.z = Math.max(82, requiredZ);
+      camera.position.y = 4;
+      renderer.setSize(w, h);
     }
-    scene.add(instancedMesh);
+    updateCameraForMobile();
+    window.addEventListener('resize', updateCameraForMobile);
+
+    // Touch / Mouse subtle 3D parallax
+    let targetRotX = 0, targetRotY = 0;
+    window.addEventListener('pointermove', (e) => {
+      const nx = (e.clientX / window.innerWidth) * 2 - 1;
+      const ny = (e.clientY / window.innerHeight) * 2 - 1;
+      targetRotY = nx * 0.22;
+      targetRotX = ny * 0.12;
+    });
 
     let startTime = performance.now();
     let popupTriggered = false;
@@ -341,30 +566,49 @@
     function animateThree(now) {
       requestAnimationFrame(animateThree);
       const elapsed = (now - startTime) / 1000;
-      const progress = Math.min(elapsed / 2.0, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
 
-      for (let i = 0; i < count; i++) {
-        const s = startPositions[i];
-        const t = targetPositions[i];
+      // Move arcade floor grid forward for 3D motion feel
+      gridHelper.position.z = (elapsed * 12) % 10;
 
-        const cx = s.x + (t.x - s.x) * ease;
-        const cy = s.y + (t.y - s.y) * ease + Math.sin(elapsed * 3 + i * 0.05) * 0.35;
-        const cz = s.z + (t.z - s.z) * ease;
+      // Slowly rotate starfield
+      stars.rotation.z = elapsed * 0.05;
+
+      // Animate each 3D pixel cube from vortex into the title
+      for (let i = 0; i < voxelCount; i++) {
+        const v = voxels[i];
+        const localT = Math.max(0, Math.min(1, (elapsed - v.delay) / 1.45));
+        // Cubic ease-out with slight snap
+        const ease = 1 - Math.pow(1 - localT, 3);
+
+        // Swirl angle decays to 0 as cube locks into place
+        const swirl = (1 - ease) * 3.5;
+        const cosS = Math.cos(swirl);
+        const sinS = Math.sin(swirl);
+        const rx = v.sx * cosS - v.sy * sinS;
+        const ry = v.sx * sinS + v.sy * cosS;
+
+        const cx = rx + (v.tx - rx) * ease;
+        // Subtle 3D wave ripple once assembled
+        const wave = localT === 1 ? Math.sin(elapsed * 3.2 + v.tx * 0.18) * 0.35 : 0;
+        const cy = ry + (v.ty - ry) * ease + wave;
+        const cz = v.sz + (v.tz - v.sz) * ease;
 
         dummy.position.set(cx, cy, cz);
-        dummy.rotation.x = (1 - ease) * 4;
-        dummy.rotation.y = (1 - ease) * 4;
+        dummy.rotation.set((1 - ease) * 5, (1 - ease) * 5, 0);
+        dummy.scale.set(v.scale, v.scale, v.scale);
         dummy.updateMatrix();
-        instancedMesh.setMatrixAt(i, dummy.matrix);
+        voxelMesh.setMatrixAt(i, dummy.matrix);
       }
-      instancedMesh.instanceMatrix.needsUpdate = true;
+      voxelMesh.instanceMatrix.needsUpdate = true;
 
-      if (progress === 1) {
-        instancedMesh.rotation.y = Math.sin(elapsed * 1.5) * 0.14;
-      }
+      // Gentle 3D floating tilt + touch parallax
+      const autoTiltY = Math.sin(elapsed * 1.4) * 0.12;
+      const autoTiltX = Math.cos(elapsed * 1.1) * 0.05;
+      voxelMesh.rotation.y += ((autoTiltY + targetRotY) - voxelMesh.rotation.y) * 0.08;
+      voxelMesh.rotation.x += ((autoTiltX + targetRotX) - voxelMesh.rotation.x) * 0.08;
 
-      if (elapsed > 1.7 && !popupTriggered) {
+      // Trigger character pop-up once the 3D logo finishes assembling
+      if (elapsed > 1.85 && !popupTriggered) {
         popupTriggered = true;
         triggerCharacterPopup();
       }
@@ -374,7 +618,7 @@
     requestAnimationFrame(animateThree);
 
     /* =====================================================
-       PART 3: FUNNY DEV DIALOGUE
+       PART 3: STILL CHARACTER + LIP-SYNCED DEV DIALOGUE
     ===================================================== */
     const devJokes = [
       "YO! Welcome to Rugged Orphans! Our dev promised a AAA metaverse, spent the mint funds on gas fees & Taco Bell, and locked us inside this arcade... Tap here to skate in before he rugs the front door too!"
@@ -382,26 +626,46 @@
 
     function triggerCharacterPopup() {
       const popup = document.getElementById('char-popup');
-      const spriteStage = document.getElementById('sprite-stage');
       const dialogueEl = document.getElementById('dialogue-text');
       const tapPrompt = document.getElementById('tap-prompt');
 
       popup.classList.add('show');
-      spriteStage.classList.add('talking');
 
       const message = devJokes[0];
       let charIndex = 0;
+      let syllableToggle = 0;
 
-      const typeInterval = setInterval(() => {
-        dialogueEl.textContent += message[charIndex];
-        charIndex++;
+      // Wait briefly for slide-up transition to finish, then start reading aloud
+      setTimeout(() => {
+        const typeInterval = setInterval(() => {
+          const ch = message[charIndex];
+          dialogueEl.textContent += ch;
+          charIndex++;
 
-        if (charIndex >= message.length) {
-          clearInterval(typeInterval);
-          spriteStage.classList.remove('talking');
-          tapPrompt.style.visibility = 'visible';
-        }
-      }, 32);
+          // Sync mouth movement to the character being printed
+          if (/[a-zA-Z0-9]/.test(ch)) {
+            syllableToggle++;
+            if (syllableToggle % 3 === 0) {
+              setMouthState('closed');
+            } else if (/[aeiouAEIOUYO]/.test(ch)) {
+              setMouthState('open');
+            } else {
+              setMouthState('half');
+            }
+          } else {
+            // Pause/close mouth naturally on spaces and punctuation
+            setMouthState('closed');
+          }
+
+          // When finished typing, close mouth and show continue prompt
+          if (charIndex >= message.length) {
+            clearInterval(typeInterval);
+            setMouthState('closed');
+            dialogueEl.classList.add('done');
+            tapPrompt.style.visibility = 'visible';
+          }
+        }, 38);
+      }, 400);
     }
 
     /* =====================================================
@@ -417,6 +681,7 @@
       if (videoStarted) return;
       videoStarted = true;
 
+      setMouthState('closed');
       introLayer.classList.add('fade-out');
 
       video.currentTime = 0;
@@ -427,8 +692,10 @@
       });
     }
 
+    // Tap speech bubble or intro screen to start the skateboard entrance video
     document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
 
+    // When he stops at the front door (video ends), unlock the hidden button
     video.addEventListener('ended', () => {
       video.pause();
       coinHotspot.classList.add('unlocked');
