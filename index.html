@@ -1,1 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rugged Arcade - Enter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #06020f;
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Ambient Neon Glow */
+    .glow-bg {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 42, 133, 0.15) 0%, rgba(53, 212, 255, 0.15) 50%, rgba(0,0,0,0) 100%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .container {
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      line-height: 1.5;
+      color: #35d4ff;
+      text-shadow: 0 0 10px #35d4ff, 0 0 20px #ff2a85;
+      animation: flicker 3s infinite alternate;
+    }
+
+    .coin-prompt {
+      font-size: 0.8rem;
+      color: #ffd966;
+      text-shadow: 0 0 5px #ff9900;
+      margin-top: 10px;
+    }
+
+    /* Interactive "Coin" button to enter */
+    .insert-coin-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 18px 24px;
+      background: #ff2a85;
+      color: #fff;
+      border: 4px solid #fff;
+      box-shadow: 0 0 15px #ff2a85, inset 0 0 5px #fff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      animation: pulse 1.5s infinite;
+      transition: transform 0.1s ease;
+    }
+
+    .insert-coin-btn:active {
+      transform: scale(0.95);
+      background: #35d4ff;
+      box-shadow: 0 0 15px #35d4ff;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.5rem;
+      color: #4a3e6e;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; filter: saturate(1); }
+      20%, 24%, 55% { opacity: 0.8; filter: saturate(0.8); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-bg"></div>
+
+  <div class="container">
+    <h1>RUGGED<br>ARCADE</h1>
+    <p class="coin-prompt">INSERT COIN TO PLAY</p>
+    
+    <!-- This links right to the main arcade image page -->
+    <a href="main.html" class="insert-coin-btn">START GAME</a>
+  </div>
+
+  <footer>© 2026 RUGGED ARCADE COLLECTIVE</footer>
+
+</body>
+</html>
 
