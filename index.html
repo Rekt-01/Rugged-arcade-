@@ -86,7 +86,7 @@
       pointer-events: auto;
     }
 
-    /* Still Sprite Stage (No bouncing!) */
+    /* Still Sprite Stage */
     .sprite-stage {
       position: relative;
       width: 145px;
@@ -271,7 +271,6 @@
       charCanvas.height = H;
       charCtx.imageSmoothingEnabled = false;
 
-      // 1. Create clean base frame with white background removed
       const baseCanvas = document.createElement('canvas');
       baseCanvas.width = W;
       baseCanvas.height = H;
@@ -279,7 +278,6 @@
       bCtx.imageSmoothingEnabled = false;
       bCtx.drawImage(charImg, 0, 0);
 
-      // Default proportional mouth coordinates for IMG_5633.png (32x32 pixel grid)
       let mouthBox = {
         x: Math.round(W * 0.53125),
         y: Math.round(H * 0.5625),
@@ -298,12 +296,10 @@
             const i = (y * W + x) * 4;
             const r = data[i], g = data[i + 1], b = data[i + 2];
 
-            // Strip solid white background
             if (r > 240 && g > 240 && b > 240) {
               data[i + 3] = 0;
             }
 
-            // Detect pink mouth pixels in the lower-middle face region
             if (x > W * 0.48 && x < W * 0.73 && y > H * 0.53 && y < H * 0.62) {
               if (r > 175 && g > 60 && g < 120 && b > 70 && b < 135) {
                 if (x < minX) minX = x;
@@ -325,13 +321,10 @@
             h: Math.max(2, maxY - minY + 1)
           };
         }
-      } catch (e) {
-        // Fallback if local file CORS blocks getImageData
-      }
+      } catch (e) {}
 
       mouthFrames.closed = baseCanvas;
 
-      // Helper to build pixel-accurate open/half-open talking frames
       function createTalkingFrame(openMultiplier) {
         const c = document.createElement('canvas');
         c.width = W;
@@ -340,11 +333,10 @@
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(baseCanvas, 0, 0);
 
-        const pxUnit = mouthBox.h; // 1 pixel-art block height
+        const pxUnit = mouthBox.h;
         const jawDrop = Math.round(pxUnit * (openMultiplier * 0.45));
         const openH = Math.round(pxUnit * openMultiplier);
 
-        // Shift chin/jaw slightly downward when mouth opens wide
         const jawX = Math.round(W * 0.40);
         const jawY = mouthBox.y + pxUnit;
         const jawW = Math.round(W * 0.32);
@@ -357,16 +349,13 @@
 
         ctx.drawImage(jawSlice, jawX, jawY + jawDrop);
 
-        // Draw dark pixel mouth interior
         ctx.fillStyle = '#1c0b19';
         ctx.fillRect(mouthBox.x, mouthBox.y + Math.round(pxUnit * 0.35), mouthBox.w, openH);
 
-        // Draw upper & lower pixel lips
         ctx.fillStyle = '#cf5763';
         ctx.fillRect(mouthBox.x, mouthBox.y, mouthBox.w, Math.max(2, Math.round(pxUnit * 0.45)));
         ctx.fillRect(mouthBox.x, mouthBox.y + openH, mouthBox.w, Math.max(2, Math.round(pxUnit * 0.45)));
 
-        // Draw pixel tongue inside wide-open mouth
         if (openMultiplier > 1.1) {
           ctx.fillStyle = '#ff5c77';
           const tongueW = Math.round(mouthBox.w * 0.55);
@@ -380,7 +369,6 @@
       mouthFrames.half = createTalkingFrame(0.85);
       mouthFrames.open = createTalkingFrame(1.45);
 
-      // Render initial closed mouth state
       setMouthState('closed');
     };
 
@@ -391,7 +379,7 @@
     }
 
     /* =====================================================
-       PART 2: REDESIGNED MOBILE-COMPATIBLE THREE.JS INTRO
+       PART 2: THREE.JS 3D ARCADE INTRO
     ===================================================== */
     const container = document.getElementById('three-canvas-container');
     const scene = new THREE.Scene();
@@ -404,7 +392,6 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // Dynamic 3D Lighting for depth on the voxel cubes
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
     scene.add(ambientLight);
 
@@ -416,12 +403,10 @@
     pinkLight.position.set(40, -20, 60);
     scene.add(pinkLight);
 
-    // 3D Retro Arcade Perspective Grid Floor
     const gridHelper = new THREE.GridHelper(320, 32, 0xff2a85, 0x2d1259);
     gridHelper.position.y = -36;
     scene.add(gridHelper);
 
-    // Floating 3D Arcade Starfield Particles
     const starCount = 180;
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
@@ -435,7 +420,6 @@
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
-    // Crisp 5x5 Pixel Bitmap Font Dictionary for Perfect Mobile Voxel Text
     const PIXEL_FONT = {
       'W': ["10001","10001","10101","11011","10001"],
       'E': ["11111","10000","11110","10000","11111"],
@@ -465,7 +449,6 @@
     const voxels = [];
 
     lines.forEach((line) => {
-      // Calculate total pixel width of the line
       let totalUnits = 0;
       for (let ch of line.text) {
         const glyph = PIXEL_FONT[ch] || PIXEL_FONT[' '];
@@ -485,14 +468,12 @@
               const px = (cursorX + col) * line.scale;
               const py = (2 - row) * line.scale + line.yOffset;
 
-              // Front neon voxel face
               voxels.push({
                 tx: px, ty: py, tz: 0,
                 scale: line.scale * 0.92,
                 color: new THREE.Color(line.color)
               });
 
-              // Extruded 3D shadow layer behind each pixel for true 3D depth
               voxels.push({
                 tx: px, ty: py, tz: -line.scale * 0.95,
                 scale: line.scale * 0.92,
@@ -505,7 +486,6 @@
       }
     });
 
-    // Build InstancedMesh for 60fps mobile performance
     const voxelCount = voxels.length;
     const boxGeo = new THREE.BoxGeometry(1, 1, 1);
     const boxMat = new THREE.MeshStandardMaterial({
@@ -518,7 +498,6 @@
 
     const dummy = new THREE.Object3D();
 
-    // Assign swirling vortex start positions & individual arrival delays
     voxels.forEach((v, i) => {
       const angle = (i / voxelCount) * Math.PI * 14;
       const radius = 25 + Math.random() * 55;
@@ -534,14 +513,12 @@
       voxelMesh.setColorAt(i, v.color);
     });
 
-    // Responsive camera distance so text always fits any mobile screen width
     function updateCameraForMobile() {
       const w = container.clientWidth;
       const h = container.clientHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
 
-      // Ensure 68 world units of horizontal width always fit inside the screen
       const fovRad = (camera.fov * Math.PI) / 180;
       const requiredZ = (68 / 2) / (Math.tan(fovRad / 2) * camera.aspect);
       camera.position.z = Math.max(82, requiredZ);
@@ -551,7 +528,6 @@
     updateCameraForMobile();
     window.addEventListener('resize', updateCameraForMobile);
 
-    // Touch / Mouse subtle 3D parallax
     let targetRotX = 0, targetRotY = 0;
     window.addEventListener('pointermove', (e) => {
       const nx = (e.clientX / window.innerWidth) * 2 - 1;
@@ -567,20 +543,14 @@
       requestAnimationFrame(animateThree);
       const elapsed = (now - startTime) / 1000;
 
-      // Move arcade floor grid forward for 3D motion feel
       gridHelper.position.z = (elapsed * 12) % 10;
-
-      // Slowly rotate starfield
       stars.rotation.z = elapsed * 0.05;
 
-      // Animate each 3D pixel cube from vortex into the title
       for (let i = 0; i < voxelCount; i++) {
         const v = voxels[i];
         const localT = Math.max(0, Math.min(1, (elapsed - v.delay) / 1.45));
-        // Cubic ease-out with slight snap
         const ease = 1 - Math.pow(1 - localT, 3);
 
-        // Swirl angle decays to 0 as cube locks into place
         const swirl = (1 - ease) * 3.5;
         const cosS = Math.cos(swirl);
         const sinS = Math.sin(swirl);
@@ -588,7 +558,6 @@
         const ry = v.sx * sinS + v.sy * cosS;
 
         const cx = rx + (v.tx - rx) * ease;
-        // Subtle 3D wave ripple once assembled
         const wave = localT === 1 ? Math.sin(elapsed * 3.2 + v.tx * 0.18) * 0.35 : 0;
         const cy = ry + (v.ty - ry) * ease + wave;
         const cz = v.sz + (v.tz - v.sz) * ease;
@@ -601,13 +570,11 @@
       }
       voxelMesh.instanceMatrix.needsUpdate = true;
 
-      // Gentle 3D floating tilt + touch parallax
       const autoTiltY = Math.sin(elapsed * 1.4) * 0.12;
       const autoTiltX = Math.cos(elapsed * 1.1) * 0.05;
       voxelMesh.rotation.y += ((autoTiltY + targetRotY) - voxelMesh.rotation.y) * 0.08;
       voxelMesh.rotation.x += ((autoTiltX + targetRotX) - voxelMesh.rotation.x) * 0.08;
 
-      // Trigger character pop-up once the 3D logo finishes assembling
       if (elapsed > 1.85 && !popupTriggered) {
         popupTriggered = true;
         triggerCharacterPopup();
@@ -618,7 +585,7 @@
     requestAnimationFrame(animateThree);
 
     /* =====================================================
-       PART 3: STILL CHARACTER + LIP-SYNCED DEV DIALOGUE
+       PART 3: SLOWED DOWN LIP-SYNCED DEV DIALOGUE (20% SLOWER)
     ===================================================== */
     const devJokes = [
       "YO! Welcome to Rugged Orphans! Our dev promised a AAA metaverse, spent the mint funds on gas fees & Taco Bell, and locked us inside this arcade... Tap here to skate in before he rugs the front door too!"
@@ -635,14 +602,12 @@
       let charIndex = 0;
       let syllableToggle = 0;
 
-      // Wait briefly for slide-up transition to finish, then start reading aloud
       setTimeout(() => {
         const typeInterval = setInterval(() => {
           const ch = message[charIndex];
           dialogueEl.textContent += ch;
           charIndex++;
 
-          // Sync mouth movement to the character being printed
           if (/[a-zA-Z0-9]/.test(ch)) {
             syllableToggle++;
             if (syllableToggle % 3 === 0) {
@@ -653,18 +618,16 @@
               setMouthState('half');
             }
           } else {
-            // Pause/close mouth naturally on spaces and punctuation
             setMouthState('closed');
           }
 
-          // When finished typing, close mouth and show continue prompt
           if (charIndex >= message.length) {
             clearInterval(typeInterval);
             setMouthState('closed');
             dialogueEl.classList.add('done');
             tapPrompt.style.visibility = 'visible';
           }
-        }, 38);
+        }, 48); // Slower typing speed (increased from 38ms to 48ms)
       }, 400);
     }
 
@@ -692,10 +655,8 @@
       });
     }
 
-    // Tap speech bubble or intro screen to start the skateboard entrance video
     document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
 
-    // When he stops at the front door (video ends), unlock the hidden button
     video.addEventListener('ended', () => {
       video.pause();
       coinHotspot.classList.add('unlocked');
