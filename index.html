@@ -160,7 +160,7 @@
     }
 
     /* ==========================================
-       2. VIDEO LAYER & HIDDEN "INSERT COIN" BUTTON
+       2. VIDEO LAYER & ALWAYS-AVAILABLE BUTTONS
     ========================================== */
     #video-layer {
       position: absolute;
@@ -176,7 +176,7 @@
       display: block;
     }
 
-    /* Hidden clickable button over "INSERT COIN" that unlocks automatically */
+    /* Always available clickable button over "INSERT COIN" */
     .hidden-coin-btn {
       position: absolute;
       bottom: 5%;
@@ -184,13 +184,13 @@
       width: 84%;
       height: 16%;
       z-index: 6;
-      display: none;
+      display: block; /* Always active */
       cursor: pointer;
       background: transparent;
       -webkit-tap-highlight-color: rgba(255, 217, 102, 0.25);
     }
 
-    /* Secondary hidden hitbox over the arcade front door */
+    /* Always available secondary hitbox over the arcade front door */
     .hidden-door-btn {
       position: absolute;
       top: 33%;
@@ -198,13 +198,9 @@
       width: 32%;
       height: 35%;
       z-index: 6;
-      display: none;
+      display: block; /* Always active */
       cursor: pointer;
       background: transparent;
-    }
-
-    .unlocked {
-      display: block !important;
     }
   </style>
 </head>
@@ -232,15 +228,15 @@
       </div>
     </div>
 
-    <!-- STAGE 3 & 4: SINGLE-PLAY VIDEO + HIDDEN INSERT COIN BUTTON -->
+    <!-- STAGE 3 & 4: SINGLE-PLAY VIDEO + ALWAYS AVAILABLE BUTTONS -->
     <div id="video-layer">
       <video id="entrance-video" playsinline webkit-playsinline preload="auto">
         <source src="gemini_generated_video_7F077754.mp4" type="video/mp4">
       </video>
 
-      <!-- Hidden button over "PRESS START / INSERT COIN TO ENTER" -->
+      <!-- Always available button over "PRESS START / INSERT COIN TO ENTER" -->
       <a href="main.html" id="coin-hotspot" class="hidden-coin-btn" title="Insert Coin"></a>
-      <!-- Backup hidden button over the Arcade Front Door -->
+      <!-- Always available backup button over the Arcade Front Door -->
       <a href="main.html" id="door-hotspot" class="hidden-door-btn" title="Enter Arcade"></a>
     </div>
   </div>
@@ -536,12 +532,10 @@
     }
 
     /* =====================================================
-       PART 4: ROBUST iOS SAFARI VIDEO PLAY & BUTTON UNLOCK
+       PART 4: ROBUST iOS SAFARI VIDEO PLAY
     ===================================================== */
     const introLayer = document.getElementById('intro-layer');
     const video = document.getElementById('entrance-video');
-    const coinHotspot = document.getElementById('coin-hotspot');
-    const doorHotspot = document.getElementById('door-hotspot');
     let videoStarted = false;
 
     function startEntranceVideo() {
@@ -560,18 +554,8 @@
 
     document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
 
-    // Guaranteed iOS Safari fix: Uses timeupdate to unlock buttons right when video reaches the final moments
-    video.addEventListener('timeupdate', () => {
-      if (video.duration && video.currentTime >= video.duration - 0.25) {
-        coinHotspot.classList.add('unlocked');
-        doorHotspot.classList.add('unlocked');
-      }
-    });
-
     video.addEventListener('ended', () => {
       video.pause();
-      coinHotspot.classList.add('unlocked');
-      doorHotspot.classList.add('unlocked');
     });
   </script>
 </body>
