@@ -1,1 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+  <title>The Rugged Bar v14.2 - Restroom</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
 
+    body {
+      background-color: #020205;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .viewport {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scene-container {
+      position: absolute; top: 50%; left: 50%;
+      width: 100vw; height: 177.78vw;
+      max-height: 100vh; max-width: 56.25vh;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      background: url('Toilet.JPG') center center / cover no-repeat;
+    }
+
+    @media (min-aspect-ratio: 9/16) {
+      .scene-container { width: 56.25vh; height: 100vh; }
+    }
+
+    /* --- INTERACTIVE HOTSPOTS --- */
+    .hotspot {
+      position: absolute;
+      z-index: 5;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      transition: background 0.2s ease;
+    }
+
+    /* Hidden button on the stall latch/lock mechanism */
+    .stall-lock-hotspot {
+      top: 42%;
+      right: 23%;
+      width: 15%;
+      height: 8%;
+    }
+    .stall-lock-hotspot:hover, .stall-lock-hotspot:active {
+      background: rgba(0, 255, 102, 0.2);
+      border-radius: 6px;
+    }
+
+    /* "LORE" graffiti hotspot on the left wall */
+    .lore-hotspot {
+      top: 56%;
+      left: 3%;
+      width: 12%;
+      height: 7%;
+    }
+    .lore-hotspot:hover, .lore-hotspot:active {
+      background: rgba(255, 0, 122, 0.25);
+      border-radius: 4px;
+    }
+
+    /* --- PULSING ARROW & TEXT POINTER FOR LORE --- */
+    .lore-pointer {
+      position: absolute;
+      top: 55%;
+      left: 15%;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none; /* Let clicks pass straight through to the hotspot */
+      animation: bounceArrow 1.2s infinite ease-in-out;
+    }
+
+    .lore-arrow-icon {
+      color: #ff007a;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-shadow: 0 0 8px rgba(255, 0, 122, 0.8);
+    }
+
+    .lore-pointer-text {
+      background: rgba(0, 0, 0, 0.75);
+      color: #00ff66;
+      border: 1px solid #ff007a;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-family: monospace;
+      font-size: 0.65rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 5px rgba(0, 255, 102, 0.6);
+      box-shadow: 0 0 10px rgba(255, 0, 122, 0.4);
+      white-space: nowrap;
+    }
+
+    @keyframes bounceArrow {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(-5px);
+      }
+    }
+
+    /* --- TOILET PAPER ROLL MODAL --- */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 20;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-content {
+      position: relative;
+      /* Realistic Toilet Paper Texture & Color */
+      background: linear-gradient(135deg, #fbfbf8 0%, #f0eee6 50%, #e6e3d8 100%);
+      color: #2b2b2b;
+      border-radius: 4px 4px 12px 12px;
+      padding: 35px 22px 25px 22px;
+      width: 92vw;
+      max-width: 410px;
+      max-height: 85vh;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(200, 195, 180, 0.6);
+      font-family: monospace;
+      
+      /* Simulating toilet paper roll lines (perforations/ridges) */
+      background-image: 
+        linear-gradient(135deg, #fbfbf8 0%, #f0eee6 50%, #e6e3d8 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(0, 0, 0, 0.02) 18px, rgba(0, 0, 0, 0.02) 19px);
+      
+      /* Torn Top and Bottom Borders */
+      border-top: 6px dashed #dcd8cc;
+      border-bottom: 6px dashed #dcd8cc;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px; right: 15px;
+      color: #777;
+      font-size: 1.8rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close-btn:hover {
+      color: #d90429;
+    }
+
+    .modal-title {
+      color: #111;
+      font-size: 1.05rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .modal-subtitle {
+      color: #555;
+      font-size: 0.75rem;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .modal-body-text {
+      color: #222;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      margin-bottom: 15px;
+      max-height: 52vh;
+      overflow-y: auto;
+      text-align: left;
+      padding-right: 5px;
+      border-top: 1px dashed #ccc;
+      border-bottom: 1px dashed #ccc;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    /* Custom Scrollbar for Toilet Paper text container */
+    .modal-body-text::-webkit-scrollbar {
+      width: 5px;
+    }
+    .modal-body-text::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+
+    .modal-action-btn {
+      background: #2b2b2b;
+      color: #fbfbf8;
+      border: none;
+      border-radius: 15px;
+      padding: 9px 18px;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 0.78rem;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      transition: background 0.2s ease;
+    }
+    .modal-action-btn:hover {
+      background: #d90429;
+    }
+    .modal-action-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="viewport">
+    <div class="scene-container">
+      
+      <!-- Hidden hotspot over the bathroom stall lock/latch pointing back to the bar -->
+      <a href="main.html" class="hotspot stall-lock-hotspot" title="Unlock Stall & Return to Bar"></a>
+
+      <!-- Pulsing arrow indicator pointing straight at the LORE graffiti -->
+      <div class="lore-pointer">
+        <div class="lore-arrow-icon">◀</div>
+        <div class="lore-pointer-text">READ LORE</div>
+      </div>
+
+      <!-- Hotspot covering the "LORE" text on the left wall -->
+      <button class="hotspot lore-hotspot" onclick="openLoreModal()" title="Inspect Lore"></button>
+
+    </div>
+  </div>
+
+  <!-- Lore Popup Window Modal (Styled like Toilet Paper) -->
+  <div class="modal" id="loreModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeLoreModal()">&times;</span>
+      <div class="modal-title">🧻 RESTROOM ROLL MANIFESTO</div>
+      <div class="modal-subtitle">APECHAIN SURVIVAL GUIDE</div>
+
+      <div class="modal-body-text" id="loreTextContainer">
+        Remember the last time you aped into a project because the promo trailer looked like a Marvel movie? The sleek 3D renders, the cinematic voiceover, the roadmaps promising metaverse penthouses and passive income while you sleep. You felt that little warm spark in your chest—<em>fuck, maybe this is the one that changes things.</em><br><br>
+        And then, forty-eight hours later, the Twitter account is wiped, the Discord says "Invite Invalid," and the founder has vanished to Dubai with your grocery money, leaving you staring at a pixelated rock worth less than a used tissue.<br><br>
+        That gut punch? We’ve all tasted it. It makes you want to throw your laptop through the drywall, touch some grass, and swear off JPEGs forever.<br><br>
+        <strong>The 3:00 AM Google Search Support Group</strong><br>
+        That exact flavor of emotional damage is why we’re sitting here in the trenches today. But instead of rage-quitting or sliding into a deep depression, a couple of smooth-brained anons who don't know the first thing about coding or digital art looked at each other and thought, <em>"How hard can it be to just... not be absolute sociopaths?"</em><br><br>
+        Turns out, it’s really hard. None of us went to art school. None of us have a computer science degree. If you peeked behind our curtain right now, it’s just a bunch of sleep-deprived degenerates frantically Googling "how to fix Solidity revert error" while surviving entirely on caffeine, cheap energy drinks, and pure spite. Our tech stack is held together by copy-pasted StackOverflow answers, duct tape, and sheer denial. We fumbled. We broke things. But because we didn't want to add <em>our</em> incompetence to your financial trauma, we did a free mint. Zero cost, zero financial risk—just an open door to come trip over our shoelaces with us.<br><br>
+        <strong>Planting Our Flag in the ApeChain Wasteland</strong><br>
+        While the rest of the timeline is digital-tourist hopping to whatever new layer-zero chain is pumping engagement farming this week, we locked ourselves in the basement on ApeChain and stayed put.<br><br>
+        It’s cozy down here in the trenches. We don't have a multi-million dollar treasury funded by your hard-earned ETH, but we do have a group chat where someone is perpetually roasting our pixelated art—which, if you squint really hard and tilt your head sideways, sort of looks like a human being. It’s hard to feel like a depressed bagholder when you're crying-laughing at the fact that your project's mascot looks less like a masterpiece and more like an accidental glitch on a 1990s graphing calculator.<br><br>
+        Our roadmap? It's not a PDF with corporate buzzwords. It’s basically just a napkin that someone spilled coffee on, and half of it says "Figure out how buttons work."<br><br>
+        <strong>The Open Door (And Zero Pressure)</strong><br>
+        * <strong>Come as you are:</strong> If you’re a crypto veteran with battle scars from every cycle, welcome home. If you’re a complete newbie who bought a wallet yesterday and thinks a "gas fee" is a tax on driving—welcome twice. There is zero sell-shaming here. We don’t care if you diamond-hand or paper-hand; we’re just glad you're breathing the same air.<br>
+        * <strong>Throw your ideas in the ring:</strong> Everyone is welcome to pitch whatever chaotic nonsense they want. We want to hear your ideas, your weird lore thoughts, and your master plans. But fair warning: <strong>we’re broke too</strong>, so whatever we build has got to be free. There’s zero pressure here—help out if you feel like it, and if you want to lurk in silence for six months, that’s totally fine too. No quotas, no mandatory participation, no corporate boss vibes.<br>
+        * <strong>The Bouncer's List:</strong> Scammers, grifters, and serial rug-devs need not apply. The iron gate is permanently welded shut for anyone whose entire business model relies on making other people cry for liquidity.<br><br>
+        At the end of the day, we’re probably not going to fix the global financial system, and our art looks like a crime against graphic design. But we’re building this together, pixel by clumsy pixel, and we're actually having fun doing it without trying to pick your pockets.<br><br>
+        Pull up a folding chair. You’re early, and for once, you’re actually safe here.
+      </div>
+
+      <button class="modal-action-btn" onclick="closeLoreModal()">FLUSH & CLOSE</button>
+    </div>
+  </div>
+
+  <script>
+    function openLoreModal() {
+      document.getElementById('loreModal').style.display = 'flex';
+    }
+
+    function closeLoreModal() {
+      document.getElementById('loreModal').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
