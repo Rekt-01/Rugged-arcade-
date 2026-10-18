@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro-Futuristic 3D Jukebox</title>
+    <!-- Tailwind CSS for UI controls -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js for 3D Jukebox rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Inter:wght@300;400;600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05050a;
+            color: #e2e8f0;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .interactive {
+            pointer-events: auto;
+        }
+        /* Custom glow effects */
+        .neon-glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5), inset 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+        .neon-glow-pink {
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between select-none">
+
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container" class="absolute inset-0"></div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="radio-audio" crossorigin="anonymous"></audio>
+
+    <!-- UI Overlay Layer -->
+    <div class="ui-layer flex flex-col h-full justify-between p-4 md:p-6 pointer-events-none">
+        
+        <!-- Top Navigation & Title Bar -->
+        <header class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 rounded-2xl p-4 interactive shadow-2xl">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-pink-500 flex items-center justify-center neon-glow-cyan">
+                    <i class="fa-solid fa-radio text-white text-lg animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="font-orbitron font-black text-lg md:text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 text-glow">
+                        CYBER JUKEBOX 3000
+                    </h1>
+                    <p class="text-xs text-cyan-300/70 font-mono">LIVE INTERNET STREAMER v2.4</p>
+                </div>
+            </div>
+
+            <!-- Return to main.html Button -->
+            <a href="main.html" class="interactive flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600/80 to-pink-600/80 hover:from-red-500 hover:to-pink-500 text-white font-semibold text-sm tracking-wide shadow-lg neon-glow-pink transition-all transform hover:scale-105 active:scale-95 border border-pink-400/30">
+                <i class="fa-solid fa-arrow-left-long"></i>
+                <span>Exit to Main</span>
+            </a>
+        </header>
+
+        <!-- Center Floating Info / Message Box (Hidden by default) -->
+        <div id="notification-box" class="hidden self-center bg-slate-900/95 border border-cyan-400/50 text-cyan-200 px-6 py-3 rounded-xl shadow-2xl interactive font-mono text-sm flex items-center space-x-3 transition-all duration-300">
+            <i class="fa-solid fa-circle-info text-cyan-400"></i>
+            <span id="notification-text">Station loaded successfully.</span>
+        </div>
+
+        <!-- Bottom Control Deck & Station Selector -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 interactive">
+            
+            <!-- Left: Station Selector Panel -->
+            <div class="bg-slate-900/85 backdrop-blur-md border border-cyan-500/30 rounded-2xl p-4 shadow-2xl flex flex-col h-56 lg:h-64">
+                <div class="flex justify-between items-center mb-3 border-b border-cyan-500/20 pb-2">
+                    <h2 class="font-orbitron font-bold text-sm text-cyan-300 flex items-center space-x-2">
+                        <i class="fa-solid fa-tower-broadcast text-pink-500"></i>
+                        <span>STATION FREQUENCIES</span>
+                    </h2>
+                    <span id="station-count" class="text-xs font-mono bg-cyan-950/80 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30">6 Stations</span>
+                </div>
+                
+                <!-- Station List -->
+                <div id="station-list" class="overflow-y-auto space-y-2 pr-1 flex-1">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Center/Right: Main Audio & Jukebox Controls Deck -->
+            <div class="lg:col-span-2 bg-slate-900/85 backdrop-blur-md border border-cyan-500/30 rounded-2xl p-4 md:p-6 shadow-2xl flex flex-col justify-between">
+                
+                <!-- Now Playing Information Display -->
+                <div class="bg-black/60 border border-cyan-500/30 rounded-xl p-4 mb-4 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-pink-500/5 pointer-events-none"></div>
+                    
+                    <div class="flex items-center space-x-4 w-full md:w-auto">
+                        <div id="vinyl-disc" class="w-14 h-14 rounded-full bg-slate-950 border-2 border-cyan-400/60 flex items-center justify-center relative shadow-lg shadow-cyan-500/20">
+                            <div class="w-4 h-4 rounded-full bg-pink-500 border border-white"></div>
+                            <div class="absolute inset-0 rounded-full border border-dashed border-cyan-500/30 animate-spin" style="animation-duration: 8s; animation-play-state: paused;" id="vinyl-spinner"></div>
+                        </div>
+                        <div>
+                            <span class="text-xs uppercase font-mono text-pink-400 tracking-wider flex items-center space-x-1.5">
+                                <span class="w-2 h-2 rounded-full bg-pink-500 animate-ping inline-block"></span>
+                                <span id="current-genre">Ambient & Chill</span>
+                            </span>
+                            <h3 id="current-station-title" class="font-orbitron font-bold text-lg text-white truncate max-w-xs md:max-w-md">SomaFM: Groove Salad</h3>
+                            <p id="current-station-desc" class="text-xs text-slate-400 truncate max-w-xs md:max-w-md">Downtempo ambient chillout grooves.</p>
+                        </div>
+                    </div>
+
+                    <!-- Visualizer Status LED / Equalizer Bars Simulator -->
+                    <div class="flex items-center space-x-1.5 h-10 px-3 bg-slate-950/80 rounded-lg border border-cyan-500/20">
+                        <div class="w-1 bg-cyan-400 rounded-full transition-all duration-150 h-3" id="eq-1"></div>
+                        <div class="w-1 bg-cyan-400 rounded-full transition-all duration-150 h-6" id="eq-2"></div>
+                        <div class="w-1 bg-pink-500 rounded-full transition-all duration-150 h-8" id="eq-3"></div>
+                        <div class="w-1 bg-pink-500 rounded-full transition-all duration-150 h-5" id="eq-4"></div>
+                        <div class="w-1 bg-cyan-400 rounded-full transition-all duration-150 h-7" id="eq-5"></div>
+                    </div>
+                </div>
+
+                <!-- Playback Action Controls & Volume -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    
+                    <!-- Play / Pause / Mute Buttons -->
+                    <div class="flex items-center space-x-3">
+                        <button id="play-btn" onclick="togglePlay()" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white flex items-center justify-center shadow-lg neon-glow-cyan transition-all transform hover:scale-105 active:scale-95 border border-cyan-300/40">
+                            <i id="play-icon" class="fa-solid fa-play text-xl ml-0.5"></i>
+                        </button>
+
+                        <button onclick="changeStationRelative(-1)" class="w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 flex items-center justify-center border border-cyan-500/30 transition-all hover:scale-105 active:scale-95" title="Previous Station">
+                            <i class="fa-solid fa-backward-step"></i>
+                        </button>
+
+                        <button onclick="changeStationRelative(1)" class="w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 flex items-center justify-center border border-cyan-500/30 transition-all hover:scale-105 active:scale-95" title="Next Station">
+                            <i class="fa-solid fa-forward-step"></i>
+                        </button>
+                    </div>
+
+                    <!-- Volume Control Slider -->
+                    <div class="flex items-center space-x-3 bg-black/40 px-4 py-2.5 rounded-xl border border-cyan-500/20 flex-1 max-w-xs">
+                        <button onclick="toggleMute()" id="mute-btn" class="text-cyan-400 hover:text-white transition-colors">
+                            <i id="mute-icon" class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" oninput="adjustVolume(this.value)" class="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                        <span id="volume-label" class="font-mono text-xs text-cyan-300 w-9 text-right">80%</span>
+                    </div>
+
+                    <!-- Camera Spin Toggle for 3D Jukebox -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleCameraRotation()" id="cam-spin-btn" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-mono tracking-wide flex items-center space-x-2 transition-all">
+                            <i class="fa-solid fa-cube animate-spin" style="animation-duration: 4s;"></i>
+                            <span>Spin Cam</span>
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Radio Stations list (Public stable internet radio streams - Icecast/SomaFM/Radio Paradise)
+        const stations = [
+            {
+                id: 1,
+                name: "SomaFM: Groove Salad",
+                genre: "Ambient / Chill",
+                description: "Downtempo ambient chillout electronic grooves.",
+                url: "https://ice2.somafm.com/groovesalad-128-mp3"
+            },
+            {
+                id: 2,
+                name: "Radio Paradise: Main Mix",
+                genre: "Eclectic Rock / Indie",
+                description: "An eclectic mix of modern and classic rock, world, and electronic.",
+                url: "https://stream.radioparadise.com/mp3-128"
+            },
+            {
+                id: 3,
+                name: "SomaFM: Secret Agent",
+                genre: "Spy / Lounge",
+                description: "The soundtrack for your stylish undercover life.",
+                url: "https://ice4.somafm.com/secretagent-128-mp3"
+            },
+            {
+                id: 4,
+                name: "Lofi Hip Hop Radio",
+                genre: "Lofi / Study Beats",
+                description: "Relaxing lofi hip hop beats to study/relax to.",
+                url: "https://stream.zeno.fm/f3wvbbqmdg8uv"
+            },
+            {
+                id: 5,
+                name: "SomaFM: Space Station",
+                genre: "Ambient Space",
+                description: "Spaced-out ambient and electronic music from the cosmos.",
+                url: "https://ice1.somafm.com/spacestation-128-mp3"
+            },
+            {
+                id: 6,
+                name: "Classic Synthwave",
+                genre: "Retrowave / 80s",
+                description: "Retro 80s synthwave, cyberpunk, and outrun electronic beats.",
+                url: "https://stream.zeno.fm/0r0xa792euhvv"
+            }
+        ];
+
+        let currentStationIndex = 0;
+        let isPlaying = false;
+        let isMuted = false;
+        let previousVolume = 0.8;
+        let spinCamera = true;
+
+        const audio = document.getElementById('radio-audio');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const vinylSpinner = document.getElementById('vinyl-spinner');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeLabel = document.getElementById('volume-label');
+        const currentTitleElem = document.getElementById('current-station-title');
+        const currentGenreElem = document.getElementById('current-genre');
+        const currentDescElem = document.getElementById('current-station-desc');
+        const stationListElem = document.getElementById('station-list');
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            renderStationList();
+            loadStation(0);
+            initThreeJS();
+            startEqualizerAnimation();
+        });
+
+        // Render station list UI
+        function renderStationList() {
+            stationListElem.innerHTML = '';
+            stations.forEach((station, index) => {
+                const isSelected = index === currentStationIndex;
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl cursor-pointer transition-all border flex items-center justify-between ${
+                    isSelected 
+                    ? 'bg-cyan-950/60 border-cyan-400/60 text-cyan-200 shadow-lg shadow-cyan-500/10' 
+                    : 'bg-slate-950/40 border-cyan-500/10 text-slate-300 hover:bg-slate-800/60 hover:border-cyan-500/30'
+                }`;
+                item.onclick = () => {
+                    loadStation(index);
+                    if (!isPlaying) togglePlay();
+                };
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3 truncate">
+                        <div class="w-8 h-8 rounded-lg ${isSelected ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-cyan-400'} flex items-center justify-center font-orbitron font-bold text-xs">
+                            0${index + 1}
+                        </div>
+                        <div class="truncate">
+                            <p class="font-orbitron font-semibold text-xs truncate">${station.name}</p>
+                            <p class="text-[10px] text-slate-400 truncate">${station.genre}</p>
+                        </div>
+                    </div>
+                    ${isSelected ? '<i class="fa-solid fa-volume-high text-cyan-400 text-xs animate-pulse"></i>' : '<i class="fa-solid fa-play text-slate-600 text-xs"></i>'}
+                `;
+                stationListElem.appendChild(item);
+            });
+        }
+
+        // Load station into audio element
+        function loadStation(index) {
+            currentStationIndex = index;
+            const station = stations[index];
+            audio.src = station.url;
+            audio.load();
+            
+            currentTitleElem.textContent = station.name;
+            currentGenreElem.textContent = station.genre;
+            currentDescElem.textContent = station.description;
+
+            renderStationList();
+            showNotification(`Tuned to ${station.name}`);
+
+            if (isPlaying) {
+                audio.play().catch(err => {
+                    console.error("Playback error:", err);
+                    showNotification("Stream buffer error. Try another station.");
+                });
+            }
+        }
+
+        // Toggle Play / Pause
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                playIcon.className = "fa-solid fa-play text-xl ml-0.5";
+                vinylSpinner.style.animationPlayState = 'paused';
+                showNotification("Radio paused");
+            } else {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    playIcon.className = "fa-solid fa-pause text-xl";
+                    vinylSpinner.style.animationPlayState = 'running';
+                    showNotification(`Streaming: ${stations[currentStationIndex].name}`);
+                }).catch(err => {
+                    console.error("Playback failed:", err);
+                    showNotification("Unable to connect to stream.");
+                });
+            }
+        }
+
+        // Change station relative (-1 or +1)
+        function changeStationRelative(direction) {
+            let newIndex = currentStationIndex + direction;
+            if (newIndex < 0) newIndex = stations.length - 1;
+            if (newIndex >= stations.length) newIndex = 0;
+            loadStation(newIndex);
+            if (!isPlaying) togglePlay();
+        }
+
+        // Volume control
+        function adjustVolume(val) {
+            audio.volume = val;
+            const percent = Math.round(val * 100);
+            volumeLabel.textContent = percent + '%';
+            if (val == 0) {
+                isMuted = true;
+                document.getElementById('mute-icon').className = "fa-solid fa-volume-xmark text-red-400";
+            } else {
+                isMuted = false;
+                document.getElementById('mute-icon').className = "fa-solid fa-volume-high";
+            }
+        }
+
+        function toggleMute() {
+            if (isMuted) {
+                isMuted = false;
+                audio.volume = previousVolume;
+                volumeSlider.value = previousVolume;
+                volumeLabel.textContent = Math.round(previousVolume * 100) + '%';
+                document.getElementById('mute-icon').className = "fa-solid fa-volume-high";
+            } else {
+                previousVolume = audio.volume;
+                isMuted = true;
+                audio.volume = 0;
+                volumeSlider.value = 0;
+                volumeLabel.textContent = '0%';
+                document.getElementById('mute-icon').className = "fa-solid fa-volume-xmark text-red-400";
+            }
+        }
+
+        // Notifications helper
+        function showNotification(text) {
+            const box = document.getElementById('notification-box');
+            const txt = document.getElementById('notification-text');
+            txt.textContent = text;
+            box.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Equalizer visual simulation bars
+        function startEqualizerAnimation() {
+            setInterval(() => {
+                if (!isPlaying) return;
+                for (let i = 1; i <= 5; i++) {
+                    const bar = document.getElementById(`eq-${i}`);
+                    const randomHeight = Math.floor(Math.random() * 28) + 8;
+                    bar.style.height = randomHeight + 'px';
+                }
+            }, 120);
+        }
+
+        function toggleCameraRotation() {
+            spinCamera = !spinCamera;
+            const btn = document.getElementById('cam-spin-btn');
+            if (spinCamera) {
+                btn.classList.add('border-cyan-400', 'text-cyan-200');
+                showNotification("3D Camera Rotation Enabled");
+            } else {
+                btn.classList.remove('border-cyan-400', 'text-cyan-200');
+                showNotification("3D Camera Rotation Paused");
+            }
+        }
+
+        // ==========================================
+        // THREE.JS 3D RETRO-FUTURISTIC JUKEBOX SCENE
+        // ==========================================
+        let scene, camera, renderer, jukeboxGroup, particlesMesh;
+        let mouseX = 0, mouseY = 0;
+        let targetRotationX = 0, targetRotationY = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x05050a, 0.035);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.5, 7);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const pointLightCyan = new THREE.PointLight(0x00f3ff, 3, 10);
+            pointLightCyan.position.set(0, 2, 3);
+            scene.add(pointLightCyan);
+
+            const pointLightPink = new THREE.PointLight(0xff0055, 3, 10);
+            pointLightPink.position.set(0, -2, -3);
+            scene.add(pointLightPink);
+
+            // Create 3D Jukebox Model
+            createJukeboxModel();
+
+            // Create Starfield / Cyber Particles
+            createParticles();
+
+            // Event Listeners for Window Resize & Mouse Interaction
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousemove', onMouseMove);
+
+            // Animation Loop
+            animate();
+        }
+
+        // Construct 3D Jukebox with retro cabinet, glowing tubes, speaker grille, and spinning vinyl
+        function createJukeboxModel() {
+            jukeboxGroup = new THREE.Group();
+
+            // Main Cabinet Body (Dark metallic carbon)
+            const cabinetGeo = new THREE.BoxGeometry(2.4, 3.4, 1.2);
+            const cabinetMat = new THREE.MeshStandardMaterial({
+                color: 0x111318,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+            const cabinet = new THREE.Mesh(cabinetGeo, cabinetMat);
+            cabinet.castShadow = true;
+            cabinet.receiveShadow = true;
+            jukeboxGroup.add(cabinet);
+
+            // Glowing Neon Edge Trim (Cyan)
+            const frameGeo = new THREE.BoxGeometry(2.5, 3.5, 1.1);
+            const frameMat = new THREE.MeshBasicMaterial({
+                color: 0x00f3ff,
+                wireframe: true
+            });
+            const frame = new THREE.Mesh(frameGeo, frameMat);
+            jukeboxGroup.add(frame);
+
+            // Speaker Grille (Lower half)
+            const grilleGeo = new THREE.BoxGeometry(1.8, 1.4, 0.1);
+            const grilleMat = new THREE.MeshStandardMaterial({
+                color: 0x1a2234,
+                roughness: 0.7,
+                metalness: 0.5
+            });
+            const grille = new THREE.Mesh(grilleGeo, grilleMat);
+            grille.position.set(0, -0.7, 0.62);
+            jukeboxGroup.add(grille);
+
+            // Add speaker circles
+            for (let i = -1; i <= 1; i += 2) {
+                const speakerRingGeo = new THREE.RingGeometry(0.35, 0.45, 32);
+                const speakerRingMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, side: THREE.DoubleSide });
+                const speakerRing = new THREE.Mesh(speakerRingGeo, speakerRingMat);
+                speakerRing.position.set(i * 0.5, -0.7, 0.68);
+                jukeboxGroup.add(speakerRing);
+            }
+
+            // Glass Dome / Upper Display Window (Pink glow)
+            const domeGeo = new THREE.CylinderGeometry(1.1, 1.1, 1.2, 32, 1, false, 0, Math.PI);
+            const domeMat = new THREE.MeshPhysicalMaterial({
+                color: 0xff0055,
+                transparent: true,
+                opacity: 0.3,
+                roughness: 0.1,
+                metalness: 0.1,
+                transmission: 0.8,
+                side: THREE.DoubleSide
+            });
+            const dome = new THREE.Mesh(domeGeo, domeMat);
+            dome.rotation.y = Math.PI / 2;
+            dome.position.set(0, 0.7, 0);
+            jukeboxGroup.add(dome);
+
+            // Turntable Vinyl Record inside glass dome
+            const vinylGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.05, 32);
+            const vinylMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.2, metalness: 0.9 });
+            window.vinylMesh = new THREE.Mesh(vinylGeo, vinylMat);
+            window.vinylMesh.position.set(0, 0.3, 0);
+            jukeboxGroup.add(window.vinylMesh);
+
+            // Vinyl Label
+            const labelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.06, 32);
+            const labelMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
+            const vinylLabel = new THREE.Mesh(labelGeo, labelMat);
+            vinylLabel.position.set(0, 0.31, 0);
+            jukeboxGroup.add(vinylLabel);
+
+            // Floating neon music notes or rings around jukebox
+            scene.add(jukeboxGroup);
+        }
+
+        // Create cyber particle field background
+        function createParticles() {
+            const particlesCount = 700;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for (let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 25;
+            }
+
+            const particlesGeo = new THREE.BufferGeometry();
+            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            const particlesMat = new THREE.PointsMaterial({
+                size: 0.05,
+                color: 0x00f3ff,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            particlesMesh = new THREE.Points(particlesGeo, particlesMat);
+            scene.add(particlesMesh);
+        }
+
+        function onMouseMove(event) {
+            mouseX = (event.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+            mouseY = (event.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth Jukebox float & rotation based on mouse
+            targetRotationY = mouseX * 0.5;
+            targetRotationX = mouseY * 0.3;
+
+            if (spinCamera) {
+                jukeboxGroup.rotation.y += 0.005;
+            } else {
+                jukeboxGroup.rotation.y += (targetRotationY - jukeboxGroup.rotation.y) * 0.05;
+            }
+            jukeboxGroup.rotation.x += (targetRotationX - jukeboxGroup.rotation.x) * 0.05;
+
+            // Spin vinyl record if playing
+            if (isPlaying && window.vinylMesh) {
+                window.vinylMesh.rotation.y += 0.04;
+            }
+
+            // Rotate particles slowly
+            if (particlesMesh) {
+                particlesMesh.rotation.y -= 0.001;
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
