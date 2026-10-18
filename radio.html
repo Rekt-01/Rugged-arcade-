@@ -30,6 +30,10 @@
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .spinning { animation: spin 3s linear infinite; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050508; }
+        ::-webkit-scrollbar-thumb { background: #ff0055; border-radius: 3px; }
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col justify-between p-3 md:p-6 select-none">
@@ -54,62 +58,73 @@
         <!-- Marquee Header -->
         <div class="text-center bg-black/90 border-2 border-pink-500/60 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(255,0,85,0.2)]">
             <h1 class="arcade-font text-base md:text-2xl text-pink-500 marquee-glow tracking-wider">RUGGED ARCADE JUKEBOX</h1>
-            <p class="text-[10px] text-cyan-400 mt-2 tracking-widest uppercase">Select Genre or Click Play Below</p>
+            <p class="text-[10px] text-cyan-400 mt-2 tracking-widest uppercase">Live Global Radio Network</p>
         </div>
 
         <!-- Genre Arcade Buttons -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <button onclick="switchGenre('hiphop')" id="btn-hiphop" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-pink-600 text-white border-b-4 border-pink-900 active:border-b-0 active:translate-y-1 shadow-lg transition">
+            <button onclick="fetchStations('hip hop')" id="btn-hiphop" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-pink-600 text-white border-b-4 border-pink-900 active:border-b-0 active:translate-y-1 shadow-lg transition">
                 HIP-HOP
             </button>
-            <button onclick="switchGenre('dance')" id="btn-dance" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
+            <button onclick="fetchStations('dance')" id="btn-dance" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
                 DANCE / RAVE
             </button>
-            <button onclick="switchGenre('country')" id="btn-country" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
+            <button onclick="fetchStations('country')" id="btn-country" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
                 COUNTRY
             </button>
-            <button onclick="switchGenre('rock')" id="btn-rock" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
+            <button onclick="fetchStations('rock')" id="btn-rock" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
                 ROCK / HITS
             </button>
         </div>
 
-        <!-- Jukebox Screen & Active Player HUD -->
-        <div class="bg-black/80 border-2 border-pink-500/40 rounded-xl p-6 flex flex-col items-center justify-between text-center relative overflow-hidden">
+        <!-- Jukebox Screen & Station Picker Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <div class="absolute inset-0 bg-gradient-to-b from-pink-950/20 to-transparent pointer-events-none"></div>
-
-            <!-- Spinning Vinyl Graphic -->
-            <div class="relative w-28 h-28 my-2">
-                <div id="vinyl-disc" class="w-full h-full rounded-full bg-black border-4 border-gray-800 shadow-[0_0_20px_rgba(255,0,85,0.4)] flex items-center justify-center spinning">
-                    <div class="w-10 h-10 rounded-full bg-cyan-500 border-2 border-black flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full bg-black"></div>
-                    </div>
+            <!-- Left Side: Dynamic Station List -->
+            <div class="bg-black/80 border-2 border-cyan-500/40 rounded-xl p-3 flex flex-col h-[240px]">
+                <div class="flex justify-between items-center border-b border-cyan-500/20 pb-2 mb-2">
+                    <span id="list-title" class="text-[10px] text-cyan-400 arcade-font">STATIONS: HIP HOP</span>
+                    <span class="text-[9px] bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded arcade-font">LIVE</span>
+                </div>
+                <div id="station-list" class="overflow-y-auto flex flex-col gap-2 pr-1 flex-grow">
+                    <div class="text-xs text-gray-400 text-center py-10 arcade-font">Loading database...</div>
                 </div>
             </div>
 
-            <!-- Now Playing Text Display -->
-            <div class="w-full z-10 my-2">
-                <div id="now-playing-name" class="arcade-font text-xs md:text-sm text-pink-400 truncate">SELECT GENRE</div>
-                <div id="now-playing-status" class="text-[10px] text-gray-400 mt-1">Ready</div>
+            <!-- Right Side: Player HUD & Spinning Vinyl -->
+            <div class="bg-black/80 border-2 border-pink-500/40 rounded-xl p-4 flex flex-col items-center justify-between text-center relative overflow-hidden h-[240px]">
+                
+                <div class="absolute inset-0 bg-gradient-to-b from-pink-950/20 to-transparent pointer-events-none"></div>
+
+                <!-- Spinning Vinyl Graphic -->
+                <div class="relative w-20 h-20 my-1">
+                    <div id="vinyl-disc" class="w-full h-full rounded-full bg-black border-4 border-gray-800 shadow-[0_0_15px_rgba(255,0,85,0.4)] flex items-center justify-center">
+                        <div class="w-7 h-7 rounded-full bg-cyan-500 border-2 border-black flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-black"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Now Playing Text Display -->
+                <div class="w-full z-10">
+                    <div id="now-playing-name" class="arcade-font text-[10px] text-pink-400 truncate">SELECT A STATION</div>
+                    <div id="now-playing-status" class="text-[9px] text-gray-400 mt-1">Ready</div>
+                </div>
+
+                <!-- Volume Bar -->
+                <div class="w-full flex items-center gap-2 bg-gray-900/80 px-3 py-1.5 rounded-lg border border-white/5 z-10">
+                    <span class="text-[9px] text-cyan-400 arcade-font">VOL</span>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-full accent-pink-500 cursor-pointer">
+                </div>
             </div>
 
-            <!-- Manual Play/Pause Backup Button (Bypasses browser autoplay restrictions) -->
-            <button onclick="togglePlay()" id="play-pause-btn" class="arcade-font text-xs bg-pink-600 hover:bg-pink-500 text-white px-6 py-2.5 rounded-lg shadow-lg transition z-10 my-2">
-                ▶ START AUDIO
-            </button>
-
-            <!-- Volume Bar -->
-            <div class="w-full max-w-md flex items-center gap-3 bg-gray-900/80 px-4 py-2.5 rounded-lg border border-white/5 z-10 mt-2">
-                <span class="text-[10px] text-cyan-400 arcade-font">VOL</span>
-                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-full accent-pink-500 cursor-pointer">
-            </div>
         </div>
 
         <!-- Cabinet Coin Slot Footer -->
         <div class="flex justify-between items-center px-4 py-2 bg-black/60 rounded-lg border border-white/5 text-[9px] text-gray-400 arcade-font">
             <span>CREDIT: FREE PLAY</span>
             <span class="text-pink-500 animate-pulse">● STEREO AUDIO ACTIVE</span>
-            <span>RUGGED OS v5.2</span>
+            <span>RUGGED OS v6.0</span>
         </div>
 
     </main>
@@ -118,78 +133,92 @@
     <audio id="audio-element" preload="none"></audio>
 
     <script>
-        // Highly reliable secure HTTPS streams
-        const channels = {
-            hiphop: { name: "SomaFM: DEF CON Radio (Electronic/Hip-Hop)", url: "https://ice2.somafm.com/defcon-128-mp3" },
-            dance: { name: "SomaFM: Groove Salad (Chill Rave / Ambient)", url: "https://ice2.somafm.com/groovesalad-128-mp3" },
-            country: { name: "181.fm Kickin' Country", url: "https://listen.181fm.com/181-kickin_128k.mp3" },
-            rock: { name: "SomaFM: Secret Agent (Rock / Surf)", url: "https://ice4.somafm.com/secretagent-128-mp3" }
-        };
-
         const audio = document.getElementById('audio-element');
         const volumeSlider = document.getElementById('volume-slider');
         const nowPlayingName = document.getElementById('now-playing-name');
         const nowPlayingStatus = document.getElementById('now-playing-status');
         const vinylDisc = document.getElementById('vinyl-disc');
-        const playPauseBtn = document.getElementById('play-pause-btn');
-
-        let currentKey = 'hiphop';
+        const stationListContainer = document.getElementById('station-list');
 
         volumeSlider.addEventListener('input', (e) => {
             audio.volume = e.target.value;
         });
 
-        function switchGenre(genreKey) {
-            currentKey = genreKey;
-            // Highlight active button
+        async function fetchStations(tag) {
+            // Update button styles
             ['hiphop', 'dance', 'country', 'rock'].forEach(k => {
                 const btn = document.getElementById(`btn-${k}`);
-                if (k === genreKey) {
-                    btn.className = "arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-pink-600 text-white border-b-4 border-pink-900 active:border-b-0 active:translate-y-1 shadow-lg transition";
-                } else {
-                    btn.className = "arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition";
+                if (btn) {
+                    if (tag.includes(k === 'hiphop' ? 'hip hop' : k)) {
+                        btn.className = "arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-pink-600 text-white border-b-4 border-pink-900 active:border-b-0 active:translate-y-1 shadow-lg transition";
+                    } else {
+                        btn.className = "arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition";
+                    }
                 }
             });
 
-            const channel = channels[genreKey];
-            nowPlayingName.innerText = channel.name;
-            audio.src = channel.url;
-            
-            audio.play().then(() => {
-                nowPlayingStatus.innerText = "LIVE STREAM ACTIVE";
-                playPauseBtn.innerText = "⏸ PAUSE AUDIO";
-                vinylDisc.classList.add('spinning');
-            }).catch(err => {
-                nowPlayingStatus.innerText = "CLICK 'START AUDIO' TO PLAY";
-                playPauseBtn.innerText = "▶ START AUDIO";
-                vinylDisc.classList.remove('spinning');
-            });
-        }
+            document.getElementById('list-title').innerText = `STATIONS: ${tag.toUpperCase()}`;
+            stationListContainer.innerHTML = `<div class="text-xs text-gray-400 text-center py-10 arcade-font">Searching streams...</div>`;
 
-        function togglePlay() {
-            if (audio.paused) {
-                if (!audio.src) {
-                    audio.src = channels[currentKey].url;
+            try {
+                // Fetch verified active streams from Radio Browser open registry
+                const response = await fetch(`https://de1.api.radio-browser.info/json/stations/bytag/${encodeURIComponent(tag)}?limit=8&order=votes&reverse=true`);
+                const data = await response.json();
+
+                stationListContainer.innerHTML = '';
+                
+                const validStations = data.filter(s => s.url_resolved && s.url_resolved.startsWith('https'));
+
+                if (validStations.length === 0) {
+                    stationListContainer.innerHTML = `<div class="text-xs text-red-400 text-center py-10 arcade-font">No secure streams found. Try another genre.</div>`;
+                    return;
                 }
-                audio.play().then(() => {
-                    nowPlayingStatus.innerText = "LIVE STREAM ACTIVE";
-                    playPauseBtn.innerText = "⏸ PAUSE AUDIO";
-                    vinylDisc.classList.add('spinning');
-                }).catch(e => {
-                    alert("Click anywhere on the page first to enable audio.");
+
+                validStations.forEach((station, index) => {
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between p-2 rounded-lg bg-gray-900/90 hover:bg-pink-950/40 border border-white/5 hover:border-pink-500/40 transition cursor-pointer group";
+                    item.innerHTML = `
+                        <span class="text-[10px] text-gray-200 group-hover:text-pink-400 font-bold truncate pr-2">${station.name}</span>
+                        <span class="text-[9px] bg-pink-600/30 group-hover:bg-pink-600 text-pink-300 group-hover:text-white px-2 py-1 rounded arcade-font transition shrink-0">PLAY ▶</span>
+                    `;
+                    item.onclick = () => playStream(station.url_resolved, station.name);
+                    stationListContainer.appendChild(item);
                 });
-            } else {
-                audio.pause();
-                nowPlayingStatus.innerText = "AUDIO PAUSED";
-                playPauseBtn.innerText = "▶ RESUME AUDIO";
-                vinylDisc.classList.remove('spinning');
+
+                // Auto-play the top voted station immediately
+                playStream(validStations[0].url_resolved, validStations[0].name);
+
+            } catch (err) {
+                console.error(err);
+                stationListContainer.innerHTML = `<div class="text-xs text-red-400 text-center py-10 arcade-font">Network error loading stations.</div>`;
             }
         }
 
-        // Initialize default on load
+        function playStream(url, name) {
+            nowPlayingName.innerText = name;
+            nowPlayingStatus.innerText = "CONNECTING...";
+            
+            audio.src = url;
+            audio.play().then(() => {
+                nowPlayingStatus.innerText = "LIVE BROADCAST";
+                vinylDisc.classList.add('spinning');
+            }).catch(e => {
+                nowPlayingStatus.innerText = "CLICK TO UNLOCK AUDIO";
+                vinylDisc.classList.remove('spinning');
+            });
+        }
+
+        // Global click unlock listener to bypass browser autoplay restrictions
+        document.body.addEventListener('click', () => {
+            if (audio.paused && audio.src) {
+                audio.play().catch(() => {});
+            }
+        }, { once: true });
+
+        // Load Hip-Hop on initial startup
         window.addEventListener('DOMContentLoaded', () => {
             audio.volume = 0.8;
-            switchGenre('hiphop');
+            fetchStations('hip hop');
         });
     </script>
 </body>
