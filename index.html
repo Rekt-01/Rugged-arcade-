@@ -112,7 +112,7 @@
       border-radius: 8px;
       padding: 16px 14px 14px;
       color: #fff;
-      font-size: 0.66rem;
+      font-size: 0.64rem;
       line-height: 1.7;
       text-align: left;
       position: relative;
@@ -124,14 +124,14 @@
       background: #ff2a85;
       color: #fff;
       padding: 4px 8px;
-      font-size: 0.52rem;
-      margin-bottom: 10px;
+      font-size: 0.5rem;
+      margin-bottom: 8px;
       border: 2px solid #fff;
       box-shadow: 2px 2px 0 #000;
     }
 
     #dialogue-text {
-      min-height: 82px;
+      min-height: 72px;
       color: #ffd966;
       text-shadow: 1px 1px 0px #000;
     }
@@ -147,9 +147,9 @@
     }
 
     .tap-continue {
-      margin-top: 10px;
+      margin-top: 8px;
       text-align: right;
-      font-size: 0.54rem;
+      font-size: 0.5rem;
       color: #35d4ff;
       animation: blink 0.8s infinite;
     }
@@ -174,16 +174,14 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      pointer-events: none; /* Prevents iOS video player from stealing taps */
+      pointer-events: none;
     }
 
-    /* Disabled during intro; activated right after video starts */
     .enter-hotspot {
       position: absolute;
       z-index: 30;
       display: none;
       cursor: pointer;
-      /* 1% alpha ensures iOS Safari registers touch events over video */
       background: rgba(255, 255, 255, 0.01);
       -webkit-tap-highlight-color: rgba(255, 217, 102, 0.25);
       text-decoration: none;
@@ -193,7 +191,6 @@
       display: block;
     }
 
-    /* Covers "PRESS START / INSERT COIN TO ENTER" */
     #coin-hotspot {
       bottom: 2%;
       left: 5%;
@@ -201,7 +198,6 @@
       height: 24%;
     }
 
-    /* Covers the Arcade Front Door */
     #door-hotspot {
       top: 30%;
       left: 55%;
@@ -225,7 +221,7 @@
         </div>
 
         <div class="speech-bubble" id="start-video-trigger">
-          <div class="speaker-tag">ORPHAN #001</div>
+          <div class="speaker-tag" id="speaker-label">ORPHAN #001</div>
           <div id="dialogue-text"></div>
           <div class="tap-continue" id="tap-prompt" style="visibility:hidden;">
             TAP TO ROLL IN ▶
@@ -241,7 +237,7 @@
       </video>
     </div>
 
-    <!-- STAGE 4: CLICKABLE ENTRANCE BUTTONS (Unlocked after video starts) -->
+    <!-- STAGE 4: CLICKABLE ENTRANCE BUTTONS POINTING TO MAIN.HTML -->
     <a href="main.html" id="coin-hotspot" class="enter-hotspot" title="Insert Coin"></a>
     <a href="main.html" id="door-hotspot" class="enter-hotspot" title="Enter Arcade"></a>
   </div>
@@ -517,48 +513,93 @@
     requestAnimationFrame(animateThree);
 
     /* =====================================================
-       PART 3: 20% SLOWER LIP-SYNCED DEV DIALOGUE
+       PART 3: DEGEN INSTRUCTIONS & RANDOM DIALOGUE LOOP
     ===================================================== */
-    const devJokes = [
-      "YO! Welcome to Rugged Orphans! Our dev promised a AAA metaverse, spent the mint funds on gas fees & Taco Bell, and locked us inside this arcade... Tap here to skate in before he rugs the front door too!"
+    const linesOfDialogue = [
+      { tag: "ORPHAN #001", text: "YO! Welcome to Rugged Orphans! Our dev spent mint funds on Taco Bell... Tap here to skate in before he rugs the front door too!" },
+      { tag: "TIPS & TRICKS", text: "Ser, try tapping my glass or clicking the TOILETS door back there to see where your portfolio is heading!" },
+      { tag: "ALPHA LEAK", text: "See that GAME OVER sign? That's just a live chart of our community token. Don't look too close." },
+      { tag: "DEGEN ADVICE", text: "Stop doom-scrolling Twitter and click 'TAP TO ROLL IN' already. We're burning gas just standing here!" }
     ];
+
+    const glassTaps = [
+      "Hey! Stop greasing up my sunglasses with your sweaty degen fingers!",
+      "Bro, touching the glass doesn't pump your floor price.",
+      "Oof, careful. You might accidentally buy a jpeg you can't afford.",
+      "What are you tapping at? Go check the FREE INTERNET PC inside!"
+    ];
+
+    let currentDialogueIndex = 0;
+    let typeInterval = null;
+    let dialogueTimer = null;
+    let isTyping = false;
+
+    function typeMessage(speakerTag, textString, onComplete) {
+      if (typeInterval) clearInterval(typeInterval);
+      const speakerEl = document.getElementById('speaker-label');
+      const dialogueEl = document.getElementById('dialogue-text');
+      const tapPrompt = document.getElementById('tap-prompt');
+
+      speakerEl.textContent = speakerTag;
+      dialogueEl.textContent = '';
+      dialogueEl.classList.remove('done');
+      tapPrompt.style.visibility = 'hidden';
+      isTyping = true;
+
+      let charIndex = 0, syllableToggle = 0;
+
+      typeInterval = setInterval(() => {
+        const ch = textString[charIndex];
+        dialogueEl.textContent += ch;
+        charIndex++;
+
+        if (/[a-zA-Z0-9]/.test(ch)) {
+          syllableToggle++;
+          if (syllableToggle % 3 === 0) setMouthState('closed');
+          else if (/[aeiouAEIOUYO]/.test(ch)) setMouthState('open');
+          else setMouthState('half');
+        } else {
+          setMouthState('closed');
+        }
+
+        if (charIndex >= textString.length) {
+          clearInterval(typeInterval);
+          setMouthState('closed');
+          dialogueEl.classList.add('done');
+          tapPrompt.style.visibility = 'visible';
+          isTyping = false;
+          if (onComplete) onComplete();
+        }
+      }, 48);
+    }
 
     function triggerCharacterPopup() {
       const popup = document.getElementById('char-popup');
-      const dialogueEl = document.getElementById('dialogue-text');
-      const tapPrompt = document.getElementById('tap-prompt');
       popup.classList.add('show');
 
-      const message = devJokes[0];
-      let charIndex = 0, syllableToggle = 0;
-
-      setTimeout(() => {
-        const typeInterval = setInterval(() => {
-          const ch = message[charIndex];
-          dialogueEl.textContent += ch;
-          charIndex++;
-
-          if (/[a-zA-Z0-9]/.test(ch)) {
-            syllableToggle++;
-            if (syllableToggle % 3 === 0) setMouthState('closed');
-            else if (/[aeiouAEIOUYO]/.test(ch)) setMouthState('open');
-            else setMouthState('half');
-          } else {
-            setMouthState('closed');
-          }
-
-          if (charIndex >= message.length) {
-            clearInterval(typeInterval);
-            setMouthState('closed');
-            dialogueEl.classList.add('done');
-            tapPrompt.style.visibility = 'visible';
-          }
-        }, 48);
-      }, 400);
+      typeMessage(linesOfDialogue[0].tag, linesOfDialogue[0].text, scheduleNextDialogue);
     }
 
+    function scheduleNextDialogue() {
+      dialogueTimer = setTimeout(() => {
+        if (!videoStarted) {
+          currentDialogueIndex = (currentDialogueIndex + 1) % linesOfDialogue.length;
+          typeMessage(linesOfDialogue[currentDialogueIndex].tag, linesOfDialogue[currentDialogueIndex].text, scheduleNextDialogue);
+        }
+      }, 7500);
+    }
+
+    document.querySelector('.sprite-stage').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (videoStarted) return;
+      if (dialogueTimer) clearTimeout(dialogueTimer);
+
+      const randomSnark = glassTaps[Math.floor(Math.random() * glassTaps.length)];
+      typeMessage("GLASS LICKER", randomSnark, scheduleNextDialogue);
+    });
+
     /* =====================================================
-       PART 4: PLAY VIDEO ONCE & UNLOCK BUTTONS SAFELY
+       PART 4: PLAY VIDEO ONCE & NAVIGATE TO MAIN.HTML
     ===================================================== */
     const introLayer = document.getElementById('intro-layer');
     const video = document.getElementById('entrance-video');
@@ -570,6 +611,9 @@
       if (videoStarted) return;
       videoStarted = true;
 
+      if (dialogueTimer) clearTimeout(dialogueTimer);
+      if (typeInterval) clearInterval(typeInterval);
+
       if (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -578,12 +622,10 @@
       setMouthState('closed');
       introLayer.classList.add('fade-out');
 
-      // Remove intro layer completely after fade so it can't block touches
       setTimeout(() => {
         introLayer.style.display = 'none';
       }, 600);
 
-      // Unlock the entrance buttons 1 second after video starts so the initial tap doesn't skip the video
       setTimeout(() => {
         coinHotspot.classList.add('ready');
         doorHotspot.classList.add('ready');
@@ -597,9 +639,9 @@
       });
     }
 
-    document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
+    document.querySelector('.speech-bubble').addEventListener('click', startEntranceVideo);
 
-    // Explicit iOS touch/click navigation so Safari never ignores taps over the video
+    // Explicitly forces navigation to main.html instead of looping back
     function goToMainArcade(e) {
       e.preventDefault();
       window.location.href = 'main.html';
