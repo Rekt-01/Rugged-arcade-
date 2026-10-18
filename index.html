@@ -51,7 +51,7 @@
       position: absolute;
       inset: 0;
       z-index: 10;
-      transition: opacity 0.65s ease;
+      transition: opacity 0.55s ease;
     }
     #intro-layer.fade-out {
       opacity: 0;
@@ -160,17 +160,13 @@
     }
 
     /* ==========================================
-       2. VIDEO LAYER & ALWAYS-AVAILABLE BUTTONS
+       2. VIDEO LAYER & ENTRANCE HOTSPOTS
     ========================================== */
     #video-layer {
       position: absolute;
       inset: 0;
       z-index: 2;
       background: #000;
-      display: none; /* Hidden until you tap to start */
-    }
-    #video-layer.active {
-      display: block;
     }
 
     #entrance-video {
@@ -178,33 +174,39 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      pointer-events: none; /* Prevents iOS video player from stealing taps */
     }
 
-    /* Always available clickable button over "INSERT COIN" */
-    .hidden-coin-btn {
+    /* Disabled during intro; activated right after video starts */
+    .enter-hotspot {
       position: absolute;
-      bottom: 5%;
-      left: 8%;
-      width: 84%;
-      height: 16%;
-      z-index: 20; /* Sits cleanly above video layer */
-      display: block;
+      z-index: 30;
+      display: none;
       cursor: pointer;
-      background: transparent;
+      /* 1% alpha ensures iOS Safari registers touch events over video */
+      background: rgba(255, 255, 255, 0.01);
       -webkit-tap-highlight-color: rgba(255, 217, 102, 0.25);
+      text-decoration: none;
     }
 
-    /* Always available secondary hitbox over the arcade front door */
-    .hidden-door-btn {
-      position: absolute;
-      top: 33%;
-      left: 60%;
-      width: 32%;
-      height: 35%;
-      z-index: 20; /* Sits cleanly above video layer */
+    .enter-hotspot.ready {
       display: block;
-      cursor: pointer;
-      background: transparent;
+    }
+
+    /* Covers "PRESS START / INSERT COIN TO ENTER" */
+    #coin-hotspot {
+      bottom: 2%;
+      left: 5%;
+      width: 90%;
+      height: 24%;
+    }
+
+    /* Covers the Arcade Front Door */
+    #door-hotspot {
+      top: 30%;
+      left: 55%;
+      width: 40%;
+      height: 40%;
     }
   </style>
 </head>
@@ -232,16 +234,16 @@
       </div>
     </div>
 
-    <!-- STAGE 3 & 4: SINGLE-PLAY VIDEO + ALWAYS AVAILABLE BUTTONS -->
+    <!-- STAGE 3: SINGLE-PLAY SKATEBOARD VIDEO -->
     <div id="video-layer">
       <video id="entrance-video" playsinline webkit-playsinline preload="auto">
         <source src="gemini_generated_video_7F077754.mp4" type="video/mp4">
       </video>
     </div>
 
-    <!-- Always available link hotspots (placed outside video layer so they never get blocked) -->
-    <a href="main.html" class="hidden-coin-btn" title="Insert Coin"></a>
-    <a href="main.html" class="hidden-door-btn" title="Enter Arcade"></a>
+    <!-- STAGE 4: CLICKABLE ENTRANCE BUTTONS (Unlocked after video starts) -->
+    <a href="main.html" id="coin-hotspot" class="enter-hotspot" title="Insert Coin"></a>
+    <a href="main.html" id="door-hotspot" class="enter-hotspot" title="Enter Arcade"></a>
   </div>
 
   <script>
@@ -389,7 +391,8 @@
       starPos[i + 2] = (Math.random() - 0.5) * 160 - 20;
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x35d4ff, size: 1.4, transparent: true, opacity: 0.75 })));
+    const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x35d4ff, size: 1.4, transparent: true, opacity: 0.75 }));
+    scene.add(stars);
 
     const PIXEL_FONT = {
       'W': ["10001","10001","10101","11011","10001"],
@@ -441,20 +444,34 @@
       }
     });
 
-    const voxelMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 0.25, metalness: 0.35 }), voxels.length);
+    const voxelMesh = new THREE.InstancedMesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25, metalness: 0.35 }),
+      voxels.length
+    );
     scene.add(voxelMesh);
     const dummy = new THREE.Object3D();
 
     voxels.forEach((v, i) => {
       const angle = (i / voxels.length) * Math.PI * 14;
       const radius = 25 + Math.random() * 55;
-      v.sx = Math.cos(angle) * radius; v.sy = Math.sin(angle) * radius + 15; v.sz = 95 + Math.random() * 80;
+      v.sx = Math.cos(angle) * radius;
+      v.sy = Math.sin(angle) * radius + 15;
+      v.sz = 95 + Math.random() * 80;
       v.delay = (v.tx + 35) * 0.008 + Math.random() * 0.25;
+
+      dummy.position.set(v.sx, v.sy, v.sz);
+      dummy.scale.set(v.scale, v.scale, v.scale);
+      dummy.updateMatrix();
+      voxelMesh.setMatrixAt(i, dummy.matrix);
+      voxelMesh.setColorAt(i, v.color);
     });
+    voxelMesh.instanceColor.needsUpdate = true;
 
     function updateCameraForMobile() {
       const w = container.clientWidth, h = container.clientHeight;
-      camera.aspect = w / h; camera.updateProjectionMatrix();
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
       camera.position.z = Math.max(82, (68 / 2) / (Math.tan((camera.fov * Math.PI) / 360) * camera.aspect));
       camera.position.y = 4;
       renderer.setSize(w, h);
@@ -468,6 +485,7 @@
       requestAnimationFrame(animateThree);
       const elapsed = (now - startTime) / 1000;
       gridHelper.position.z = (elapsed * 12) % 10;
+      stars.rotation.z = elapsed * 0.05;
 
       for (let i = 0; i < voxels.length; i++) {
         const v = voxels[i];
@@ -477,13 +495,18 @@
         const rx = v.sx * Math.cos(swirl) - v.sy * Math.sin(swirl);
         const ry = v.sx * Math.sin(swirl) + v.sy * Math.cos(swirl);
 
-        dummy.position.set(rx + (v.tx - rx) * ease, ry + (v.ty - ry) * ease + (localT === 1 ? Math.sin(elapsed * 3.2 + v.tx * 0.18) * 0.35 : 0), v.sz + (v.tz - v.sz) * ease);
+        dummy.position.set(
+          rx + (v.tx - rx) * ease,
+          ry + (v.ty - ry) * ease + (localT === 1 ? Math.sin(elapsed * 3.2 + v.tx * 0.18) * 0.35 : 0),
+          v.sz + (v.tz - v.sz) * ease
+        );
         dummy.rotation.set((1 - ease) * 5, (1 - ease) * 5, 0);
         dummy.scale.set(v.scale, v.scale, v.scale);
         dummy.updateMatrix();
         voxelMesh.setMatrixAt(i, dummy.matrix);
       }
       voxelMesh.instanceMatrix.needsUpdate = true;
+      voxelMesh.rotation.y = Math.sin(elapsed * 1.4) * 0.12;
 
       if (elapsed > 1.85 && !popupTriggered) {
         popupTriggered = true;
@@ -535,19 +558,36 @@
     }
 
     /* =====================================================
-       PART 4: VIDEO PLAYBACK & TAP CONTROLS
+       PART 4: PLAY VIDEO ONCE & UNLOCK BUTTONS SAFELY
     ===================================================== */
     const introLayer = document.getElementById('intro-layer');
-    const videoLayer = document.getElementById('video-layer');
     const video = document.getElementById('entrance-video');
+    const coinHotspot = document.getElementById('coin-hotspot');
+    const doorHotspot = document.getElementById('door-hotspot');
     let videoStarted = false;
 
-    function startEntranceVideo() {
+    function startEntranceVideo(e) {
       if (videoStarted) return;
       videoStarted = true;
+
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
       setMouthState('closed');
       introLayer.classList.add('fade-out');
-      videoLayer.classList.add('active');
+
+      // Remove intro layer completely after fade so it can't block touches
+      setTimeout(() => {
+        introLayer.style.display = 'none';
+      }, 600);
+
+      // Unlock the entrance buttons 1 second after video starts so the initial tap doesn't skip the video
+      setTimeout(() => {
+        coinHotspot.classList.add('ready');
+        doorHotspot.classList.add('ready');
+      }, 1000);
 
       video.currentTime = 0;
       video.loop = false;
@@ -558,6 +598,17 @@
     }
 
     document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
+
+    // Explicit iOS touch/click navigation so Safari never ignores taps over the video
+    function goToMainArcade(e) {
+      e.preventDefault();
+      window.location.href = 'main.html';
+    }
+
+    coinHotspot.addEventListener('click', goToMainArcade);
+    coinHotspot.addEventListener('touchend', goToMainArcade);
+    doorHotspot.addEventListener('click', goToMainArcade);
+    doorHotspot.addEventListener('touchend', goToMainArcade);
   </script>
 </body>
 </html>
