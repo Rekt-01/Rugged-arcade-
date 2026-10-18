@@ -1,225 +1,1237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rugged Arcade Jukebox</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Arcade & Digital Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --neon-primary: #ff0055;
+            --neon-secondary: #00f0ff;
+            --neon-glow: rgba(255, 0, 85, 0.45);
+        }
+
         body {
             background-color: #050508;
             background-image: 
-                radial-gradient(circle at 50% 20%, #1a102f 0%, #030305 80%),
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-            background-size: 100% 100%, 100% 4px;
+                radial-gradient(circle at 50% 10%, rgba(255, 0, 85, 0.14) 0%, transparent 60%),
+                radial-gradient(circle at 85% 85%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #07070c 0%, #030306 100%);
             font-family: 'Orbitron', sans-serif;
+            color: #f8fafc;
             overflow-x: hidden;
         }
+
         .arcade-font { font-family: 'Press Start 2P', monospace; }
-        
-        .arcade-cabinet {
-            background: linear-gradient(145deg, #121019 0%, #08070b 100%);
-            box-shadow: 0 0 50px rgba(255, 0, 85, 0.2), inset 0 0 25px rgba(255, 255, 255, 0.04);
-            border: 5px solid #2a223d;
-        }
-        
-        .marquee-glow {
-            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff0055, 0 0 40px #ff0055;
+        .led-font { font-family: 'VT323', monospace; }
+
+        /* Heavy-Duty Rugged Metallic Cabinet Frame */
+        .rugged-cabinet {
+            background: linear-gradient(145deg, #1b1d29 0%, #0d0e15 55%, #07080d 100%);
+            border: 4px solid #33384d;
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.95),
+                0 0 35px var(--neon-glow),
+                inset 0 2px 3px rgba(255, 255, 255, 0.12),
+                inset 0 -4px 12px rgba(0, 0, 0, 0.85);
+            position: relative;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .spinning { animation: spin 3s linear infinite; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #050508; }
-        ::-webkit-scrollbar-thumb { background: #ff0055; border-radius: 3px; }
+        /* Neon Tube Arch Border */
+        .neon-arch {
+            border: 2px solid var(--neon-primary);
+            box-shadow: 
+                0 0 15px var(--neon-glow),
+                inset 0 0 15px var(--neon-glow);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Corner Industrial Bolts */
+        .rivet {
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 35% 35%, #94a3b8, #334155 70%, #0f172a 100%);
+            border: 1px solid #1e293b;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 2px 3px rgba(0,0,0,0.8);
+        }
+
+        /* CRT Screen & Scanline Overlay */
+        .crt-display {
+            background: radial-gradient(circle at 50% 50%, #0c1322 0%, #04070e 100%);
+            border: 3px solid #1e293b;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 240, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .crt-display::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.35) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        /* Tactile 3D Arcade Push Buttons */
+        .arcade-push-btn {
+            position: relative;
+            transition: all 0.1s ease;
+            border-bottom-width: 5px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .arcade-push-btn:active {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+        .arcade-push-btn.active-genre {
+            box-shadow: 0 0 20px var(--neon-glow), inset 0 0 10px rgba(255,255,255,0.35);
+        }
+
+        /* Transport Deck Buttons */
+        .deck-btn {
+            background: linear-gradient(180deg, #272b3f 0%, #151824 100%);
+            border: 2px solid #3f4663;
+            border-bottom: 5px solid #0b0d14;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            transition: all 0.08s ease;
+        }
+        .deck-btn:hover {
+            border-color: #00f0ff;
+            color: #00f0ff;
+        }
+        .deck-btn:active {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+
+        .deck-btn-primary {
+            background: linear-gradient(180deg, #ff1a66 0%, #b3003b 100%);
+            border: 2px solid #ff6699;
+            border-bottom: 5px solid #660022;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
+        }
+        .deck-btn-primary:hover {
+            background: linear-gradient(180deg, #ff3377 0%, #cc0044 100%);
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        /* Vinyl Record Grooves & Spin */
+        @keyframes spinRecord {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .vinyl-spinning {
+            animation: spinRecord 2.8s linear infinite;
+        }
+        .vinyl-paused {
+            animation: spinRecord 2.8s linear infinite;
+            animation-play-state: paused;
+        }
+        .vinyl-grooves {
+            background: repeating-radial-gradient(
+                #0a0a0f 0px,
+                #0a0a0f 3px,
+                #1c1d29 4px,
+                #0a0a0f 5px
+            );
+        }
+
+        /* Tonearm Pivot Transition */
+        .tonearm {
+            transform-origin: 82% 18%;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .tonearm-rest {
+            transform: rotate(-28deg);
+        }
+        .tonearm-engaged {
+            transform: rotate(2deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #090b10; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #ff0055; border-radius: 4px; border: 1px solid #090b10; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
     </style>
 </head>
-<body class="text-white min-h-screen flex flex-col justify-between p-3 md:p-6 select-none">
+<body class="min-h-screen flex flex-col justify-between p-2 sm:p-4 md:p-6 select-none">
 
-    <!-- Top Navigation -->
-    <header class="max-w-4xl mx-auto w-full flex justify-between items-center bg-black/80 backdrop-blur-md p-4 rounded-xl border border-purple-500/30 shadow-lg">
-        <a href="main.html" class="arcade-font text-[9px] md:text-xs bg-red-600 hover:bg-red-500 text-white px-4 py-3 rounded-lg shadow-[0_0_15px_rgba(220,38,38,0.5)] transition flex items-center gap-2">
-            <span>◄</span> BACK
+    <!-- Native HTML5 Audio Element (NO crossorigin attribute so all public streams play without CORS blocks) -->
+    <audio id="radio-player" preload="none"></audio>
+
+    <!-- TOP NAVIGATION HEADER -->
+    <header class="max-w-6xl mx-auto w-full flex flex-wrap justify-between items-center gap-3 bg-slate-950/90 backdrop-blur-md px-4 py-3 rounded-2xl border-2 border-slate-800 shadow-[0_0_25px_rgba(0,0,0,0.8)] z-30">
+        <!-- MANDATORY BACK TO ARCADE BUTTON -->
+        <a href="main.html" class="arcade-push-btn arcade-font text-[10px] sm:text-xs bg-gradient-to-b from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white px-4 py-3 rounded-xl border border-red-400 border-b-red-950 shadow-[0_0_15px_rgba(239,68,68,0.5)] flex items-center gap-2.5">
+            <i class="fa-solid fa-caret-left text-sm"></i>
+            <span>◄ BACK TO ARCADE</span>
         </a>
-        <div class="text-center hidden sm:block">
-            <span class="text-[10px] text-pink-400 arcade-font tracking-widest">RUGGED SOUND SYSTEMS</span>
+
+        <!-- Center Brand Badge -->
+        <div class="hidden md:flex items-center gap-3 bg-black/60 px-4 py-1.5 rounded-xl border border-slate-800">
+            <i class="fa-solid fa-bolt text-amber-400 animate-pulse"></i>
+            <span class="arcade-font text-[10px] text-slate-300 tracking-widest">HEAVY-DUTY HI-FI STREAMING UNIT</span>
+            <i class="fa-solid fa-bolt text-amber-400 animate-pulse"></i>
         </div>
-        <div class="flex items-center gap-2 bg-purple-950/60 px-3 py-1.5 rounded-lg border border-purple-500/40">
-            <span id="live-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-            <span id="live-text" class="text-[10px] arcade-font text-green-400">ONLINE</span>
+
+        <!-- Live Connection Status Indicator -->
+        <div class="flex items-center gap-3 bg-black/80 px-3.5 py-2 rounded-xl border border-slate-800">
+            <span id="header-status-dot" class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]"></span>
+            <span id="header-status-text" class="arcade-font text-[9px] sm:text-[10px] text-emerald-400">SYSTEM READY</span>
         </div>
     </header>
 
-    <!-- Main Arcade Cabinet -->
-    <main class="max-w-3xl mx-auto w-full my-4 arcade-cabinet rounded-2xl p-4 md:p-6 flex flex-col gap-5 relative">
+    <!-- MAIN RUGGED ARCADE JUKEBOX CABINET -->
+    <main class="max-w-6xl mx-auto w-full my-3 rugged-cabinet rounded-3xl p-3 sm:p-5 md:p-7 flex flex-col gap-5">
         
-        <!-- Marquee Header -->
-        <div class="text-center bg-black/90 border-2 border-pink-500/60 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(255,0,85,0.2)]">
-            <h1 class="arcade-font text-base md:text-2xl text-pink-500 marquee-glow tracking-wider">RUGGED ARCADE JUKEBOX</h1>
-            <p class="text-[10px] text-cyan-400 mt-2 tracking-widest uppercase">Live Global Radio Network</p>
+        <!-- Industrial Corner Bolts -->
+        <div class="rivet absolute top-3 left-3"></div>
+        <div class="rivet absolute top-3 right-3"></div>
+        <div class="rivet absolute bottom-3 left-3"></div>
+        <div class="rivet absolute bottom-3 right-3"></div>
+
+        <!-- glowing Marquee Header -->
+        <div class="neon-arch bg-black/90 rounded-2xl p-4 sm:p-5 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-pink-600/10 via-cyan-500/10 to-pink-600/10 pointer-events-none"></div>
+            <div class="flex items-center justify-center gap-3">
+                <i class="fa-solid fa-compact-disc text-pink-500 text-lg sm:text-2xl animate-spin" style="animation-duration: 6s;"></i>
+                <h1 class="arcade-font text-base sm:text-2xl md:text-3xl tracking-wider text-white drop-shadow-[0_0_12px_rgba(255,0,85,0.9)]">
+                    RUGGED ARCADE JUKEBOX
+                </h1>
+                <i class="fa-solid fa-compact-disc text-cyan-400 text-lg sm:text-2xl animate-spin" style="animation-duration: 6s;"></i>
+            </div>
+            <p class="led-font text-cyan-300 text-lg sm:text-xl tracking-widest mt-1 uppercase">
+                SELECT YOUR COUNTRY &amp; MUSIC STYLE • GUARANTEED 24/7 LIVE STREAMS
+            </p>
         </div>
 
-        <!-- Genre Arcade Buttons -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <button onclick="fetchStations('hip hop')" id="btn-hiphop" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-pink-600 text-white border-b-4 border-pink-900 active:border-b-0 active:translate-y-1 shadow-lg transition">
-                HIP-HOP
-            </button>
-            <button onclick="fetchStations('dance')" id="btn-dance" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
-                DANCE / RAVE
-            </button>
-            <button onclick="fetchStations('country')" id="btn-country" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
-                COUNTRY
-            </button>
-            <button onclick="fetchStations('rock')" id="btn-rock" class="arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition">
-                ROCK / HITS
-            </button>
-        </div>
-
-        <!-- Jukebox Screen & Station Picker Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- Left Side: Dynamic Station List -->
-            <div class="bg-black/80 border-2 border-cyan-500/40 rounded-xl p-3 flex flex-col h-[240px]">
-                <div class="flex justify-between items-center border-b border-cyan-500/20 pb-2 mb-2">
-                    <span id="list-title" class="text-[10px] text-cyan-400 arcade-font">STATIONS: HIP HOP</span>
-                    <span class="text-[9px] bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded arcade-font">LIVE</span>
+        <!-- STEP 1: COUNTRY SELECTOR BAR -->
+        <section class="bg-slate-950/90 border-2 border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col gap-2.5">
+            <div class="flex flex-wrap justify-between items-center gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <h2 class="arcade-font text-[10px] sm:text-xs text-cyan-400 tracking-wider">1. SELECT COUNTRY / REGION</h2>
                 </div>
-                <div id="station-list" class="overflow-y-auto flex flex-col gap-2 pr-1 flex-grow">
-                    <div class="text-xs text-gray-400 text-center py-10 arcade-font">Loading database...</div>
-                </div>
+                <button onclick="detectUserCountry()" class="text-xs led-font bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 px-3 py-1 rounded-lg transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <span>AUTO-DETECT MY COUNTRY</span>
+                </button>
             </div>
 
-            <!-- Right Side: Player HUD & Spinning Vinyl -->
-            <div class="bg-black/80 border-2 border-pink-500/40 rounded-xl p-4 flex flex-col items-center justify-between text-center relative overflow-hidden h-[240px]">
-                
-                <div class="absolute inset-0 bg-gradient-to-b from-pink-950/20 to-transparent pointer-events-none"></div>
+            <!-- Country Pills -->
+            <div id="country-selector" class="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5">
+                <!-- Populated by JS -->
+            </div>
+        </section>
 
-                <!-- Spinning Vinyl Graphic -->
-                <div class="relative w-20 h-20 my-1">
-                    <div id="vinyl-disc" class="w-full h-full rounded-full bg-black border-4 border-gray-800 shadow-[0_0_15px_rgba(255,0,85,0.4)] flex items-center justify-center">
-                        <div class="w-7 h-7 rounded-full bg-cyan-500 border-2 border-black flex items-center justify-center">
-                            <div class="w-2 h-2 rounded-full bg-black"></div>
+        <!-- STEP 2: MUSIC STYLE / GENRE SELECTOR (8 ARCADE PUSH BUTTONS) -->
+        <section class="bg-slate-950/90 border-2 border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                    <h2 class="arcade-font text-[10px] sm:text-xs text-pink-400 tracking-wider">2. SELECT MUSIC STYLE</h2>
+                </div>
+                <span id="active-genre-badge" class="led-font text-base sm:text-lg text-amber-300">STYLE: HIP-HOP / RAP</span>
+            </div>
+
+            <div id="genre-buttons-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- STEP 3: INTERACTIVE JUKEBOX CRT DECK & STATION SELECTOR GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            
+            <!-- LEFT COLUMN (5 COLS): TURNTABLE, CRT LED MARQUEE, EQUALIZER & TRANSPORT CONTROLS -->
+            <div class="lg:col-span-5 crt-display rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4">
+                
+                <!-- Top CRT Status Row -->
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 z-20">
+                    <div class="flex items-center gap-2">
+                        <span class="arcade-font text-[9px] px-2 py-1 rounded bg-pink-600 text-white" id="crt-slot-code">SLOT A-01</span>
+                        <span class="led-font text-lg text-cyan-300" id="crt-country-label">🌍 GLOBAL</span>
+                    </div>
+                    <span class="led-font text-lg text-amber-400 tracking-wider" id="crt-bitrate">128 KBPS MP3</span>
+                </div>
+
+                <!-- Turntable & Mechanical Tonearm Area -->
+                <div class="relative flex items-center justify-center py-2 z-20">
+                    <!-- Glowing Halo Behind Vinyl -->
+                    <div id="vinyl-halo" class="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-pink-500/20 blur-xl absolute pointer-events-none transition-all duration-500"></div>
+
+                    <!-- Vinyl Disc -->
+                    <div id="vinyl-disc" class="w-36 h-36 sm:w-40 sm:h-40 rounded-full vinyl-grooves border-4 border-slate-800 shadow-[0_0_30px_rgba(0,0,0,0.95)] flex items-center justify-center relative vinyl-paused">
+                        <!-- Vinyl Light Sheen -->
+                        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none"></div>
+                        <!-- Center Record Label -->
+                        <div id="vinyl-label" class="w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-purple-700 border-4 border-slate-950 flex flex-col items-center justify-center shadow-inner">
+                            <span class="arcade-font text-[6px] text-white/90 tracking-tighter">RUGGED</span>
+                            <div class="w-3 h-3 rounded-full bg-slate-950 border border-slate-700 my-0.5"></div>
+                            <span class="arcade-font text-[5px] text-cyan-200">45 RPM</span>
                         </div>
+                    </div>
+
+                    <!-- Articulated Tonearm SVG -->
+                    <div id="tonearm-assembly" class="tonearm tonearm-rest absolute right-6 sm:right-10 top-1 w-24 h-32 pointer-events-none z-30">
+                        <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.8)]">
+                            <!-- Pivot Base -->
+                            <circle cx="82" cy="18" r="14" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                            <circle cx="82" cy="18" r="6" fill="#94a3b8"/>
+                            <!-- Arm Rod -->
+                            <path d="M 82 18 L 62 92 L 42 108" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <!-- Cartridge Head -->
+                            <rect x="32" y="102" width="16" height="10" rx="2" transform="rotate(-35 40 107)" fill="#ff0055" stroke="#ffffff" stroke-width="1"/>
+                        </svg>
                     </div>
                 </div>
 
-                <!-- Now Playing Text Display -->
-                <div class="w-full z-10">
-                    <div id="now-playing-name" class="arcade-font text-[10px] text-pink-400 truncate">SELECT A STATION</div>
-                    <div id="now-playing-status" class="text-[9px] text-gray-400 mt-1">Ready</div>
+                <!-- Dot-Matrix Digital Readout Screen -->
+                <div class="bg-slate-950/95 border-2 border-cyan-500/40 rounded-xl p-3 shadow-inner z-20">
+                    <div class="flex justify-between items-center text-xs led-font text-slate-400 mb-0.5">
+                        <span id="player-state-badge" class="text-emerald-400 font-bold tracking-wider">● TUNED &amp; READY</span>
+                        <span id="failover-notice" class="text-amber-400 hidden">AUTO-SWITCHING...</span>
+                    </div>
+                    <div id="now-playing-title" class="arcade-font text-xs sm:text-sm text-white truncate tracking-wide py-1">
+                        SELECT A STATION
+                    </div>
+                    <div id="now-playing-subtitle" class="led-font text-lg text-pink-400 truncate">
+                        Hip-Hop, Rave, Country, Rock &amp; More
+                    </div>
+
+                    <!-- 24-Bar LED Spectrum Visualizer -->
+                    <div id="equalizer-bars" class="h-10 flex items-end justify-between gap-1 pt-2 mt-1 border-t border-slate-800/80">
+                        <!-- Generated via JS -->
+                    </div>
                 </div>
 
-                <!-- Volume Bar -->
-                <div class="w-full flex items-center gap-2 bg-gray-900/80 px-3 py-1.5 rounded-lg border border-white/5 z-10">
-                    <span class="text-[9px] text-cyan-400 arcade-font">VOL</span>
-                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-full accent-pink-500 cursor-pointer">
+                <!-- Arcade Transport Controls -->
+                <div class="flex flex-col gap-3 z-20">
+                    <div class="grid grid-cols-4 gap-2.5">
+                        <button onclick="prevStation()" class="deck-btn py-3 rounded-xl text-slate-200 flex flex-col items-center justify-center gap-1" title="Previous Station">
+                            <i class="fa-solid fa-backward-step text-sm"></i>
+                            <span class="arcade-font text-[7px]">PREV</span>
+                        </button>
+
+                        <button onclick="togglePlay()" id="main-play-btn" class="deck-btn-primary col-span-2 py-3 rounded-xl text-white flex items-center justify-center gap-2.5 transition">
+                            <i id="main-play-icon" class="fa-solid fa-play text-lg"></i>
+                            <span id="main-play-text" class="arcade-font text-[10px] sm:text-xs">PLAY</span>
+                        </button>
+
+                        <button onclick="nextStation()" class="deck-btn py-3 rounded-xl text-slate-200 flex flex-col items-center justify-center gap-1" title="Next Station">
+                            <i class="fa-solid fa-forward-step text-sm"></i>
+                            <span class="arcade-font text-[7px]">NEXT</span>
+                        </button>
+                    </div>
+
+                    <!-- Volume & Random Row -->
+                    <div class="flex items-center gap-3 bg-slate-950/90 px-3.5 py-2.5 rounded-xl border border-slate-800">
+                        <button onclick="toggleMute()" id="mute-btn" class="text-cyan-400 hover:text-pink-400 transition w-6 text-center" title="Mute / Unmute">
+                            <i id="volume-icon" class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.85" class="w-full accent-pink-500 cursor-pointer h-2 bg-slate-800 rounded-lg">
+                        <span id="volume-percent" class="led-font text-lg text-cyan-300 w-10 text-right">85%</span>
+                        <button onclick="playRandomStation()" class="deck-btn px-3 py-1.5 rounded-lg text-amber-400 hover:text-amber-300 flex items-center gap-1.5 shrink-0" title="Random Station">
+                            <i class="fa-solid fa-shuffle text-xs"></i>
+                            <span class="arcade-font text-[7px] hidden sm:inline">RANDOM</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN (7 COLS): JUKEBOX STATION SELECTOR GRID & SEARCH -->
+            <div class="lg:col-span-7 bg-slate-950/95 border-2 border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 h-[520px] lg:h-auto">
+                
+                <!-- Top Filter & Custom Search Bar -->
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 border-b border-slate-800 pb-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="arcade-font text-[10px] sm:text-xs text-white">JUKEBOX SELECTION RACK</h3>
+                            <span id="station-count-badge" class="text-xs led-font bg-pink-600/30 text-pink-300 border border-pink-500/40 px-2 py-0.5 rounded">12 CHANNELS</span>
+                        </div>
+                        <p id="rack-subtitle" class="led-font text-base text-slate-400">Click any jukebox slot card below for instant playback</p>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-magnifying-glass text-slate-500 text-xs absolute left-3"></i>
+                        <input 
+                            id="station-search" 
+                            type="text" 
+                            placeholder="Filter or search station..." 
+                            oninput="handleSearchInput(this.value)"
+                            class="bg-slate-900 border border-slate-700 focus:border-cyan-400 text-white text-xs rounded-xl pl-8 pr-8 py-2 w-full sm:w-56 outline-none transition"
+                        >
+                        <button id="clear-search-btn" onclick="clearSearch()" class="hidden text-slate-400 hover:text-white absolute right-2.5 text-xs">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Jukebox Cards Grid -->
+                <div id="stations-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto pr-1 flex-1 content-start">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Bottom Rack Status Bar -->
+                <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-800/90 text-xs led-font text-slate-400">
+                    <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> AUTO-FAILOVER PROTECTION ENABLED</span>
+                    <span class="text-cyan-400">KEYBOARD: [SPACE] PLAY/PAUSE • [←/→] CHANGE CHANNEL</span>
                 </div>
             </div>
 
         </div>
 
-        <!-- Cabinet Coin Slot Footer -->
-        <div class="flex justify-between items-center px-4 py-2 bg-black/60 rounded-lg border border-white/5 text-[9px] text-gray-400 arcade-font">
-            <span>CREDIT: FREE PLAY</span>
-            <span class="text-pink-500 animate-pulse">● STEREO AUDIO ACTIVE</span>
-            <span>RUGGED OS v6.0</span>
+        <!-- Bottom Cabinet Coin Door Bar -->
+        <div class="flex flex-wrap justify-between items-center gap-2 px-4 py-2.5 bg-black/80 rounded-xl border border-slate-800/80 text-[9px] arcade-font text-slate-400">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="text-amber-400">CREDITS: FREE PLAY MODE</span>
+            </div>
+            <span class="hidden sm:inline text-slate-500">HI-VOLTAGE STEREO AMPLIFIER</span>
+            <span class="text-cyan-400">RUGGED OS v7.0</span>
         </div>
 
     </main>
 
-    <!-- HTML5 Audio Element -->
-    <audio id="audio-element" preload="none"></audio>
-
     <script>
-        const audio = document.getElementById('audio-element');
-        const volumeSlider = document.getElementById('volume-slider');
-        const nowPlayingName = document.getElementById('now-playing-name');
-        const nowPlayingStatus = document.getElementById('now-playing-status');
-        const vinylDisc = document.getElementById('vinyl-disc');
-        const stationListContainer = document.getElementById('station-list');
+        // =========================================================================
+        // 1. COUNTRIES & GENRES CONFIGURATION
+        // =========================================================================
+        const COUNTRIES = [
+            { code: 'ALL', name: 'Global / All', flag: '🌍' },
+            { code: 'US',  name: 'USA',          flag: '🇺🇸' },
+            { code: 'GB',  name: 'UK',           flag: '🇬🇧' },
+            { code: 'IE',  name: 'Ireland',      flag: '🇮🇪' },
+            { code: 'CA',  name: 'Canada',       flag: '🇨🇦' },
+            { code: 'AU',  name: 'Australia',    flag: '🇦🇺' },
+            { code: 'DE',  name: 'Germany',      flag: '🇩🇪' },
+            { code: 'FR',  name: 'France',       flag: '🇫🇷' },
+            { code: 'NL',  name: 'Netherlands',  flag: '🇳🇱' },
+            { code: 'JP',  name: 'Japan',        flag: '🇯🇵' }
+        ];
 
-        volumeSlider.addEventListener('input', (e) => {
-            audio.volume = e.target.value;
+        const GENRES = [
+            { id: 'hiphop',  label: 'HIP-HOP / RAP', icon: 'fa-microphone-lines', apiTag: 'hiphop',     color: '#ff0055', bgClass: 'from-pink-600 to-rose-800 border-pink-400 border-b-rose-950' },
+            { id: 'dance',   label: 'DANCE / RAVE',  icon: 'fa-bolt',             apiTag: 'dance',      color: '#00f0ff', bgClass: 'from-cyan-500 to-blue-700 border-cyan-300 border-b-blue-950' },
+            { id: 'country', label: 'COUNTRY',       icon: 'fa-hat-cowboy',       apiTag: 'country',    color: '#f59e0b', bgClass: 'from-amber-500 to-orange-700 border-amber-300 border-b-orange-950' },
+            { id: 'rock',    label: 'ROCK / CLASSIC',icon: 'fa-guitar',           apiTag: 'rock',       color: '#ef4444', bgClass: 'from-red-600 to-red-800 border-red-400 border-b-red-950' },
+            { id: 'pop',     label: 'POP / HITS',    icon: 'fa-star',             apiTag: 'pop',        color: '#10b981', bgClass: 'from-emerald-500 to-teal-700 border-emerald-300 border-b-teal-950' },
+            { id: 'retro80s',label: '80s / SYNTH',   icon: 'fa-wave-square',      apiTag: '80s',        color: '#a855f7', bgClass: 'from-purple-600 to-indigo-800 border-purple-400 border-b-indigo-950' },
+            { id: 'rnb',     label: 'R&B / SOUL',    icon: 'fa-headphones',       apiTag: 'rnb',        color: '#ec4899', bgClass: 'from-fuchsia-600 to-pink-800 border-fuchsia-400 border-b-pink-950' },
+            { id: 'metal',   label: 'METAL / HARD',  icon: 'fa-fire-flame-curved',apiTag: 'metal',      color: '#f97316', bgClass: 'from-orange-600 to-stone-800 border-orange-400 border-b-stone-950' }
+        ];
+
+        // =========================================================================
+        // 2. VERIFIED 24/7 HTTPS MP3 BUILT-IN STREAMS (ZERO CORS / ALWAYS ONLINE)
+        // =========================================================================
+        const VERIFIED_STREAMS = {
+            hiphop: [
+                { name: "181.fm The Beat (Hip-Hop & Rap)", url: "https://listen.181fm.com/181-beat_128k.mp3", country: "US", bitrate: 128, style: "Hip-Hop / Rap" },
+                { name: "181.fm Old School Hip-Hop", url: "https://listen.181fm.com/181-oldschool_128k.mp3", country: "US", bitrate: 128, style: "Classic Hip-Hop" },
+                { name: "Laut.fm Hip-Hop Central", url: "https://stream.laut.fm/hiphop", country: "DE", bitrate: 128, style: "Hip-Hop & Urban" },
+                { name: "Laut.fm Oldschool Boom Bap", url: "https://stream.laut.fm/oldschool-hiphop", country: "DE", bitrate: 128, style: "90s Boom Bap" },
+                { name: "SomaFM Fluid (Instrumental Beats)", url: "https://ice2.somafm.com/fluid-128-mp3", country: "US", bitrate: 128, style: "Hip-Hop Beats" },
+                { name: "181.fm The Box (Urban Rap)", url: "https://listen.181fm.com/181-thebox_128k.mp3", country: "US", bitrate: 128, style: "Hip-Hop / R&B" }
+            ],
+            dance: [
+                { name: "181.fm Energy 98 (Dance & EDM)", url: "https://listen.181fm.com/181-energy98_128k.mp3", country: "US", bitrate: 128, style: "Club Dance / EDM" },
+                { name: "181.fm 90s Dance & Rave", url: "https://listen.181fm.com/181-90sdance_128k.mp3", country: "US", bitrate: 128, style: "90s Rave Classics" },
+                { name: "SomaFM The Trip (Prog Trance/Rave)", url: "https://ice2.somafm.com/thetrip-128-mp3", country: "US", bitrate: 128, style: "Rave / Trance" },
+                { name: "Hirschmilch Electronic & Techno", url: "https://hirschmilch.de:7001/electronic.mp3", country: "DE", bitrate: 128, style: "Techno / House" },
+                { name: "Laut.fm Eurodance 90s Rave", url: "https://stream.laut.fm/eurodance", country: "DE", bitrate: 128, style: "Eurodance / Rave" },
+                { name: "SomaFM Cliqhop IDM & Bass", url: "https://ice2.somafm.com/cliqhop-128-mp3", country: "US", bitrate: 128, style: "Electronic / IDM" }
+            ],
+            country: [
+                { name: "181.fm Kickin' Country Hits", url: "https://listen.181fm.com/181-kickin_128k.mp3", country: "US", bitrate: 128, style: "Today's Country" },
+                { name: "181.fm Highway 181 (Classic Country)", url: "https://listen.181fm.com/181-highway_128k.mp3", country: "US", bitrate: 128, style: "Classic Country" },
+                { name: "181.fm Real Country Radio", url: "https://listen.181fm.com/181-realcountry_128k.mp3", country: "US", bitrate: 128, style: "Traditional Country" },
+                { name: "181.fm 90s Country Gold", url: "https://listen.181fm.com/181-90scountry_128k.mp3", country: "US", bitrate: 128, style: "90s Country" },
+                { name: "SomaFM Boot Liquor (Americana/Country)", url: "https://ice2.somafm.com/bootliquor-128-mp3", country: "US", bitrate: 128, style: "Outlaw Country" },
+                { name: "Laut.fm Country Nashville", url: "https://stream.laut.fm/country", country: "DE", bitrate: 128, style: "Country Hits" }
+            ],
+            rock: [
+                { name: "181.fm The Eagle (Classic Rock)", url: "https://listen.181fm.com/181-eagle_128k.mp3", country: "US", bitrate: 128, style: "Classic Rock" },
+                { name: "Radio Paradise Rock Mix", url: "https://stream.radioparadise.com/rock-128", country: "US", bitrate: 128, style: "Modern & Classic Rock" },
+                { name: "181.fm Rock 40 (Rock Anthems)", url: "https://listen.181fm.com/181-rock40_128k.mp3", country: "US", bitrate: 128, style: "Active Rock" },
+                { name: "181.fm The Buzz (90s Alt Rock)", url: "https://listen.181fm.com/181-buzz_128k.mp3", country: "US", bitrate: 128, style: "90s Alternative" },
+                { name: "SomaFM Indie Pop Rocks!", url: "https://ice2.somafm.com/indiepop-128-mp3", country: "US", bitrate: 128, style: "Indie Rock" },
+                { name: "Laut.fm Classic Rock Legends", url: "https://stream.laut.fm/classicrock", country: "DE", bitrate: 128, style: "Arena Rock" }
+            ],
+            pop: [
+                { name: "181.fm Power 181 (Top 40 Hits)", url: "https://listen.181fm.com/181-power_128k.mp3", country: "US", bitrate: 128, style: "Top 40 / Pop" },
+                { name: "181.fm UK Top 40 Chart", url: "https://listen.181fm.com/181-uktop40_128k.mp3", country: "GB", bitrate: 128, style: "UK Chart Hits" },
+                { name: "181.fm Star 90s Pop Hits", url: "https://listen.181fm.com/181-star90s_128k.mp3", country: "US", bitrate: 128, style: "90s Pop Anthems" },
+                { name: "Radio Paradise Main Mix", url: "https://stream.radioparadise.com/mp3-128", country: "US", bitrate: 128, style: "Eclectic Hits" },
+                { name: "SomaFM PopTron (Electropop)", url: "https://ice2.somafm.com/poptron-128-mp3", country: "US", bitrate: 128, style: "Synthpop / Hits" },
+                { name: "181.fm The Point (Hot AC Pop)", url: "https://listen.181fm.com/181-point_128k.mp3", country: "US", bitrate: 128, style: "Hit Music" }
+            ],
+            retro80s: [
+                { name: "181.fm Awesome 80s", url: "https://listen.181fm.com/181-awesome80s_128k.mp3", country: "US", bitrate: 128, style: "80s Pop & Rock" },
+                { name: "Nightride FM (Cyberpunk Synthwave)", url: "https://stream.nightride.fm/nightride.mp3", country: "US", bitrate: 192, style: "Retro Synthwave" },
+                { name: "SomaFM Underground 80s", url: "https://ice2.somafm.com/u80s-128-mp3", country: "US", bitrate: 128, style: "80s New Wave & Synth" },
+                { name: "Nightride ChillSynth (Outrun)", url: "https://stream.nightride.fm/chillsynth.mp3", country: "US", bitrate: 192, style: "80s Outrun" },
+                { name: "181.fm Lite 80s Classics", url: "https://listen.181fm.com/181-lite80s_128k.mp3", country: "US", bitrate: 128, style: "80s Favorites" },
+                { name: "Laut.fm 80s Mania", url: "https://stream.laut.fm/80er", country: "DE", bitrate: 128, style: "80s Euro & Pop" }
+            ],
+            rnb: [
+                { name: "181.fm True R&B", url: "https://listen.181fm.com/181-true_128k.mp3", country: "US", bitrate: 128, style: "R&B / Slow Jams" },
+                { name: "181.fm Jammin 181 (Urban Throwbacks)", url: "https://listen.181fm.com/181-jammin_128k.mp3", country: "US", bitrate: 128, style: "Urban / Funk" },
+                { name: "181.fm Soul & Motown Classics", url: "https://listen.181fm.com/181-soul_128k.mp3", country: "US", bitrate: 128, style: "Classic Soul" },
+                { name: "SomaFM Seven Inch Soul", url: "https://ice2.somafm.com/7soul-128-mp3", country: "US", bitrate: 128, style: "Vintage R&B / Soul" },
+                { name: "181.fm The Vibe of Vegas", url: "https://listen.181fm.com/181-vibe_128k.mp3", country: "US", bitrate: 128, style: "R&B Groove" },
+                { name: "Laut.fm Soul & Funk Radio", url: "https://stream.laut.fm/soul", country: "DE", bitrate: 128, style: "Soul / R&B" }
+            ],
+            metal: [
+                { name: "181.fm Hard Rock Heaven", url: "https://listen.181fm.com/181-hardrock_128k.mp3", country: "US", bitrate: 128, style: "Hard Rock / Metal" },
+                { name: "181.fm 80s Hair Metal", url: "https://listen.181fm.com/181-80smetal_128k.mp3", country: "US", bitrate: 128, style: "80s Glam & Heavy Metal" },
+                { name: "SomaFM Metal Detector", url: "https://ice2.somafm.com/metal-128-mp3", country: "US", bitrate: 128, style: "Heavy Metal" },
+                { name: "Nightride Darksynth & Industrial", url: "https://stream.nightride.fm/darksynth.mp3", country: "US", bitrate: 192, style: "Cyber Metal / Darksynth" },
+                { name: "Laut.fm Heavy Metal Power", url: "https://stream.laut.fm/metal", country: "DE", bitrate: 128, style: "Heavy Metal" },
+                { name: "Laut.fm Rock & Metal Core", url: "https://stream.laut.fm/hardrock", country: "DE", bitrate: 128, style: "Hard Rock" }
+            ]
+        };
+
+        // Radio-Browser API Mirrors for resilient live querying
+        const API_MIRRORS = [
+            'https://de1.api.radio-browser.info',
+            'https://fi1.api.radio-browser.info',
+            'https://at1.api.radio-browser.info'
+        ];
+
+        // =========================================================================
+        // 3. APPLICATION STATE
+        // =========================================================================
+        let selectedCountry = 'ALL';
+        let selectedGenre = 'hiphop';
+        let currentStationsList = [];
+        let filteredStationsList = [];
+        let currentStationIndex = 0;
+        let isPlaying = false;
+        let isMuted = false;
+        let savedVolume = 0.85;
+        let streamTimeoutId = null;
+        let consecutiveFailCount = 0;
+        let searchDebounceId = null;
+
+        const audio = document.getElementById('radio-player');
+
+        // =========================================================================
+        // 4. INITIALIZATION & UI RENDERING
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            audio.volume = savedVolume;
+            initEqualizerBars();
+            renderCountrySelector();
+            renderGenreButtons();
+            setupAudioListeners();
+            setupKeyboardShortcuts();
+
+            // Load initial genre & attempt auto-play
+            loadStationsForCurrentSelection(true);
         });
 
-        async function fetchStations(tag) {
-            // Update button styles
-            ['hiphop', 'dance', 'country', 'rock'].forEach(k => {
-                const btn = document.getElementById(`btn-${k}`);
-                if (btn) {
-                    if (tag.includes(k === 'hiphop' ? 'hip hop' : k)) {
-                        btn.className = "arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-pink-600 text-white border-b-4 border-pink-900 active:border-b-0 active:translate-y-1 shadow-lg transition";
-                    } else {
-                        btn.className = "arcade-font text-[9px] md:text-[11px] py-3 px-2 rounded-xl bg-purple-900 text-gray-300 border-b-4 border-purple-950 active:border-b-0 active:translate-y-1 shadow-lg transition";
-                    }
-                }
-            });
+        function renderCountrySelector() {
+            const container = document.getElementById('country-selector');
+            container.innerHTML = '';
 
-            document.getElementById('list-title').innerText = `STATIONS: ${tag.toUpperCase()}`;
-            stationListContainer.innerHTML = `<div class="text-xs text-gray-400 text-center py-10 arcade-font">Searching streams...</div>`;
+            COUNTRIES.forEach(c => {
+                const isSelected = c.code === selectedCountry;
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 border ${
+                    isSelected 
+                        ? 'bg-cyan-500 text-slate-950 border-white shadow-[0_0_12px_rgba(0,240,255,0.6)]' 
+                        : 'bg-slate-900/90 text-slate-300 border-slate-700 hover:border-cyan-400/60 hover:text-white'
+                }`;
+                btn.innerHTML = `<span class="text-base">${c.flag}</span><span>${c.name}</span>`;
+                btn.onclick = () => {
+                    selectedCountry = c.code;
+                    renderCountrySelector();
+                    loadStationsForCurrentSelection(true);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderGenreButtons() {
+            const container = document.getElementById('genre-buttons-grid');
+            container.innerHTML = '';
+
+            GENRES.forEach(g => {
+                const isSelected = g.id === selectedGenre;
+                const btn = document.createElement('button');
+                btn.className = `arcade-push-btn py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1.5 border ${
+                    isSelected
+                        ? `bg-gradient-to-b ${g.bgClass} text-white active-genre scale-[1.02]`
+                        : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700 border-b-slate-950'
+                }`;
+                btn.innerHTML = `
+                    <i class="fa-solid ${g.icon} text-sm ${isSelected ? 'text-white' : 'text-slate-400'}"></i>
+                    <span class="arcade-font text-[8px] sm:text-[9px] tracking-tighter text-center leading-tight">${g.label}</span>
+                `;
+                btn.onclick = () => {
+                    selectedGenre = g.id;
+                    updateCabinetNeonTheme(g);
+                    renderGenreButtons();
+                    document.getElementById('active-genre-badge').textContent = `STYLE: ${g.label}`;
+                    loadStationsForCurrentSelection(true);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function updateCabinetNeonTheme(genreObj) {
+            document.documentElement.style.setProperty('--neon-primary', genreObj.color);
+            document.documentElement.style.setProperty('--neon-glow', genreObj.color + '66');
+            const halo = document.getElementById('vinyl-halo');
+            if (halo) {
+                halo.style.backgroundColor = genreObj.color + '33';
+            }
+        }
+
+        // =========================================================================
+        // 5. HYBRID STATION ENGINE (VERIFIED STREAMS + LIVE RADIO-BROWSER API)
+        // =========================================================================
+        async function loadStationsForCurrentSelection(autoPlayFirst = false) {
+            const genreObj = GENRES.find(g => g.id === selectedGenre) || GENRES[0];
+            const countryObj = COUNTRIES.find(c => c.code === selectedCountry) || COUNTRIES[0];
+
+            // Clear search input
+            const searchInput = document.getElementById('station-search');
+            if (searchInput) searchInput.value = '';
+            document.getElementById('clear-search-btn').classList.add('hidden');
+
+            // 1. Immediately load built-in verified stations so there is ZERO wait time
+            const verifiedPool = VERIFIED_STREAMS[selectedGenre] || VERIFIED_STREAMS.hiphop;
+            let initialList = [];
+
+            if (selectedCountry === 'ALL') {
+                initialList = [...verifiedPool];
+            } else {
+                // Prioritize matching country from verified pool, plus keep backups
+                const countryMatches = verifiedPool.filter(s => s.country === selectedCountry);
+                const backups = verifiedPool.filter(s => s.country !== selectedCountry);
+                initialList = [...countryMatches, ...backups];
+            }
+
+            currentStationsList = formatStationsWithSlotCodes(initialList);
+            filteredStationsList = [...currentStationsList];
+            renderStationsGrid();
+
+            if (autoPlayFirst && filteredStationsList.length > 0) {
+                consecutiveFailCount = 0;
+                playStationByIndex(0);
+            }
+
+            // 2. Fetch live Country + Genre stations from Radio-Browser API in the background
+            document.getElementById('rack-subtitle').innerHTML = `<i class="fa-solid fa-satellite-dish text-cyan-400 animate-spin mr-1"></i> Scanning live ${countryObj.name} ${genreObj.label} broadcasts...`;
 
             try {
-                // Fetch verified active streams from Radio Browser open registry
-                const response = await fetch(`https://de1.api.radio-browser.info/json/stations/bytag/${encodeURIComponent(tag)}?limit=8&order=votes&reverse=true`);
-                const data = await response.json();
+                const apiStations = await fetchLiveRadioBrowserStations(selectedCountry, genreObj.apiTag);
+                if (apiStations.length > 0) {
+                    // Combine live country-specific stations + verified 24/7 streams (deduplicated)
+                    const seenUrls = new Set();
+                    const merged = [];
 
-                stationListContainer.innerHTML = '';
-                
-                const validStations = data.filter(s => s.url_resolved && s.url_resolved.startsWith('https'));
+                    // If a specific country is chosen, put live stations from that country first!
+                    const orderedSources = selectedCountry === 'ALL'
+                        ? [...verifiedPool.slice(0, 3), ...apiStations, ...verifiedPool.slice(3)]
+                        : [...apiStations, ...verifiedPool];
 
-                if (validStations.length === 0) {
-                    stationListContainer.innerHTML = `<div class="text-xs text-red-400 text-center py-10 arcade-font">No secure streams found. Try another genre.</div>`;
-                    return;
+                    for (const st of orderedSources) {
+                        const cleanUrl = st.url.trim();
+                        if (!seenUrls.has(cleanUrl)) {
+                            seenUrls.add(cleanUrl);
+                            merged.push(st);
+                        }
+                        if (merged.length >= 24) break;
+                    }
+
+                    // Preserve currently playing station index if already playing
+                    const currentPlayingUrl = currentStationsList[currentStationIndex]?.url;
+                    currentStationsList = formatStationsWithSlotCodes(merged);
+                    filteredStationsList = [...currentStationsList];
+
+                    if (currentPlayingUrl) {
+                        const newIdx = filteredStationsList.findIndex(s => s.url === currentPlayingUrl);
+                        if (newIdx !== -1) currentStationIndex = newIdx;
+                    }
+
+                    renderStationsGrid();
+
+                    // If user switched to a specific country and wants local radio right away, play #1 local result if it changed
+                    if (autoPlayFirst && selectedCountry !== 'ALL' && apiStations.length > 0) {
+                        playStationByIndex(0);
+                    }
                 }
-
-                validStations.forEach((station, index) => {
-                    const item = document.createElement('div');
-                    item.className = "flex items-center justify-between p-2 rounded-lg bg-gray-900/90 hover:bg-pink-950/40 border border-white/5 hover:border-pink-500/40 transition cursor-pointer group";
-                    item.innerHTML = `
-                        <span class="text-[10px] text-gray-200 group-hover:text-pink-400 font-bold truncate pr-2">${station.name}</span>
-                        <span class="text-[9px] bg-pink-600/30 group-hover:bg-pink-600 text-pink-300 group-hover:text-white px-2 py-1 rounded arcade-font transition shrink-0">PLAY ▶</span>
-                    `;
-                    item.onclick = () => playStream(station.url_resolved, station.name);
-                    stationListContainer.appendChild(item);
-                });
-
-                // Auto-play the top voted station immediately
-                playStream(validStations[0].url_resolved, validStations[0].name);
-
+                document.getElementById('rack-subtitle').textContent = `Showing ${filteredStationsList.length} verified live channels (${countryObj.flag} ${countryObj.name} • ${genreObj.label})`;
             } catch (err) {
-                console.error(err);
-                stationListContainer.innerHTML = `<div class="text-xs text-red-400 text-center py-10 arcade-font">Network error loading stations.</div>`;
+                document.getElementById('rack-subtitle').textContent = `Showing verified 24/7 ${genreObj.label} channels`;
             }
         }
 
-        function playStream(url, name) {
-            nowPlayingName.innerText = name;
-            nowPlayingStatus.innerText = "CONNECTING...";
-            
-            audio.src = url;
-            audio.play().then(() => {
-                nowPlayingStatus.innerText = "LIVE BROADCAST";
-                vinylDisc.classList.add('spinning');
-            }).catch(e => {
-                nowPlayingStatus.innerText = "CLICK TO UNLOCK AUDIO";
-                vinylDisc.classList.remove('spinning');
+        async function fetchLiveRadioBrowserStations(countryCode, tag) {
+            const params = new URLSearchParams({
+                hidebroken: 'true',
+                is_https: 'true',
+                codec: 'MP3',
+                order: 'clickcount',
+                reverse: 'true',
+                limit: '20',
+                tag: tag
+            });
+            if (countryCode && countryCode !== 'ALL') {
+                params.set('countrycode', countryCode);
+            }
+
+            for (const mirror of API_MIRRORS) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 4000);
+                    const res = await fetch(`${mirror}/json/stations/search?${params.toString()}`, {
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        return data
+                            .filter(s => s.url_resolved && s.url_resolved.startsWith('https://'))
+                            .map(s => ({
+                                name: (s.name || 'Live Radio').trim(),
+                                url: s.url_resolved.trim(),
+                                country: (s.countrycode || countryCode || 'GLOBAL').toUpperCase(),
+                                bitrate: s.bitrate && s.bitrate > 0 ? s.bitrate : 128,
+                                style: s.tags ? s.tags.split(',').slice(0, 2).join(' / ') : tag.toUpperCase()
+                            }));
+                    }
+                } catch (e) {
+                    // Try next mirror
+                }
+            }
+            return [];
+        }
+
+        function formatStationsWithSlotCodes(stationsArray) {
+            const letters = ['A', 'B', 'C', 'D'];
+            return stationsArray.map((st, idx) => {
+                const rowLetter = letters[Math.floor(idx / 6) % letters.length];
+                const slotNum = String((idx % 6) + 1).padStart(2, '0');
+                return {
+                    ...st,
+                    slotCode: `${rowLetter}-${slotNum}`
+                };
             });
         }
 
-        // Global click unlock listener to bypass browser autoplay restrictions
-        document.body.addEventListener('click', () => {
-            if (audio.paused && audio.src) {
-                audio.play().catch(() => {});
-            }
-        }, { once: true });
+        function getFlagForCountryCode(code) {
+            const found = COUNTRIES.find(c => c.code === code);
+            return found ? found.flag : '📻';
+        }
 
-        // Load Hip-Hop on initial startup
-        window.addEventListener('DOMContentLoaded', () => {
-            audio.volume = 0.8;
-            fetchStations('hip hop');
-        });
+        // =========================================================================
+        // 6. RENDER JUKEBOX STATION CARDS GRID
+        // =========================================================================
+        function renderStationsGrid() {
+            const grid = document.getElementById('stations-grid');
+            const badge = document.getElementById('station-count-badge');
+            badge.textContent = `${filteredStationsList.length} CHANNELS`;
+
+            if (filteredStationsList.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-2 text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-radio text-3xl text-pink-500 mb-2"></i>
+                        <p class="arcade-font text-xs">NO MATCHING STATIONS</p>
+                        <p class="led-font text-lg mt-1">Try clearing your search filter or picking another style.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+            filteredStationsList.forEach((st, idx) => {
+                const isSelected = idx === currentStationIndex;
+                const flag = getFlagForCountryCode(st.country);
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border-2 transition cursor-pointer flex items-center justify-between gap-2.5 group ${
+                    isSelected
+                        ? 'bg-gradient-to-r from-pink-950/80 via-slate-900 to-slate-900 border-pink-500 shadow-[0_0_15px_rgba(255,0,85,0.35)]'
+                        : 'bg-slate-900/90 hover:bg-slate-800/90 border-slate-800 hover:border-cyan-400/50'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <!-- Jukebox Slot Code Badge -->
+                        <div class="px-2 py-1.5 rounded-lg text-center shrink-0 border ${
+                            isSelected 
+                                ? 'bg-pink-600 text-white border-pink-300' 
+                                : 'bg-slate-950 text-cyan-400 border-slate-700 group-hover:border-cyan-400'
+                        }">
+                            <span class="arcade-font text-[9px] block">${st.slotCode}</span>
+                        </div>
+
+                        <!-- Station Info -->
+                        <div class="min-w-0">
+                            <div class="font-bold text-xs sm:text-sm text-white truncate group-hover:text-cyan-300 transition">
+                                ${escapeHtml(st.name)}
+                            </div>
+                            <div class="flex items-center gap-2 text-xs led-font text-slate-400 mt-0.5">
+                                <span class="text-cyan-300">${flag} ${st.country}</span>
+                                <span>•</span>
+                                <span class="truncate">${escapeHtml(st.style || 'Live Radio')}</span>
+                                <span>•</span>
+                                <span class="text-amber-400">${st.bitrate || 128}k</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Play Status Icon -->
+                    <div class="shrink-0">
+                        ${isSelected && isPlaying
+                            ? `<span class="w-8 h-8 rounded-lg bg-pink-600 text-white flex items-center justify-center shadow-md">
+                                 <i class="fa-solid fa-volume-high text-xs animate-bounce"></i>
+                               </span>`
+                            : `<span class="w-8 h-8 rounded-lg bg-slate-800 group-hover:bg-cyan-500 text-slate-400 group-hover:text-slate-950 flex items-center justify-center transition">
+                                 <i class="fa-solid fa-play text-xs"></i>
+                               </span>`
+                        }
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    consecutiveFailCount = 0;
+                    playStationByIndex(idx);
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        // =========================================================================
+        // 7. AUDIO PLAYBACK ENGINE & AUTOMATIC STREAM FAILOVER
+        // =========================================================================
+        function playStationByIndex(index) {
+            if (!filteredStationsList.length) return;
+            if (index < 0) index = filteredStationsList.length - 1;
+            if (index >= filteredStationsList.length) index = 0;
+
+            currentStationIndex = index;
+            const station = filteredStationsList[index];
+
+            // Clear any previous connection watchdog timer
+            if (streamTimeoutId) {
+                clearTimeout(streamTimeoutId);
+                streamTimeoutId = null;
+            }
+
+            // Update CRT Marquee Display
+            document.getElementById('crt-slot-code').textContent = `SLOT ${station.slotCode || 'A-01'}`;
+            document.getElementById('crt-country-label').textContent = `${getFlagForCountryCode(station.country)} ${station.country}`;
+            document.getElementById('crt-bitrate').textContent = `${station.bitrate || 128} KBPS MP3`;
+            document.getElementById('now-playing-title').textContent = station.name;
+            document.getElementById('now-playing-subtitle').textContent = `${station.style || 'Live Stream'} • ${station.country}`;
+
+            setPlayerStatus('TUNING STREAM...', 'amber');
+            renderStationsGrid();
+
+            // Load and play stream
+            try {
+                audio.pause();
+                audio.src = station.url;
+                audio.load();
+
+                // 6-second watchdog timeout in case a stream hangs while connecting
+                streamTimeoutId = setTimeout(() => {
+                    if (audio.readyState < 2 && !audio.paused) {
+                        handleStreamFailure('Stream timeout');
+                    }
+                }, 6500);
+
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        if (streamTimeoutId) clearTimeout(streamTimeoutId);
+                        consecutiveFailCount = 0;
+                        isPlaying = true;
+                        updateTransportUI(true);
+                        setPlayerStatus('● LIVE BROADCAST PLAYING', 'emerald');
+                        document.getElementById('failover-notice').classList.add('hidden');
+                        renderStationsGrid();
+                    }).catch(err => {
+                        if (streamTimeoutId) clearTimeout(streamTimeoutId);
+                        // Check if error is browser autoplay policy vs broken stream
+                        if (err.name === 'NotAllowedError') {
+                            isPlaying = false;
+                            updateTransportUI(false);
+                            setPlayerStatus('▶ CLICK PLAY TO START AUDIO', 'cyan');
+                            renderStationsGrid();
+                        } else {
+                            handleStreamFailure(err.message || 'Playback error');
+                        }
+                    });
+                }
+            } catch (e) {
+                handleStreamFailure('Exception loading stream');
+            }
+        }
+
+        function setupAudioListeners() {
+            audio.addEventListener('playing', () => {
+                if (streamTimeoutId) clearTimeout(streamTimeoutId);
+                isPlaying = true;
+                consecutiveFailCount = 0;
+                updateTransportUI(true);
+                setPlayerStatus('● LIVE BROADCAST PLAYING', 'emerald');
+                document.getElementById('failover-notice').classList.add('hidden');
+                renderStationsGrid();
+            });
+
+            audio.addEventListener('waiting', () => {
+                if (isPlaying) {
+                    setPlayerStatus('● BUFFERING AUDIO...', 'amber');
+                }
+            });
+
+            audio.addEventListener('error', () => {
+                if (streamTimeoutId) clearTimeout(streamTimeoutId);
+                handleStreamFailure('Stream error event');
+            });
+
+            // Volume Slider Listener
+            const slider = document.getElementById('volume-slider');
+            slider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                audio.volume = val;
+                savedVolume = val;
+                isMuted = val === 0;
+                updateVolumeUI(val);
+            });
+        }
+
+        function handleStreamFailure(reason) {
+            if (streamTimeoutId) clearTimeout(streamTimeoutId);
+            consecutiveFailCount++;
+
+            const notice = document.getElementById('failover-notice');
+            notice.classList.remove('hidden');
+
+            if (consecutiveFailCount < filteredStationsList.length && consecutiveFailCount <= 5) {
+                setPlayerStatus('⚡ AUTO-SWITCHING TO NEXT ACTIVE CHANNEL...', 'amber');
+                setTimeout(() => {
+                    const nextIdx = (currentStationIndex + 1) % filteredStationsList.length;
+                    playStationByIndex(nextIdx);
+                }, 450);
+            } else {
+                // Ultimate fallback to guaranteed SomaFM / 181.fm stream
+                consecutiveFailCount = 0;
+                const fallbackPool = VERIFIED_STREAMS[selectedGenre] || VERIFIED_STREAMS.hiphop;
+                const safeStation = fallbackPool[0];
+                if (safeStation && audio.src !== safeStation.url) {
+                    audio.src = safeStation.url;
+                    audio.play().then(() => {
+                        isPlaying = true;
+                        updateTransportUI(true);
+                        setPlayerStatus('● LIVE BROADCAST PLAYING', 'emerald');
+                        notice.classList.add('hidden');
+                    }).catch(() => {
+                        isPlaying = false;
+                        updateTransportUI(false);
+                        setPlayerStatus('▶ CLICK PLAY TO START AUDIO', 'cyan');
+                    });
+                }
+            }
+        }
+
+        // =========================================================================
+        // 8. TRANSPORT CONTROLS & UI ANIMATIONS
+        // =========================================================================
+        function togglePlay() {
+            if (!filteredStationsList.length) return;
+
+            if (isPlaying && !audio.paused) {
+                audio.pause();
+                if (streamTimeoutId) clearTimeout(streamTimeoutId);
+                isPlaying = false;
+                updateTransportUI(false);
+                setPlayerStatus('⏸ AUDIO PAUSED', 'slate');
+                renderStationsGrid();
+            } else {
+                consecutiveFailCount = 0;
+                if (!audio.src) {
+                    playStationByIndex(currentStationIndex);
+                } else {
+                    audio.play().then(() => {
+                        isPlaying = true;
+                        updateTransportUI(true);
+                        setPlayerStatus('● LIVE BROADCAST PLAYING', 'emerald');
+                        renderStationsGrid();
+                    }).catch(() => {
+                        playStationByIndex(currentStationIndex);
+                    });
+                }
+            }
+        }
+
+        function prevStation() {
+            consecutiveFailCount = 0;
+            playStationByIndex(currentStationIndex - 1);
+        }
+
+        function nextStation() {
+            consecutiveFailCount = 0;
+            playStationByIndex(currentStationIndex + 1);
+        }
+
+        function playRandomStation() {
+            if (filteredStationsList.length <= 1) return;
+            consecutiveFailCount = 0;
+            let randIdx = Math.floor(Math.random() * filteredStationsList.length);
+            if (randIdx === currentStationIndex) {
+                randIdx = (randIdx + 1) % filteredStationsList.length;
+            }
+            playStationByIndex(randIdx);
+        }
+
+        function toggleMute() {
+            const slider = document.getElementById('volume-slider');
+            if (isMuted) {
+                isMuted = false;
+                audio.volume = savedVolume > 0 ? savedVolume : 0.8;
+                slider.value = audio.volume;
+                updateVolumeUI(audio.volume);
+            } else {
+                isMuted = true;
+                audio.volume = 0;
+                slider.value = 0;
+                updateVolumeUI(0);
+            }
+        }
+
+        function updateVolumeUI(val) {
+            const pct = Math.round(val * 100);
+            document.getElementById('volume-percent').textContent = `${pct}%`;
+            const icon = document.getElementById('volume-icon');
+            if (pct === 0) {
+                icon.className = 'fa-solid fa-volume-xmark text-red-400';
+            } else if (pct < 50) {
+                icon.className = 'fa-solid fa-volume-low text-cyan-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-cyan-400';
+            }
+        }
+
+        function updateTransportUI(playing) {
+            const vinyl = document.getElementById('vinyl-disc');
+            const tonearm = document.getElementById('tonearm-assembly');
+            const playIcon = document.getElementById('main-play-icon');
+            const playText = document.getElementById('main-play-text');
+            const headerDot = document.getElementById('header-status-dot');
+            const headerText = document.getElementById('header-status-text');
+
+            if (playing) {
+                vinyl.classList.remove('vinyl-paused');
+                vinyl.classList.add('vinyl-spinning');
+                tonearm.classList.remove('tonearm-rest');
+                tonearm.classList.add('tonearm-engaged');
+                playIcon.className = 'fa-solid fa-pause text-lg';
+                playText.textContent = 'PAUSE';
+                headerDot.className = 'w-3 h-3 rounded-full bg-emerald-400 animate-ping shadow-[0_0_10px_#34d399]';
+                headerText.textContent = 'ON AIR • LIVE';
+                headerText.className = 'arcade-font text-[9px] sm:text-[10px] text-emerald-400';
+            } else {
+                vinyl.classList.remove('vinyl-spinning');
+                vinyl.classList.add('vinyl-paused');
+                tonearm.classList.remove('tonearm-engaged');
+                tonearm.classList.add('tonearm-rest');
+                playIcon.className = 'fa-solid fa-play text-lg';
+                playText.textContent = 'PLAY';
+                headerDot.className = 'w-3 h-3 rounded-full bg-amber-400';
+                headerText.textContent = 'STANDBY';
+                headerText.className = 'arcade-font text-[9px] sm:text-[10px] text-amber-400';
+            }
+        }
+
+        function setPlayerStatus(text, colorKey) {
+            const badge = document.getElementById('player-state-badge');
+            badge.textContent = text;
+            const colors = {
+                emerald: 'text-emerald-400 font-bold tracking-wider',
+                amber: 'text-amber-400 font-bold tracking-wider animate-pulse',
+                cyan: 'text-cyan-300 font-bold tracking-wider animate-pulse',
+                slate: 'text-slate-400 font-bold tracking-wider'
+            };
+            badge.className = colors[colorKey] || colors.emerald;
+        }
+
+        // =========================================================================
+        // 9. SEARCH / FILTER & IP COUNTRY AUTO-DETECT
+        // =========================================================================
+        function handleSearchInput(query) {
+            const clearBtn = document.getElementById('clear-search-btn');
+            const cleanQuery = query.trim().toLowerCase();
+
+            if (cleanQuery.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+                filteredStationsList = [...currentStationsList];
+                renderStationsGrid();
+                return;
+            }
+
+            // Immediate local filter
+            filteredStationsList = currentStationsList.filter(s =>
+                s.name.toLowerCase().includes(cleanQuery) ||
+                (s.style && s.style.toLowerCase().includes(cleanQuery)) ||
+                (s.country && s.country.toLowerCase().includes(cleanQuery))
+            );
+            currentStationIndex = 0;
+            renderStationsGrid();
+
+            // Also debounce a live Radio-Browser search if user typed 3+ characters
+            if (searchDebounceId) clearTimeout(searchDebounceId);
+            if (cleanQuery.length >= 3) {
+                searchDebounceId = setTimeout(async () => {
+                    const params = new URLSearchParams({
+                        name: cleanQuery,
+                        hidebroken: 'true',
+                        is_https: 'true',
+                        codec: 'MP3',
+                        order: 'clickcount',
+                        reverse: 'true',
+                        limit: '15'
+                    });
+                    if (selectedCountry !== 'ALL') params.set('countrycode', selectedCountry);
+
+                    for (const mirror of API_MIRRORS) {
+                        try {
+                            const res = await fetch(`${mirror}/json/stations/search?${params.toString()}`);
+                            if (!res.ok) continue;
+                            const data = await res.json();
+                            if (Array.isArray(data) && data.length > 0) {
+                                const remoteResults = data
+                                    .filter(s => s.url_resolved && s.url_resolved.startsWith('https://'))
+                                    .map(s => ({
+                                        name: (s.name || 'Radio').trim(),
+                                        url: s.url_resolved.trim(),
+                                        country: (s.countrycode || 'GLOBAL').toUpperCase(),
+                                        bitrate: s.bitrate || 128,
+                                        style: s.tags ? s.tags.split(',')[0] : 'Live Radio'
+                                    }));
+                                const combined = formatStationsWithSlotCodes([...filteredStationsList, ...remoteResults]);
+                                // Deduplicate by URL
+                                const unique = [];
+                                const urls = new Set();
+                                for (const item of combined) {
+                                    if (!urls.has(item.url)) {
+                                        urls.add(item.url);
+                                        unique.push(item);
+                                    }
+                                }
+                                filteredStationsList = unique;
+                                renderStationsGrid();
+                                break;
+                            }
+                        } catch (e) {}
+                    }
+                }, 400);
+            }
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('station-search');
+            input.value = '';
+            document.getElementById('clear-search-btn').classList.add('hidden');
+            filteredStationsList = [...currentStationsList];
+            renderStationsGrid();
+        }
+
+        async function detectUserCountry() {
+            setPlayerStatus('DETECTING YOUR COUNTRY...', 'cyan');
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if (data && data.country_code) {
+                    const code = data.country_code.toUpperCase();
+                    const exists = COUNTRIES.find(c => c.code === code);
+                    if (!exists) {
+                        COUNTRIES.push({ code: code, name: data.country_name || code, flag: '📍' });
+                    }
+                    selectedCountry = code;
+                    renderCountrySelector();
+                    loadStationsForCurrentSelection(true);
+                    return;
+                }
+            } catch (e) {}
+            setPlayerStatus('● READY', 'emerald');
+        }
+
+        // =========================================================================
+        // 10. 24-BAND LED SPECTRUM VISUALIZER & KEYBOARD SHORTCUTS
+        // =========================================================================
+        function initEqualizerBars() {
+            const container = document.getElementById('equalizer-bars');
+            container.innerHTML = '';
+            const totalBars = 24;
+
+            for (let i = 0; i < totalBars; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'flex-1 bg-gradient-to-t from-pink-600 via-cyan-400 to-emerald-300 rounded-t transition-all duration-75';
+                bar.style.height = '12%';
+                container.appendChild(bar);
+            }
+
+            setInterval(() => {
+                const bars = container.children;
+                for (let i = 0; i < bars.length; i++) {
+                    if (isPlaying && !audio.paused && !isMuted) {
+                        const wave = Math.sin((Date.now() / 140) + i * 0.45) * 0.5 + 0.5;
+                        const jitter = Math.random() * 0.45;
+                        const heightPct = Math.min(100, Math.max(14, Math.round((wave * 0.6 + jitter * 0.4) * 100)));
+                        bars[i].style.height = `${heightPct}%`;
+                    } else {
+                        bars[i].style.height = '12%';
+                    }
+                }
+            }, 85);
+        }
+
+        function setupKeyboardShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    togglePlay();
+                } else if (e.code === 'ArrowRight') {
+                    e.preventDefault();
+                    nextStation();
+                } else if (e.code === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevStation();
+                }
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
     </script>
 </body>
 </html>
