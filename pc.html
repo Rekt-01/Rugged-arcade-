@@ -3,144 +3,753 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Windows XP Emulator</title>
+    <title>Windows XP Professional</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; font-family: Tahoma, sans-serif; background-color: #3a6ea5; }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Tahoma, 'Segoe UI', sans-serif;
+            background-color: #3a6ea5;
+        }
 
-        /* --- DESKTOP --- */
-        #desktop { width: 100%; height: calc(100% - 40px); position: relative; padding: 10px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 15px; }
-        .desktop-icon { width: 75px; text-align: center; color: white; text-shadow: 1px 1px 2px black; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 11px; }
-        .desktop-icon img { width: 32px; height: 32px; margin-bottom: 4px; }
+        /* --- BLISS WALLPAPER (CSS + SVG) --- */
+        #desktop {
+            width: 100%;
+            height: calc(100% - 36px);
+            position: relative;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 14px;
+            background: 
+                radial-gradient(circle at 75% 25%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 22%),
+                radial-gradient(circle at 25% 35%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 18%),
+                linear-gradient(to bottom, #1e69de 0%, #5ea3f2 48%, #8ec5fc 55%, #51a825 55.5%, #3d8c19 72%, #2b6b10 100%);
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        /* --- DESKTOP ICONS --- */
+        .desktop-icon {
+            width: 78px;
+            padding: 6px 4px;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+        }
+        .desktop-icon:hover {
+            background: rgba(49, 106, 197, 0.35);
+            border: 1px dotted rgba(255,255,255,0.6);
+        }
+        .desktop-icon .icon-glyph {
+            font-size: 28px;
+            margin-bottom: 4px;
+            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.5));
+        }
 
         /* --- TASKBAR --- */
-        #taskbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 3%, #245edb 10%, #1a4bc5 100%); display: flex; align-items: center; border-top: 1px solid #0831d9; z-index: 9999; }
-        #start-btn { background: linear-gradient(to bottom, #3c9d3c 0%, #287a28 50%, #1e5c1e 100%); border: 1px solid #103810; border-radius: 0 10px 10px 0; color: white; font-weight: bold; font-style: italic; padding: 0 15px 0 10px; height: 100%; display: flex; align-items: center; cursor: pointer; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); font-size: 14px; }
-        #start-btn:hover { background: linear-gradient(to bottom, #45af45 0%, #2e8b2e 50%, #226922 100%); }
-        #taskbar-apps { display: flex; flex-grow: 1; padding: 0 5px; gap: 4px; }
-        .taskbar-task { background: linear-gradient(to bottom, #3c81f3 0%, #1b63dc 50%, #1152bd 100%); border: 1px solid #0831d9; color: white; padding: 0 10px; height: 30px; display: flex; align-items: center; gap: 6px; border-radius: 3px; font-size: 12px; cursor: pointer; max-width: 150px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        #tray { color: white; padding: 0 10px; font-size: 11px; display: flex; align-items: center; }
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 36px;
+            background: linear-gradient(to bottom, #3168d5 0%, #4993e6 6%, #2157d5 18%, #1941a5 90%, #122e7a 100%);
+            display: flex;
+            align-items: center;
+            z-index: 9999;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.4);
+        }
+        #start-btn {
+            background: linear-gradient(to bottom, #43a243 0%, #388e38 15%, #277327 85%, #195119 100%);
+            border-right: 1px solid #103810;
+            border-radius: 0 12px 12px 0;
+            color: white;
+            font-weight: bold;
+            font-style: italic;
+            padding: 0 18px 0 12px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            font-size: 15px;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 2px 0 4px rgba(0,0,0,0.3);
+        }
+        #start-btn:hover {
+            background: linear-gradient(to bottom, #52b752 0%, #3e9d3e 50%, #246c24 100%);
+        }
+        #taskbar-apps {
+            display: flex;
+            flex-grow: 1;
+            padding: 0 8px;
+            gap: 4px;
+            overflow-x: auto;
+        }
+        .taskbar-task {
+            background: linear-gradient(to bottom, #3c81f3 0%, #2666d9 50%, #1b52b8 100%);
+            border: 1px solid #103c8f;
+            color: white;
+            padding: 0 10px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+            min-width: 110px;
+            max-width: 160px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+        }
+        .taskbar-task.focused {
+            background: linear-gradient(to bottom, #184296 0%, #1c4fb3 100%);
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6);
+            font-weight: bold;
+        }
+        #tray {
+            background: linear-gradient(to bottom, #1289e3 0%, #0f71c7 15%, #0d62b0 85%, #094987 100%);
+            border-left: 1px solid #093569;
+            color: white;
+            padding: 0 14px;
+            height: 100%;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: inset 1px 1px 1px rgba(255,255,255,0.2);
+        }
 
         /* --- WINDOWS --- */
-        .window { position: absolute; top: 50px; left: 50px; width: 85vw; max-width: 600px; height: 75vh; max-height: 450px; background: #ece9d8; border: 3px solid #0055ea; border-top-left-radius: 6px; border-top-right-radius: 6px; display: flex; flex-direction: column; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); display: none; z-index: 10; }
-        .window.active { display: flex; }
-        .title-bar { background: linear-gradient(to right, #0055ea 0%, #5c87e6 100%); color: white; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 12px; border-top-left-radius: 3px; border-top-right-radius: 3px; cursor: move; }
+        .window {
+            position: absolute;
+            top: 40px;
+            left: 60px;
+            width: 680px;
+            height: 460px;
+            max-width: 96vw;
+            max-height: calc(100vh - 50px);
+            background: #ece9d8;
+            border: 3px solid #0055ea;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 3px 5px 18px rgba(0,0,0,0.55);
+        }
+        .window.open { display: flex; }
+        .window.minimized { display: none !important; }
+        .window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 36px) !important;
+            max-width: 100vw !important;
+            max-height: calc(100vh - 36px) !important;
+            border-radius: 0;
+        }
+        .title-bar {
+            background: linear-gradient(to bottom, #0058ee 0%, #3593ff 6%, #288eff 12%, #127dff 20%, #036ffc 50%, #0054e3 88%, #0042b5 100%);
+            color: white;
+            padding: 5px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 12px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            cursor: move;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.6);
+            touch-action: none;
+        }
         .title-btns { display: flex; gap: 3px; }
-        .win-btn { width: 18px; height: 18px; background: linear-gradient(to bottom, #e4e3d9 0%, #bcbeae 100%); border: 1px solid #716f64; color: black; font-weight: bold; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 2px; }
-        .win-btn.close { background: linear-gradient(to bottom, #e87b72 0%, #c53323 100%); color: white; border-color: #832015; }
-        .window-content { flex-grow: 1; background: white; border: 1px solid #716f64; display: flex; flex-direction: column; overflow: hidden; }
+        .win-btn {
+            width: 21px;
+            height: 21px;
+            background: linear-gradient(to bottom, #548df7 0%, #1c5bd9 50%, #1143ac 100%);
+            border: 1px solid #fff;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 3px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+        .win-btn:hover { filter: brightness(1.15); }
+        .win-btn.close {
+            background: linear-gradient(to bottom, #f08275 0%, #db432b 50%, #b52410 100%);
+        }
+        .window-content {
+            flex-grow: 1;
+            background: white;
+            border: 1px solid #716f64;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: text;
+        }
 
-        /* --- INTERNET EXPLORER --- */
-        .ie-toolbar { background: #ece9d8; padding: 5px; border-bottom: 1px solid #aca899; display: flex; gap: 5px; align-items: center; }
-        .ie-toolbar input { flex-grow: 1; padding: 3px 6px; border: 1px solid #716f64; font-size: 12px; }
-        .ie-toolbar button { padding: 3px 10px; font-size: 11px; cursor: pointer; }
-        .ie-content { flex-grow: 1; width: 100%; border: none; }
+        /* --- INTERNET EXPLORER 6 --- */
+        .ie-toolbar {
+            background: #ece9d8;
+            padding: 4px 6px;
+            border-bottom: 1px solid #aca899;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .ie-nav-btn {
+            padding: 3px 7px;
+            font-size: 11px;
+            background: #f5f4ea;
+            border: 1px solid #999;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .ie-nav-btn:hover { background: #e2e0d0; }
+        .ie-toolbar input {
+            flex-grow: 1;
+            min-width: 140px;
+            padding: 4px 7px;
+            border: 1px solid #7f9db9;
+            font-size: 12px;
+            outline: none;
+        }
+        .ie-bookmarks {
+            background: #f5f4ea;
+            padding: 3px 8px;
+            border-bottom: 1px solid #d4d0c8;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-size: 11px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .ie-bookmark {
+            color: #003399;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        .ie-bookmark:hover { background: #dcd9c6; text-decoration: underline; }
+        .ie-mode-badge {
+            margin-left: auto;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: #d9ead3;
+            color: #1b5e20;
+            border: 1px solid #93c47d;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .ie-content { flex-grow: 1; width: 100%; border: none; background: #fff; }
+        .ie-statusbar {
+            background: #ece9d8;
+            border-top: 1px solid #aca899;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
 
         /* --- CMD TERMINAL --- */
-        .cmd-body { background: black; color: #00ff00; font-family: 'Courier New', Courier, monospace; padding: 8px; flex-grow: 1; overflow-y: auto; font-size: 13px; }
-        .cmd-input-line { display: flex; align-items: center; background: black; color: #00ff00; border-top: 1px solid #222; padding: 4px; }
-        .cmd-input-line span { margin-right: 5px; }
-        .cmd-input-line input { background: transparent; border: none; color: #00ff00; outline: none; font-family: 'Courier New', Courier, monospace; font-size: 13px; flex-grow: 1; }
+        .cmd-body {
+            background: black;
+            color: #c0c0c0;
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            padding: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .cmd-input-line {
+            display: flex;
+            align-items: center;
+            background: black;
+            color: #c0c0c0;
+            padding: 6px 10px;
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .cmd-input-line input {
+            background: transparent;
+            border: none;
+            color: inherit;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            flex-grow: 1;
+            margin-left: 4px;
+        }
 
-        /* --- START MENU --- */
-        #start-menu { position: absolute; bottom: 40px; left: 0; width: 250px; background: white; border: 2px solid #0055ea; border-top-left-radius: 8px; border-top-right-radius: 8px; display: none; z-index: 10000; box-shadow: 3px 3px 10px rgba(0,0,0,0.4); }
-        .start-header { background: linear-gradient(to right, #245edb 0%, #3f8cf3 100%); color: white; padding: 10px; font-weight: bold; display: flex; align-items: center; gap: 10px; border-top-left-radius: 6px; border-top-right-radius: 6px; }
-        .start-items { padding: 5px 0; }
-        .start-item { padding: 8px 15px; display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer; }
-        .start-item:hover { background: #2f71db; color: white; }
-        .start-footer { background: #d3e5fc; padding: 8px 15px; display: flex; justify-content: flex-end; border-top: 1px solid #b3d1f9; }
-        .start-footer button { padding: 4px 10px; font-size: 11px; cursor: pointer; }
+        /* --- NOTEPAD --- */
+        #notepad-area {
+            width: 100%;
+            flex-grow: 1;
+            border: none;
+            padding: 8px;
+            font-family: 'Lucida Console', monospace;
+            font-size: 13px;
+            resize: none;
+            outline: none;
+        }
+
+        /* --- MS PAINT --- */
+        .paint-toolbar {
+            background: #ece9d8;
+            padding: 5px 8px;
+            border-bottom: 1px solid #aca899;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+        .color-swatch.active { outline: 2px solid #0055ea; }
+
+        /* --- MINESWEEPER --- */
+        .mine-container {
+            background: #c0c0c0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+        .mine-header {
+            width: 234px;
+            background: #c0c0c0;
+            border: 2px inset #fff;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .mine-lcd {
+            background: #000;
+            color: #ff0000;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 2px 6px;
+            border: 1px inset #888;
+        }
+        .mine-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 26px);
+            grid-template-rows: repeat(9, 26px);
+            border: 3px inset #fff;
+        }
+        .mine-cell {
+            width: 26px;
+            height: 26px;
+            background: #c0c0c0;
+            border: 2px outset #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .mine-cell.revealed {
+            border: 1px solid #808080;
+            background: #bdbdbd;
+            cursor: default;
+        }
+
+        /* --- TWO-COLUMN XP START MENU --- */
+        #start-menu {
+            position: absolute;
+            bottom: 36px;
+            left: 0;
+            width: 340px;
+            background: white;
+            border: 2px solid #0055ea;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: none;
+            z-index: 10000;
+            box-shadow: 4px 4px 16px rgba(0,0,0,0.55);
+            overflow: hidden;
+        }
+        .start-header {
+            background: linear-gradient(to bottom, #1665df 0%, #3d8ef7 100%);
+            color: white;
+            padding: 10px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #e57a1e;
+        }
+        .start-avatar {
+            width: 36px;
+            height: 36px;
+            background: #fff;
+            border: 2px solid #cfe4ff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .start-columns { display: flex; min-height: 250px; }
+        .start-col-left {
+            width: 55%;
+            background: #fff;
+            padding: 6px 4px;
+            border-right: 1px solid #95bdee;
+        }
+        .start-col-right {
+            width: 45%;
+            background: #d3e5fa;
+            padding: 6px 4px;
+            color: #0a246a;
+        }
+        .start-item {
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .start-item:hover { background: #2f71cd; color: white; }
+        .start-footer {
+            background: linear-gradient(to bottom, #3d8ef7 0%, #155ed1 100%);
+            padding: 7px 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #e57a1e;
+        }
+        .start-footer-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .start-footer-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* --- RIGHT CLICK CONTEXT MENU --- */
+        #context-menu {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #716f64;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.35);
+            width: 170px;
+            display: none;
+            z-index: 20000;
+            padding: 2px;
+            font-size: 11px;
+        }
+        .ctx-item {
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+        .ctx-item:hover { background: #316ac5; color: #fff; }
+        .ctx-divider { border-top: 1px solid #d4d0c8; margin: 3px 0; }
+
+        /* --- BLUE SCREEN OF DEATH --- */
+        #bsod {
+            position: fixed;
+            inset: 0;
+            background: #0000aa;
+            color: #ffffff;
+            font-family: 'Lucida Console', monospace;
+            padding: 5vw;
+            font-size: 15px;
+            line-height: 1.6;
+            z-index: 99999;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
+    <!-- DESKTOP -->
     <div id="desktop">
-        <!-- Desktop Shortcuts -->
         <div class="desktop-icon" onclick="openWindow('ie-win')">
-            <span style="font-size:24px;">🌐</span>
+            <div class="icon-glyph">🌐</div>
             <span>Internet Explorer</span>
         </div>
+        <div class="desktop-icon" onclick="openJukeboxInIE()">
+            <div class="icon-glyph">📻</div>
+            <span>Arcade Jukebox</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('mine-win')">
+            <div class="icon-glyph">💣</div>
+            <span>Minesweeper</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('paint-win')">
+            <div class="icon-glyph">🎨</div>
+            <span>MS Paint</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('notepad-win')">
+            <div class="icon-glyph">📝</div>
+            <span>Notepad</span>
+        </div>
         <div class="desktop-icon" onclick="openWindow('cmd-win')">
-            <span style="font-size:24px;">💻</span>
+            <div class="icon-glyph">💻</div>
             <span>Command Prompt</span>
         </div>
         <div class="desktop-icon" onclick="closeEmulator()">
-            <span style="font-size:24px;">🚪</span>
-            <span>Exit to Main</span>
+            <div class="icon-glyph">🚪</div>
+            <span>Back to Arcade</span>
         </div>
+    </div>
+
+    <!-- RIGHT-CLICK CONTEXT MENU -->
+    <div id="context-menu">
+        <div class="ctx-item" onclick="setWallpaper('bliss')">🌄 Wallpaper: XP Bliss</div>
+        <div class="ctx-item" onclick="setWallpaper('classic')">🟦 Wallpaper: Classic Teal</div>
+        <div class="ctx-item" onclick="setWallpaper('night')">🌌 Wallpaper: Cyber Night</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="openWindow('notepad-win')">📝 New Text Note</div>
+        <div class="ctx-item" onclick="openWindow('ie-win')">🌐 Launch Browser</div>
     </div>
 
     <!-- START MENU -->
     <div id="start-menu">
         <div class="start-header">
-            <span style="font-size: 18px;">👤</span> User
+            <div class="start-avatar">🧑‍💻</div>
+            <span>Administrator</span>
         </div>
-        <div class="start-items">
-            <div class="start-item" onclick="openWindow('ie-win'); toggleStartMenu();">🌐 Internet Explorer</div>
-            <div class="start-item" onclick="openWindow('cmd-win'); toggleStartMenu();">💻 Command Prompt</div>
+        <div class="start-columns">
+            <div class="start-col-left">
+                <div class="start-item" onclick="openWindow('ie-win'); toggleStartMenu();">🌐 <b>Internet Explorer</b></div>
+                <div class="start-item" onclick="openJukeboxInIE(); toggleStartMenu();">📻 <b>Arcade Jukebox</b></div>
+                <div class="start-item" onclick="openWindow('mine-win'); toggleStartMenu();">💣 Minesweeper</div>
+                <div class="start-item" onclick="openWindow('paint-win'); toggleStartMenu();">🎨 MS Paint</div>
+                <div class="start-item" onclick="openWindow('notepad-win'); toggleStartMenu();">📝 Notepad</div>
+                <div class="start-item" onclick="openWindow('cmd-win'); toggleStartMenu();">💻 Command Prompt</div>
+            </div>
+            <div class="start-col-right">
+                <div class="start-item" onclick="setWallpaper('bliss'); toggleStartMenu();">🖥️ Display Theme: Bliss</div>
+                <div class="start-item" onclick="setWallpaper('night'); toggleStartMenu();">🌙 Display Theme: Night</div>
+                <div class="start-item" onclick="playXPSound('startup'); toggleStartMenu();">🔊 Test XP Sound</div>
+                <div class="start-item" onclick="triggerBSOD(); toggleStartMenu();">⚠️ Test BSOD Screen</div>
+            </div>
         </div>
         <div class="start-footer">
-            <button onclick="closeEmulator()">Log Off / Exit</button>
+            <button class="start-footer-btn" onclick="closeEmulator()">🔑 Log Off / Exit</button>
         </div>
     </div>
 
     <!-- TASKBAR -->
     <div id="taskbar">
-        <div id="start-btn" onclick="toggleStartMenu()">start</div>
+        <div id="start-btn" onclick="toggleStartMenu()">
+            <span>🪟</span> start
+        </div>
         <div id="taskbar-apps"></div>
-        <div id="tray">12:00 PM</div>
+        <div id="tray">
+            <span title="Sound Active" style="cursor:pointer" onclick="playXPSound('startup')">🔊</span>
+            <span id="clock-text">12:00 PM</span>
+        </div>
     </div>
 
-    <!-- INTERNET EXPLORER WINDOW -->
-    <div id="ie-win" class="window">
+    <!-- 1. INTERNET EXPLORER 6 (UNIVERSAL PROXY + DIRECT BROWSER) -->
+    <div id="ie-win" class="window" style="top: 25px; left: 45px; width: 760px; height: 500px;">
         <div class="title-bar">
-            <span>Internet Explorer</span>
+            <span>🌐 Microsoft Internet Explorer</span>
             <div class="title-btns">
                 <div class="win-btn" onclick="minimizeWindow('ie-win')">_</div>
-                <div class="win-btn" onclick="closeWindow('ie-win')">X</div>
+                <div class="win-btn" onclick="maximizeWindow('ie-win')">□</div>
+                <div class="win-btn close" onclick="closeWindow('ie-win')">X</div>
             </div>
         </div>
         <div class="window-content">
             <div class="ie-toolbar">
-                <input type="text" id="ie-url" value="https://en.wikipedia.org">
-                <button onclick="navigateIE()">Go</button>
+                <button class="ie-nav-btn" onclick="ieBack()" title="Back">◀</button>
+                <button class="ie-nav-btn" onclick="ieForward()" title="Forward">▶</button>
+                <button class="ie-nav-btn" onclick="ieRefresh()" title="Refresh">🔄</button>
+                <button class="ie-nav-btn" onclick="loadUrl('https://en.wikipedia.org/wiki/Windows_XP')">🏠</button>
+                <input type="text" id="ie-url" value="https://en.wikipedia.org/wiki/Windows_XP" onkeydown="if(event.key==='Enter') navigateIE()">
+                <button class="ie-nav-btn" style="font-weight:bold; background:#d9ead3;" onclick="navigateIE()">Go</button>
+                <button class="ie-nav-btn" onclick="openExternalTab()" title="Open in real browser tab">↗ Tab</button>
             </div>
-            <!-- Note: Some external websites block iframes due to security (X-Frame-Options). Wikipedia works well. -->
-            <iframe id="ie-frame" class="ie-content" src="https://en.wikipedia.org"></iframe>
+            <div class="ie-bookmarks">
+                <b>Links:</b>
+                <span class="ie-bookmark" onclick="loadUrl('https://www.bing.com')">🔍 Bing Search</span>
+                <span class="ie-bookmark" onclick="loadUrl('https://en.wikipedia.org')">📚 Wikipedia</span>
+                <span class="ie-bookmark" onclick="loadUrl('https://news.ycombinator.com')">📰 Hacker News</span>
+                <span class="ie-bookmark" onclick="loadUrl('https://wiby.me')">🕹️ Wiby Retro Web</span>
+                <span class="ie-bookmark" onclick="loadUrl('https://example.com')">🌐 Example.com</span>
+                <span class="ie-bookmark" onclick="loadUrl('radio.html')">📻 Radio.html</span>
+                <span id="ie-mode-toggle" class="ie-mode-badge" onclick="toggleProxyMode()" title="Click to switch between Proxy Unblocker and Direct Iframe">🛡️ Mode: Auto-Proxy ON</span>
+            </div>
+            <iframe id="ie-frame" class="ie-content" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <div class="ie-statusbar">
+                <span id="ie-status">Done</span>
+                <span>🌐 Internet Zone</span>
+            </div>
         </div>
     </div>
 
-    <!-- CMD TERMINAL WINDOW -->
-    <div id="cmd-win" class="window">
+    <!-- 2. MINESWEEPER WINDOW -->
+    <div id="mine-win" class="window" style="top: 70px; left: 180px; width: 300px; height: 365px;">
         <div class="title-bar">
-            <span>Command Prompt</span>
+            <span>💣 Minesweeper</span>
             <div class="title-btns">
-                <div class="win-btn" onclick="minimizeWindow('cmd-win')">_</div>
-                <div class="win-btn" onclick="closeWindow('cmd-win')">X</div>
+                <div class="win-btn" onclick="minimizeWindow('mine-win')">_</div>
+                <div class="win-btn close" onclick="closeWindow('mine-win')">X</div>
             </div>
         </div>
         <div class="window-content">
+            <div class="mine-container">
+                <div class="mine-header">
+                    <div id="mine-count" class="mine-lcd">010</div>
+                    <button onclick="initMinesweeper()" id="mine-smiley" style="font-size:18px; padding:1px 5px; cursor:pointer;">🙂</button>
+                    <div id="mine-timer" class="mine-lcd">000</div>
+                </div>
+                <div id="mine-grid" class="mine-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MS PAINT WINDOW -->
+    <div id="paint-win" class="window" style="top: 55px; left: 120px; width: 620px; height: 440px;">
+        <div class="title-bar">
+            <span>🎨 untitled - Paint</span>
+            <div class="title-btns">
+                <div class="win-btn" onclick="minimizeWindow('paint-win')">_</div>
+                <div class="win-btn" onclick="maximizeWindow('paint-win')">□</div>
+                <div class="win-btn close" onclick="closeWindow('paint-win')">X</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="paint-toolbar">
+                <div id="paint-palette" style="display:flex; gap:3px;"></div>
+                <label style="font-size:11px;">Size:
+                    <input type="range" id="paint-size" min="1" max="24" value="4" style="width:65px; vertical-align:middle;">
+                </label>
+                <button class="ie-nav-btn" onclick="setPaintColor('#ffffff')">🧽 Eraser</button>
+                <button class="ie-nav-btn" onclick="clearPaint()">🗑️ Clear</button>
+            </div>
+            <canvas id="paint-canvas" width="800" height="500" style="background:#fff; cursor:crosshair; flex-grow:1;"></canvas>
+        </div>
+    </div>
+
+    <!-- 4. NOTEPAD WINDOW -->
+    <div id="notepad-win" class="window" style="top: 85px; left: 220px; width: 480px; height: 360px;">
+        <div class="title-bar">
+            <span>📝 Notepad</span>
+            <div class="title-btns">
+                <div class="win-btn" onclick="minimizeWindow('notepad-win')">_</div>
+                <div class="win-btn" onclick="maximizeWindow('notepad-win')">□</div>
+                <div class="win-btn close" onclick="closeWindow('notepad-win')">X</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <textarea id="notepad-area" placeholder="Type your notes here... (Automatically saved to browser storage)"></textarea>
+        </div>
+    </div>
+
+    <!-- 5. COMMAND PROMPT WINDOW -->
+    <div id="cmd-win" class="window" style="top: 90px; left: 140px; width: 560px; height: 370px;">
+        <div class="title-bar">
+            <span>💻 C:\WINDOWS\system32\cmd.exe</span>
+            <div class="title-btns">
+                <div class="win-btn" onclick="minimizeWindow('cmd-win')">_</div>
+                <div class="win-btn" onclick="maximizeWindow('cmd-win')">□</div>
+                <div class="win-btn close" onclick="closeWindow('cmd-win')">X</div>
+            </div>
+        </div>
+        <div class="window-content" onclick="document.getElementById('cmd-input').focus()">
             <div id="cmd-body" class="cmd-body">
                 Microsoft Windows XP [Version 5.1.2600]<br>
                 (C) Copyright 1985-2001 Microsoft Corp.<br><br>
                 Type <b>help</b> for available commands.<br><br>
             </div>
             <div class="cmd-input-line">
-                <span>C:\></span>
-                <input type="text" id="cmd-input" autofocus onkeypress="handleCmd(event)">
+                <span>C:\Documents and Settings\Admin&gt;</span>
+                <input type="text" id="cmd-input" onkeydown="handleCmd(event)">
             </div>
         </div>
     </div>
 
+    <!-- BLUE SCREEN OF DEATH OVERLAY -->
+    <div id="bsod" onclick="this.style.display='none'">
+        A problem has been detected and Windows has been shut down to prevent damage to your computer.<br><br>
+        KERNEL_DATA_INPAGE_ERROR<br><br>
+        If this is the first time you've seen this Stop error screen, restart your computer. If this screen appears again, follow these steps:<br><br>
+        Check to make sure any new hardware or software is properly installed.<br><br>
+        Technical information:<br>
+        *** STOP: 0x0000007A (0xC03DD228, 0xC000000E, 0xF748D520, 0x0264C860)<br><br>
+        <b>Click anywhere or press any key to return to Windows XP...</b>
+    </div>
+
     <script>
-        // --- CLOCK & NAVIGATION ---
+        // ==========================================
+        // 1. SYNTHESIZED WINDOWS XP SOUND EFFECTS
+        // ==========================================
+        function playXPSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+                const notes = type === 'startup' ? [311.13, 466.16, 622.25, 415.30, 622.25] : [220, 180];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type === 'startup' ? 'sine' : 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+                    gain.gain.setValueAtTime(0.08, now + idx * 0.14);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.14 + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.14);
+                    osc.stop(now + idx * 0.14 + 0.45);
+                });
+            } catch (e) {}
+        }
+
+        // ==========================================
+        // 2. CLOCK, WALLPAPER & NAVIGATION
+        // ==========================================
         function updateClock() {
             const now = new Date();
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12 || 12;
-            document.getElementById('tray').innerText = `${hours}:${minutes} ${ampm}`;
+            document.getElementById('clock-text').innerText = `${hours}:${minutes} ${ampm}`;
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -149,23 +758,66 @@
             window.location.href = 'main.html';
         }
 
-        // --- WINDOW MANAGEMENT ---
+        function setWallpaper(theme) {
+            const d = document.getElementById('desktop');
+            if (theme === 'classic') {
+                d.style.background = '#008080';
+            } else if (theme === 'night') {
+                d.style.background = 'radial-gradient(circle at 50% 25%, #2b1055 0%, #0a0612 100%)';
+            } else {
+                d.style.background = '';
+            }
+        }
+
+        function triggerBSOD() {
+            playXPSound('error');
+            document.getElementById('bsod').style.display = 'block';
+        }
+        window.addEventListener('keydown', () => {
+            document.getElementById('bsod').style.display = 'none';
+        });
+
+        // ==========================================
+        // 3. WINDOW MANAGER (DRAG, Z-INDEX, TASKBAR)
+        // ==========================================
+        let topZ = 20;
+        let focusedWinId = null;
+
+        function focusWindow(winId) {
+            const win = document.getElementById(winId);
+            if (!win) return;
+            topZ++;
+            win.style.zIndex = topZ;
+            focusedWinId = winId;
+            updateTaskbar();
+        }
+
         function openWindow(winId) {
             const win = document.getElementById(winId);
-            win.classList.add('active');
+            win.classList.add('open');
+            win.classList.remove('minimized');
             document.getElementById('start-menu').style.display = 'none';
-            updateTaskbar();
+            focusWindow(winId);
         }
 
         function closeWindow(winId) {
             const win = document.getElementById(winId);
-            win.classList.remove('active');
+            win.classList.remove('open', 'minimized', 'maximized');
+            if (focusedWinId === winId) focusedWinId = null;
             updateTaskbar();
         }
 
         function minimizeWindow(winId) {
             const win = document.getElementById(winId);
-            win.classList.remove('active');
+            win.classList.add('minimized');
+            if (focusedWinId === winId) focusedWinId = null;
+            updateTaskbar();
+        }
+
+        function maximizeWindow(winId) {
+            const win = document.getElementById(winId);
+            win.classList.toggle('maximized');
+            focusWindow(winId);
         }
 
         function toggleStartMenu() {
@@ -176,48 +828,393 @@
         function updateTaskbar() {
             const container = document.getElementById('taskbar-apps');
             container.innerHTML = '';
-            document.querySelectorAll('.window').forEach(win => {
-                if (win.classList.contains('active')) {
-                    const title = win.querySelector('.title-bar span').innerText;
-                    const task = document.createElement('div');
-                    task.className = 'taskbar-task';
-                    task.innerText = title;
-                    task.onclick = () => {
-                        win.classList.toggle('active');
-                    };
-                    container.appendChild(task);
-                }
+            document.querySelectorAll('.window.open').forEach(win => {
+                const winId = win.id;
+                const title = win.querySelector('.title-bar span').innerText;
+                const task = document.createElement('div');
+                task.className = 'taskbar-task' + (focusedWinId === winId && !win.classList.contains('minimized') ? ' focused' : '');
+                task.innerText = title;
+                task.onclick = () => {
+                    if (win.classList.contains('minimized')) {
+                        win.classList.remove('minimized');
+                        focusWindow(winId);
+                    } else if (focusedWinId === winId) {
+                        minimizeWindow(winId);
+                    } else {
+                        focusWindow(winId);
+                    }
+                };
+                container.appendChild(task);
             });
         }
 
-        // --- INTERNET EXPLORER LOGIC ---
-        function navigateIE() {
-            let url = document.getElementById('ie-url').value;
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'https://' + url;
-            }
-            document.getElementById('ie-frame').src = url;
+        // Make all windows draggable (Mouse + Touch)
+        document.querySelectorAll('.window').forEach(win => {
+            win.addEventListener('mousedown', () => focusWindow(win.id));
+            const bar = win.querySelector('.title-bar');
+            let dragging = false, offsetX = 0, offsetY = 0;
+
+            const startDrag = (clientX, clientY, target) => {
+                if (target.classList.contains('win-btn') || win.classList.contains('maximized')) return;
+                dragging = true;
+                focusWindow(win.id);
+                offsetX = clientX - win.offsetLeft;
+                offsetY = clientY - win.offsetTop;
+            };
+
+            const moveDrag = (clientX, clientY) => {
+                if (!dragging) return;
+                win.style.left = Math.max(0, Math.min(window.innerWidth - 80, clientX - offsetX)) + 'px';
+                win.style.top = Math.max(0, Math.min(window.innerHeight - 70, clientY - offsetY)) + 'px';
+            };
+
+            bar.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY, e.target));
+            window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+            window.addEventListener('mouseup', () => dragging = false);
+
+            bar.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.touches[0].clientY, e.target));
+            window.addEventListener('touchmove', e => { if (dragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY); });
+            window.addEventListener('touchend', () => dragging = false);
+        });
+
+        // ==========================================
+        // 4. UNIVERSAL INTERNET EXPLORER ENGINE
+        // ==========================================
+        let ieHistory = [];
+        let ieHistoryIndex = -1;
+        let useProxyMode = true;
+
+        // Direct-frame friendly domains
+        const directAllowedDomains = ['wikipedia.org', 'bing.com', 'wiby.me', 'archive.org'];
+
+        function toggleProxyMode() {
+            useProxyMode = !useProxyMode;
+            const badge = document.getElementById('ie-mode-toggle');
+            badge.innerText = useProxyMode ? '🛡️ Mode: Auto-Proxy ON' : '⚡ Mode: Direct Iframe';
+            badge.style.background = useProxyMode ? '#d9ead3' : '#fff2cc';
+            ieRefresh();
         }
 
-        // --- CMD TERMINAL LOGIC ---
+        function openJukeboxInIE() {
+            openWindow('ie-win');
+            loadUrl('radio.html');
+        }
+
+        function navigateIE() {
+            let input = document.getElementById('ie-url').value.trim();
+            if (!input) return;
+
+            // Local file check (e.g. radio.html or main.html)
+            if (input.endsWith('.html') && !input.includes('/')) {
+                loadUrl(input);
+                return;
+            }
+
+            // If user typed a search query instead of a domain, search via Bing
+            if (input.includes(' ') || (!input.includes('.') && !input.startsWith('http'))) {
+                loadUrl('https://www.bing.com/search?q=' + encodeURIComponent(input));
+                return;
+            }
+
+            if (!input.startsWith('http://') && !input.startsWith('https://')) {
+                input = 'https://' + input;
+            }
+            loadUrl(input);
+        }
+
+        function loadUrl(url, pushHistory = true) {
+            document.getElementById('ie-url').value = url;
+            const status = document.getElementById('ie-status');
+            const frame = document.getElementById('ie-frame');
+
+            if (pushHistory) {
+                ieHistory = ieHistory.slice(0, ieHistoryIndex + 1);
+                ieHistory.push(url);
+                ieHistoryIndex = ieHistory.length - 1;
+            }
+
+            const isLocal = !url.startsWith('http');
+            const isDirectFriendly = directAllowedDomains.some(d => url.includes(d));
+
+            if (isLocal || !useProxyMode || isDirectFriendly) {
+                status.innerText = 'Opening page directly: ' + url;
+                frame.removeAttribute('srcdoc');
+                frame.src = url;
+                frame.onload = () => { status.innerText = 'Done'; };
+            } else {
+                loadViaUnblockerProxy(url);
+            }
+        }
+
+        async function loadViaUnblockerProxy(targetUrl) {
+            const status = document.getElementById('ie-status');
+            const frame = document.getElementById('ie-frame');
+            status.innerText = 'Unblocking & fetching ' + targetUrl + ' ...';
+
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            ];
+
+            for (const proxyUrl of proxies) {
+                try {
+                    const res = await fetch(proxyUrl);
+                    if (!res.ok) continue;
+                    let html = await res.text();
+
+                    // Inject <base> so all relative assets resolve + intercept link clicks to stay in IE
+                    const interceptorScript = `
+                        <base href="${targetUrl}">
+                        <script>
+                            document.addEventListener('click', function(e) {
+                                const a = e.target.closest('a');
+                                if (a && a.href) {
+                                    e.preventDefault();
+                                    window.parent.postMessage({ type: 'IE_NAV', url: a.href }, '*');
+                                }
+                            }, true);
+                        <\/script>
+                    `;
+
+                    if (html.includes('<head>')) {
+                        html = html.replace('<head>', '<head>' + interceptorScript);
+                    } else {
+                        html = interceptorScript + html;
+                    }
+
+                    frame.removeAttribute('src');
+                    frame.srcdoc = html;
+                    status.innerText = 'Loaded via Proxy Unblocker: ' + targetUrl;
+                    return;
+                } catch (err) {
+                    console.warn('Proxy attempt failed:', err);
+                }
+            }
+
+            // Fallback if proxy fails
+            status.innerText = 'Proxy blocked by remote firewall; attempting direct load...';
+            frame.removeAttribute('srcdoc');
+            frame.src = targetUrl;
+        }
+
+        // Listen for link clicks inside proxied pages
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'IE_NAV' && e.data.url) {
+                loadUrl(e.data.url);
+            }
+        });
+
+        function ieBack() {
+            if (ieHistoryIndex > 0) {
+                ieHistoryIndex--;
+                loadUrl(ieHistory[ieHistoryIndex], false);
+            }
+        }
+
+        function ieForward() {
+            if (ieHistoryIndex < ieHistory.length - 1) {
+                ieHistoryIndex++;
+                loadUrl(ieHistory[ieHistoryIndex], false);
+            }
+        }
+
+        function ieRefresh() {
+            if (ieHistoryIndex >= 0) {
+                loadUrl(ieHistory[ieHistoryIndex], false);
+            }
+        }
+
+        function openExternalTab() {
+            const url = document.getElementById('ie-url').value.trim();
+            if (url) window.open(url, '_blank');
+        }
+
+        // ==========================================
+        // 5. MINESWEEPER GAME
+        // ==========================================
+        let mineBoard = [], mineGameOver = false, mineTimerInterval = null, mineSeconds = 0;
+
+        function initMinesweeper() {
+            const grid = document.getElementById('mine-grid');
+            grid.innerHTML = '';
+            mineBoard = [];
+            mineGameOver = false;
+            mineSeconds = 0;
+            clearInterval(mineTimerInterval);
+            document.getElementById('mine-timer').innerText = '000';
+            document.getElementById('mine-count').innerText = '010';
+            document.getElementById('mine-smiley').innerText = '🙂';
+
+            for (let i = 0; i < 81; i++) {
+                mineBoard.push({ mine: false, revealed: false, flagged: false, count: 0 });
+            }
+
+            let placed = 0;
+            while (placed < 10) {
+                const idx = Math.floor(Math.random() * 81);
+                if (!mineBoard[idx].mine) {
+                    mineBoard[idx].mine = true;
+                    placed++;
+                }
+            }
+
+            for (let i = 0; i < 81; i++) {
+                if (mineBoard[i].mine) continue;
+                let count = 0;
+                getNeighbors(i).forEach(n => { if (mineBoard[n].mine) count++; });
+                mineBoard[i].count = count;
+            }
+
+            mineBoard.forEach((cell, idx) => {
+                const div = document.createElement('div');
+                div.className = 'mine-cell';
+                div.onclick = () => revealCell(idx);
+                div.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    if (mineGameOver || cell.revealed) return;
+                    cell.flagged = !cell.flagged;
+                    div.innerText = cell.flagged ? '🚩' : '';
+                };
+                grid.appendChild(div);
+            });
+
+            mineTimerInterval = setInterval(() => {
+                if (!mineGameOver && mineSeconds < 999) {
+                    mineSeconds++;
+                    document.getElementById('mine-timer').innerText = String(mineSeconds).padStart(3, '0');
+                }
+            }, 1000);
+        }
+
+        function getNeighbors(idx) {
+            const r = Math.floor(idx / 9), c = idx % 9, res = [];
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < 9 && nc >= 0 && nc < 9) res.push(nr * 9 + nc);
+                }
+            }
+            return res;
+        }
+
+        function revealCell(idx) {
+            if (mineGameOver) return;
+            const cell = mineBoard[idx];
+            if (cell.revealed || cell.flagged) return;
+
+            const domCells = document.querySelectorAll('.mine-cell');
+            cell.revealed = true;
+            domCells[idx].classList.add('revealed');
+
+            if (cell.mine) {
+                domCells[idx].innerText = '💥';
+                domCells[idx].style.background = 'red';
+                document.getElementById('mine-smiley').innerText = '😵';
+                mineGameOver = true;
+                playXPSound('error');
+                return;
+            }
+
+            if (cell.count > 0) {
+                const colors = ['', '#0000ff', '#008000', '#ff0000', '#000080', '#800000', '#008080', '#000', '#808080'];
+                domCells[idx].innerText = cell.count;
+                domCells[idx].style.color = colors[cell.count];
+            } else {
+                getNeighbors(idx).forEach(n => revealCell(n));
+            }
+        }
+        initMinesweeper();
+
+        // ==========================================
+        // 6. MS PAINT
+        // ==========================================
+        const paintCanvas = document.getElementById('paint-canvas');
+        const pCtx = paintCanvas.getContext('2d');
+        let painting = false, paintColor = '#000000';
+
+        const paletteColors = ['#000000', '#ffffff', '#ff0000', '#00aa00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#795548'];
+        const paletteContainer = document.getElementById('paint-palette');
+        paletteColors.forEach((col, i) => {
+            const sw = document.createElement('div');
+            sw.className = 'color-swatch' + (i === 0 ? ' active' : '');
+            sw.style.background = col;
+            sw.onclick = () => {
+                paintColor = col;
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+            };
+            paletteContainer.appendChild(sw);
+        });
+
+        function setPaintColor(col) { paintColor = col; }
+        function clearPaint() { pCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height); }
+
+        paintCanvas.addEventListener('mousedown', e => {
+            painting = true;
+            pCtx.beginPath();
+            const rect = paintCanvas.getBoundingClientRect();
+            pCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        });
+        paintCanvas.addEventListener('mousemove', e => {
+            if (!painting) return;
+            const rect = paintCanvas.getBoundingClientRect();
+            pCtx.lineWidth = document.getElementById('paint-size').value;
+            pCtx.lineCap = 'round';
+            pCtx.strokeStyle = paintColor;
+            pCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            pCtx.stroke();
+        });
+        window.addEventListener('mouseup', () => painting = false);
+
+        // ==========================================
+        // 7. NOTEPAD PERSISTENCE
+        // ==========================================
+        const noteArea = document.getElementById('notepad-area');
+        noteArea.value = localStorage.getItem('xp_notepad_text') || 'Welcome to Windows XP Professional!\n\n- Use Internet Explorer with Auto-Proxy ON to browse external sites.\n- Click Arcade Jukebox on the desktop to open radio.html.';
+        noteArea.addEventListener('input', () => {
+            localStorage.setItem('xp_notepad_text', noteArea.value);
+        });
+
+        // ==========================================
+        // 8. COMMAND PROMPT
+        // ==========================================
         function handleCmd(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById('cmd-input');
                 const body = document.getElementById('cmd-body');
                 const cmdText = input.value.trim();
 
-                body.innerHTML += `C:\\>${cmdText}<br>`;
-
-                // Command Processing
+                body.innerHTML += `C:\\Documents and Settings\\Admin&gt;${cmdText}<br>`;
                 const args = cmdText.split(' ');
                 const command = args[0].toLowerCase();
 
                 if (command === 'help') {
-                    body.innerHTML += `Available commands:<br>&nbsp;&nbsp;<b>help</b> - Displays this help message<br>&nbsp;&nbsp;<b>cls</b> - Clears the screen<br>&nbsp;&nbsp;<b>echo [text]</b> - Prints text<br>&nbsp;&nbsp;<b>exit</b> - Returns to main.html<br><br>`;
+                    body.innerHTML += `Available commands:<br>
+                    &nbsp;&nbsp;<b>dir</b>       - List directory files<br>
+                    &nbsp;&nbsp;<b>ipconfig</b>  - Show network details<br>
+                    &nbsp;&nbsp;<b>color [a/b/c]</b> - Change terminal color<br>
+                    &nbsp;&nbsp;<b>cls</b>       - Clear screen<br>
+                    &nbsp;&nbsp;<b>bsod</b>      - Trigger Blue Screen of Death<br>
+                    &nbsp;&nbsp;<b>exit</b>      - Return to main.html<br><br>`;
+                } else if (command === 'dir') {
+                    body.innerHTML += ` Directory of C:\\Documents and Settings\\Admin<br><br>
+                    10/18/2026  06:50 PM    &lt;DIR&gt;          Desktop<br>
+                    10/18/2026  06:50 PM            24,512 radio.html<br>
+                    10/18/2026  06:50 PM            18,204 main.html<br>
+                    10/18/2026  06:50 PM             1,024 notes.txt<br><br>`;
+                } else if (command === 'ipconfig') {
+                    body.innerHTML += `Windows IP Configuration<br>
+                    &nbsp;&nbsp;IPv4 Address. . . . . . : 192.168.1.104<br>
+                    &nbsp;&nbsp;Subnet Mask . . . . . . : 255.255.255.0<br>
+                    &nbsp;&nbsp;Default Gateway . . . . : 192.168.1.1<br><br>`;
+                } else if (command === 'color') {
+                    const map = { a: '#00ff00', b: '#00ffff', c: '#ff5555', f: '#ffffff' };
+                    body.style.color = map[args[1]] || '#00ff00';
                 } else if (command === 'cls') {
                     body.innerHTML = '';
-                } else if (command === 'echo') {
-                    body.innerHTML += `${args.slice(1).join(' ')}<br><br>`;
+                } else if (command === 'bsod') {
+                    triggerBSOD();
                 } else if (command === 'exit') {
                     closeEmulator();
                 } else if (cmdText !== '') {
@@ -229,12 +1226,27 @@
             }
         }
 
-        // Close start menu when clicking outside
-        window.onclick = function(e) {
+        // Right-click desktop menu & close menus on outside click
+        document.getElementById('desktop').addEventListener('contextmenu', e => {
+            e.preventDefault();
+            const ctx = document.getElementById('context-menu');
+            ctx.style.left = e.clientX + 'px';
+            ctx.style.top = e.clientY + 'px';
+            ctx.style.display = 'block';
+        });
+
+        window.addEventListener('click', e => {
             if (!e.target.closest('#start-menu') && !e.target.closest('#start-btn')) {
                 document.getElementById('start-menu').style.display = 'none';
             }
-        }
+            document.getElementById('context-menu').style.display = 'none';
+        });
+
+        // Open IE by default on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            openWindow('ie-win');
+            loadUrl('https://en.wikipedia.org/wiki/Windows_XP');
+        });
     </script>
 </body>
 </html>
