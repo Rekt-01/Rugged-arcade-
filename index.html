@@ -167,6 +167,10 @@
       inset: 0;
       z-index: 2;
       background: #000;
+      display: none; /* Hidden until you tap to start */
+    }
+    #video-layer.active {
+      display: block;
     }
 
     #entrance-video {
@@ -183,8 +187,8 @@
       left: 8%;
       width: 84%;
       height: 16%;
-      z-index: 6;
-      display: block; /* Always active */
+      z-index: 20; /* Sits cleanly above video layer */
+      display: block;
       cursor: pointer;
       background: transparent;
       -webkit-tap-highlight-color: rgba(255, 217, 102, 0.25);
@@ -197,8 +201,8 @@
       left: 60%;
       width: 32%;
       height: 35%;
-      z-index: 6;
-      display: block; /* Always active */
+      z-index: 20; /* Sits cleanly above video layer */
+      display: block;
       cursor: pointer;
       background: transparent;
     }
@@ -233,12 +237,11 @@
       <video id="entrance-video" playsinline webkit-playsinline preload="auto">
         <source src="gemini_generated_video_7F077754.mp4" type="video/mp4">
       </video>
-
-      <!-- Always available button over "PRESS START / INSERT COIN TO ENTER" -->
-      <a href="main.html" id="coin-hotspot" class="hidden-coin-btn" title="Insert Coin"></a>
-      <!-- Always available backup button over the Arcade Front Door -->
-      <a href="main.html" id="door-hotspot" class="hidden-door-btn" title="Enter Arcade"></a>
     </div>
+
+    <!-- Always available link hotspots (placed outside video layer so they never get blocked) -->
+    <a href="main.html" class="hidden-coin-btn" title="Insert Coin"></a>
+    <a href="main.html" class="hidden-door-btn" title="Enter Arcade"></a>
   </div>
 
   <script>
@@ -532,9 +535,10 @@
     }
 
     /* =====================================================
-       PART 4: ROBUST iOS SAFARI VIDEO PLAY
+       PART 4: VIDEO PLAYBACK & TAP CONTROLS
     ===================================================== */
     const introLayer = document.getElementById('intro-layer');
+    const videoLayer = document.getElementById('video-layer');
     const video = document.getElementById('entrance-video');
     let videoStarted = false;
 
@@ -543,6 +547,7 @@
       videoStarted = true;
       setMouthState('closed');
       introLayer.classList.add('fade-out');
+      videoLayer.classList.add('active');
 
       video.currentTime = 0;
       video.loop = false;
@@ -553,10 +558,6 @@
     }
 
     document.getElementById('intro-layer').addEventListener('click', startEntranceVideo);
-
-    video.addEventListener('ended', () => {
-      video.pause();
-    });
   </script>
 </body>
 </html>
