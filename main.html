@@ -2,72 +2,313 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rugged Arcade</title>
+  <!-- Retro Pixel Font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      background: #0d061a;
+      background-color: #0d061a;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      height: 100dvh;
-      overflow: hidden;
+      min-height: 100vh;
       font-family: 'Press Start 2P', monospace;
+      overflow-x: hidden;
     }
 
-    /* Viewport Wrapper to maintain natural iPhone aspect ratio */
-    .arcade-wrapper {
+    /* Main container that locks hotspots to the image proportions */
+    .arcade-container {
       position: relative;
-      width: 100vw;
-      height: 100dvh;
-      max-width: 460px; /* Standard portrait screen width limit */
-      /* Uses your GitHub asset: IMG_5664.jpeg */
-      background: url('IMG_5664.jpeg') no-repeat center center;
-      background-size: cover;
-      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+      width: 100%;
+      max-width: 550px; /* Matches vertical mobile/arcade aspect ratio */
+      margin: 0 auto;
+      user-select: none;
     }
 
-    /* Invisible, Responsive Clickable Mapping boxes over the scene */
+    .arcade-bg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Clickable Hotspots */
     .hotspot {
       position: absolute;
       display: block;
       cursor: pointer;
-      border-radius: 6px;
-      -webkit-tap-highlight-color: rgba(255, 42, 133, 0.3); /* Tap glow for mobile */
-      transition: background 0.2s, box-shadow 0.2s;
-    }
-    
-    .hotspot:active {
-      box-shadow: 0 0 15px rgba(53, 212, 255, 0.7);
-      background: rgba(255, 255, 255, 0.08);
+      text-decoration: none;
+      z-index: 10;
+      transition: all 0.15s ease-in-out;
+      border-radius: 4px;
     }
 
-    /* Responsive Percentages map perfectly to targets in IMG_5664.jpeg */
-    .hs-leaderboard { top: 21%; left: 3%; width: 22%; height: 22%; }
-    .hs-toilets     { top: 38%; left: 43%; width: 13%; height: 15%; } /* <-- Pointing to toilet.html */
-    .hs-roadmap     { top: 39%; left: 64%; width: 10%; height: 7%; }
-    .hs-shop        { top: 29%; left: 75%; width: 24%; height: 28%; }
-    .hs-play        { top: 50%; left: 1%; width: 29%; height: 32%; }
-    .hs-gallery     { top: 53%; left: 75%; width: 24%; height: 35%; }
+    /* Subtle neon glow when hovering over a clickable object */
+    .hotspot:hover {
+      background-color: rgba(255, 0, 255, 0.18);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.8), inset 0 0 8px rgba(255, 0, 255, 0.6);
+      border: 1px solid rgba(0, 255, 255, 0.8);
+    }
+
+    /* Tooltip label on hover */
+    .hotspot::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 6, 26, 0.9);
+      color: #00ffff;
+      border: 1px solid #ff00ff;
+      padding: 4px 6px;
+      font-size: 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      margin-bottom: 4px;
+      box-shadow: 2px 2px 0px #000;
+      z-index: 30;
+    }
+
+    .hotspot:hover::after {
+      opacity: 1;
+    }
+
+    /* ==========================================
+       HOTSPOT COORDINATES
+       ========================================== */
+
+    /* Leaderboard Screen (Top Left) */
+    .leaderboard {
+      top: 21%;
+      left: 2%;
+      width: 22%;
+      height: 23%;
+    }
+
+    /* Spaceman Poster (Top Right) */
+    .spaceman {
+      top: 3%;
+      left: 76%;
+      width: 22%;
+      height: 29%;
+    }
+
+    /* Prizes / Shop Neon Sign */
+    .shop-sign {
+      top: 29%;
+      left: 75%;
+      width: 24%;
+      height: 12%;
+    }
+
+    /* Info / Roadmap Sign (Discord) */
+    .info-sign {
+      top: 39%;
+      left: 63.5%;
+      width: 10.5%;
+      height: 7%;
+    }
+
+    /* Toilet Door */
+    .toilet-door {
+      top: 38%;
+      left: 43%;
+      width: 13.5%;
+      height: 14.5%;
+    }
+
+    /* Jukebox (Radio) */
+    .jukebox {
+      top: 46.5%;
+      left: 63.5%;
+      width: 11.5%;
+      height: 9.5%;
+    }
+
+    /* Retro PC Terminal (Back Left behind Pinball) */
+    .retro-pc {
+      top: 46%;
+      left: 29.5%;
+      width: 13.5%;
+      height: 8.5%;
+    }
+
+    /* Arcade 1: Front-Left "PLAY" Machine */
+    .arcade-1 {
+      top: 51%;
+      left: 1%;
+      width: 19%;
+      height: 36%;
+    }
+
+    /* Arcade 2: Second-Left "SPACE" Machine */
+    .arcade-2 {
+      top: 49.5%;
+      left: 16%;
+      width: 15%;
+      height: 27%;
+    }
+
+    /* Arcade 3: Pinball Machine (Left Middle) */
+    .arcade-3 {
+      top: 52.5%;
+      left: 24%;
+      width: 20%;
+      height: 10%;
+    }
+
+    /* Arcade 4: Right-Side Pink/Yellow Machine & NFTs Machine */
+    .arcade-4 {
+      top: 53%;
+      left: 65%;
+      width: 24%;
+      height: 28%;
+    }
+
+    /* Arcade 5: Front-Right "GALLERY" Machine */
+    .arcade-5 {
+      top: 58%;
+      left: 83%;
+      width: 16%;
+      height: 36%;
+    }
+
+    /* ==========================================
+       SHOPKEEPER GIRL & PIXEL SPEECH BUBBLE
+       ========================================== */
+    .shopkeeper-trigger {
+      position: absolute;
+      top: 47%;
+      left: 84%;
+      width: 11%;
+      height: 7%;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .speech-bubble {
+      position: absolute;
+      top: 40.5%;
+      right: 12%;
+      width: 44%;
+      background: #ffffff;
+      color: #000000;
+      border: 3px solid #000000;
+      padding: 8px;
+      font-size: 7.5px;
+      line-height: 1.5;
+      text-align: center;
+      box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.75);
+      z-index: 25;
+      cursor: pointer;
+      animation: floatBubble 2.5s ease-in-out infinite;
+    }
+
+    /* Speech bubble pointer tail pointing to the girl */
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      right: 18px;
+      border-width: 10px 8px 0;
+      border-style: solid;
+      border-color: #ffffff transparent;
+      display: block;
+      width: 0;
+      z-index: 2;
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -14px;
+      right: 15px;
+      border-width: 13px 11px 0;
+      border-style: solid;
+      border-color: #000000 transparent;
+      display: block;
+      width: 0;
+      z-index: 1;
+    }
+
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
   </style>
 </head>
 <body>
 
-  <div class="arcade-wrapper">
-    <!-- Clickable Links & Targets -->
-    <a href="#leaderboard" class="hotspot hs-leaderboard" title="Leaderboard"></a>
-    
-    <!-- Toilets hotspot links directly to toilet.html -->
-    <a href="toilet.html"   class="hotspot hs-toilets"     title="Go To Toilets"></a>
-    
-    <a href="#roadmap"     class="hotspot hs-roadmap"     title="Info / Roadmap"></a>
-    <a href="#shop"        class="hotspot hs-shop"        title="Prizes & Shop"></a>
-    <a href="#play"        class="hotspot hs-play"        title="Play Arcade"></a>
-    <a href="#nfts"        class="hotspot hs-gallery"     title="NFTs & Gallery"></a>
+  <div class="arcade-container">
+    <!-- Main Background Image -->
+    <img src="IMG_5676.jpeg" alt="Rugged Arcade" class="arcade-bg">
+
+    <!-- Speech Bubble for the Girl Behind the Counter -->
+    <div class="speech-bubble" id="speechBubble" title="Click for next message">
+      WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀
+    </div>
+    <div class="shopkeeper-trigger" id="shopkeeper" title="Talk to Clerk"></div>
+
+    <!-- Clickable Links -->
+    <a href="leaderboard.html" class="hotspot leaderboard" data-label="LEADERBOARD"></a>
+    <a href="nft.html" class="hotspot spaceman" data-label="NFTs"></a>
+    <a href="shop.html" class="hotspot shop-sign" data-label="PRIZES / SHOP"></a>
+    <a href="discord.html" class="hotspot info-sign" data-label="DISCORD / INFO"></a>
+    <a href="toilet.html" class="hotspot toilet-door" data-label="TOILETS"></a>
+    <a href="radio.html" class="hotspot jukebox" data-label="RADIO JUKEBOX"></a>
+
+    <!-- Arcade Machines 1 - 5 -->
+    <a href="arcade1.html" class="hotspot arcade-1" data-label="ARCADE 1"></a>
+    <a href="arcade2.html" class="hotspot arcade-2" data-label="ARCADE 2"></a>
+    <a href="arcade3.html" class="hotspot arcade-3" data-label="ARCADE 3"></a>
+    <a href="arcade4.html" class="hotspot arcade-4" data-label="ARCADE 4"></a>
+    <a href="arcade5.html" class="hotspot arcade-5" data-label="ARCADE 5"></a>
   </div>
+
+  <script>
+    const phrases = [
+      "WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀",
+      "SWEEP THE FLOOR BEFORE YOU GET REKT! 🧹💎",
+      "DIAMOND HANDS ONLY IN THIS ARCADE! 💎🙌",
+      "SOLD MY RENT MONEY FOR PIXEL JPEGS! 🦍🔥",
+      "NGMI IF YOU DON'T MINT RIGHT NOW! 📈",
+      "1 NFT = 1 NFT. NO CRYING IN THE CASINO! 🎰",
+      "WEN LAMBO? PLAY SOME GAMES FIRST DEGEN! 🏎️💨"
+    ];
+
+    let currentIndex = 0;
+    const bubble = document.getElementById('speechBubble');
+    const clerk = document.getElementById('shopkeeper');
+
+    function nextPhrase() {
+      currentIndex = (currentIndex + 1) % phrases.length;
+      bubble.textContent = phrases[currentIndex];
+    }
+
+    // Automatically cycle her speech bubble every 4.5 seconds
+    let dialogueInterval = setInterval(nextPhrase, 4500);
+
+    // Also allow clicking her or the speech bubble to cycle immediately
+    bubble.addEventListener('click', () => {
+      clearInterval(dialogueInterval);
+      nextPhrase();
+      dialogueInterval = setInterval(nextPhrase, 4500);
+    });
+
+    clerk.addEventListener('click', () => {
+      clearInterval(dialogueInterval);
+      nextPhrase();
+      dialogueInterval = setInterval(nextPhrase, 4500);
+    });
+  </script>
 
 </body>
 </html>
