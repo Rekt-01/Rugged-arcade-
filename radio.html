@@ -54,7 +54,7 @@
         <!-- Marquee Header -->
         <div class="text-center bg-black/90 border-2 border-pink-500/60 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(255,0,85,0.2)]">
             <h1 class="arcade-font text-base md:text-2xl text-pink-500 marquee-glow tracking-wider">RUGGED ARCADE JUKEBOX</h1>
-            <p class="text-[10px] text-cyan-400 mt-2 tracking-widest uppercase">Instant Live Audio Streamer</p>
+            <p class="text-[10px] text-cyan-400 mt-2 tracking-widest uppercase">Select Genre or Click Play Below</p>
         </div>
 
         <!-- Genre Arcade Buttons -->
@@ -89,9 +89,14 @@
 
             <!-- Now Playing Text Display -->
             <div class="w-full z-10 my-2">
-                <div id="now-playing-name" class="arcade-font text-xs md:text-sm text-pink-400 truncate">HIP-HOP CHANNEL</div>
-                <div id="now-playing-status" class="text-[10px] text-gray-400 mt-1">Live Broadcast Active</div>
+                <div id="now-playing-name" class="arcade-font text-xs md:text-sm text-pink-400 truncate">SELECT GENRE</div>
+                <div id="now-playing-status" class="text-[10px] text-gray-400 mt-1">Ready</div>
             </div>
+
+            <!-- Manual Play/Pause Backup Button (Bypasses browser autoplay restrictions) -->
+            <button onclick="togglePlay()" id="play-pause-btn" class="arcade-font text-xs bg-pink-600 hover:bg-pink-500 text-white px-6 py-2.5 rounded-lg shadow-lg transition z-10 my-2">
+                ▶ START AUDIO
+            </button>
 
             <!-- Volume Bar -->
             <div class="w-full max-w-md flex items-center gap-3 bg-gray-900/80 px-4 py-2.5 rounded-lg border border-white/5 z-10 mt-2">
@@ -104,33 +109,38 @@
         <div class="flex justify-between items-center px-4 py-2 bg-black/60 rounded-lg border border-white/5 text-[9px] text-gray-400 arcade-font">
             <span>CREDIT: FREE PLAY</span>
             <span class="text-pink-500 animate-pulse">● STEREO AUDIO ACTIVE</span>
-            <span>RUGGED OS v5.0</span>
+            <span>RUGGED OS v5.2</span>
         </div>
 
     </main>
 
     <!-- HTML5 Audio Element -->
-    <audio id="audio-element" autoplay></audio>
+    <audio id="audio-element" preload="none"></audio>
 
     <script>
-        // High-speed reliable CDN audio streaming endpoints
+        // Highly reliable secure HTTPS streams
         const channels = {
-            hiphop: { name: "181.fm The Beat (Hip-Hop)", url: "https://ice4.somafm.com/beatblender-128-mp3" },
-            dance: { name: "SomaFM Groove Salad (Dance/Rave)", url: "https://ice2.somafm.com/groovesalad-128-mp3" },
+            hiphop: { name: "SomaFM: DEF CON Radio (Electronic/Hip-Hop)", url: "https://ice2.somafm.com/defcon-128-mp3" },
+            dance: { name: "SomaFM: Groove Salad (Chill Rave / Ambient)", url: "https://ice2.somafm.com/groovesalad-128-mp3" },
             country: { name: "181.fm Kickin' Country", url: "https://listen.181fm.com/181-kickin_128k.mp3" },
-            rock: { name: "181.fm The Eagle (Classic Rock)", url: "https://listen.181fm.com/181-eagle_128k.mp3" }
+            rock: { name: "SomaFM: Secret Agent (Rock / Surf)", url: "https://ice4.somafm.com/secretagent-128-mp3" }
         };
 
         const audio = document.getElementById('audio-element');
         const volumeSlider = document.getElementById('volume-slider');
         const nowPlayingName = document.getElementById('now-playing-name');
+        const nowPlayingStatus = document.getElementById('now-playing-status');
         const vinylDisc = document.getElementById('vinyl-disc');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+
+        let currentKey = 'hiphop';
 
         volumeSlider.addEventListener('input', (e) => {
             audio.volume = e.target.value;
         });
 
         function switchGenre(genreKey) {
+            currentKey = genreKey;
             // Highlight active button
             ['hiphop', 'dance', 'country', 'rock'].forEach(k => {
                 const btn = document.getElementById(`btn-${k}`);
@@ -144,24 +154,43 @@
             const channel = channels[genreKey];
             nowPlayingName.innerText = channel.name;
             audio.src = channel.url;
-            audio.play().catch(err => {
-                console.log("Autoplay blocked, waiting for interaction");
+            
+            audio.play().then(() => {
+                nowPlayingStatus.innerText = "LIVE STREAM ACTIVE";
+                playPauseBtn.innerText = "⏸ PAUSE AUDIO";
+                vinylDisc.classList.add('spinning');
+            }).catch(err => {
+                nowPlayingStatus.innerText = "CLICK 'START AUDIO' TO PLAY";
+                playPauseBtn.innerText = "▶ START AUDIO";
+                vinylDisc.classList.remove('spinning');
             });
-            vinylDisc.classList.add('spinning');
         }
 
-        // Initialize audio on load
+        function togglePlay() {
+            if (audio.paused) {
+                if (!audio.src) {
+                    audio.src = channels[currentKey].url;
+                }
+                audio.play().then(() => {
+                    nowPlayingStatus.innerText = "LIVE STREAM ACTIVE";
+                    playPauseBtn.innerText = "⏸ PAUSE AUDIO";
+                    vinylDisc.classList.add('spinning');
+                }).catch(e => {
+                    alert("Click anywhere on the page first to enable audio.");
+                });
+            } else {
+                audio.pause();
+                nowPlayingStatus.innerText = "AUDIO PAUSED";
+                playPauseBtn.innerText = "▶ RESUME AUDIO";
+                vinylDisc.classList.remove('spinning');
+            }
+        }
+
+        // Initialize default on load
         window.addEventListener('DOMContentLoaded', () => {
             audio.volume = 0.8;
             switchGenre('hiphop');
         });
-
-        // Instant fallback unlock if browser blocks audio autoplay
-        document.body.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play().catch(() => {});
-            }
-        }, { once: true });
     </script>
 </body>
 </html>
