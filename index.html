@@ -236,7 +236,7 @@
       </video>
     </div>
 
-    <!-- STAGE 4: JAVASCRIPT-CONTROLLED ENTRANCE HOTSPOTS -->
+    <!-- STAGE 4: ENTRANCE HOTSPOTS -->
     <div id="coin-hotspot" class="enter-hotspot" title="Insert Coin"></div>
     <div id="door-hotspot" class="enter-hotspot" title="Enter Arcade"></div>
   </div>
@@ -597,7 +597,7 @@
     });
 
     /* =====================================================
-       PART 4: PLAY VIDEO ONCE & FORCE NAVIGATION TO MAIN.HTML
+       PART 4: PLAY VIDEO ONCE & FORCE ABSOLUTE NAVIGATION TO MAIN.HTML
     ===================================================== */
     const introLayer = document.getElementById('intro-layer');
     const video = document.getElementById('entrance-video');
@@ -639,13 +639,14 @@
 
     document.querySelector('.speech-bubble').addEventListener('click', startEntranceVideo);
 
-    // Explicit JS navigation to main.html with absolute root path fallback
+    // Forces absolute path resolution to main.html so GitHub Pages never loops home
     function goToMainArcade(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      window.location.assign('main.html');
+      const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+      window.location.href = window.location.origin + basePath + 'main.html';
     }
 
     coinHotspot.addEventListener('click', goToMainArcade);
