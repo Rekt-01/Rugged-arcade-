@@ -3,10 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rugged Arcade</title>
-  <!-- Retro Pixel Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <title>VAULT // 0xf3e5...9020 — RUGGED ARCADE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-base: #06050a;
+      --bg-panel: #0c0a14;
+      --bg-elevated: #120f1d;
+      --bg-hover: #191528;
+      --line: #241f36;
+      --line-bright: #3c3459;
+      --text-primary: #edeaf6;
+      --text-secondary: #8f87a8;
+      --text-muted: #564f6e;
+      --cyan: #00f0ff;
+      --magenta: #ff00a0;
+      --green: #00ff66;
+      --amber: #ffb800;
+      --red: #ff3355;
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,448 +34,1655 @@
     }
 
     body {
-      background-color: #0d061a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.4;
       min-height: 100vh;
-      font-family: 'Press Start 2P', monospace;
       overflow-x: hidden;
-    }
-
-    /* Main container that locks hotspots to the image proportions */
-    .arcade-container {
-      position: relative;
-      width: 100%;
-      max-width: 550px; /* Matches vertical mobile/arcade aspect ratio */
-      margin: 0 auto;
-      user-select: none;
-    }
-
-    .arcade-bg {
-      display: block;
-      width: 100%;
-      height: auto;
+      -webkit-font-smoothing: antialiased;
+      /* Subtle CRT scanline texture */
+      background-image: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.28) 50%
+      );
+      background-size: 100% 4px;
     }
 
     /* ==========================================
-       TEAM WALLET RETRO HUD (TOP LEFT)
+       TOP HARDWARE BAR
        ========================================== */
-    .treasury-hud {
-      position: absolute;
-      top: 2.5%;
-      left: 3%;
-      z-index: 35;
-      background: rgba(13, 6, 26, 0.92);
-      border: 2px solid #00ffff;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 3px 3px 0px #ff00ff;
-      padding: 7px 10px;
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: #08060e;
+      border-bottom: 1px solid var(--line-bright);
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      height: 44px;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      background: var(--bg-panel);
+      color: var(--cyan);
+      font-family: var(--font-pixel);
+      font-size: 9px;
       text-decoration: none;
+      border-right: 1px solid var(--line-bright);
+      transition: background 0.1s, color 0.1s;
+      white-space: nowrap;
+    }
+
+    .back-btn:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+
+    .sys-title {
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      color: var(--text-primary);
+      letter-spacing: 0.06em;
+      border-right: 1px solid var(--line);
+    }
+
+    .sys-tag {
+      color: var(--magenta);
+      margin-right: 8px;
+    }
+
+    .telemetry-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      border-left: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .led {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      display: inline-block;
+    }
+
+    .led.loading {
+      background: var(--amber);
+      box-shadow: 0 0 6px var(--amber);
+    }
+
+    .led.error {
+      background: var(--red);
+      box-shadow: 0 0 6px var(--red);
+    }
+
+    /* ==========================================
+       MAIN TERMINAL SHELL
+       ========================================== */
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ==========================================
+       VAULT TELEMETRY HEADER GRID
+       ========================================== */
+    .vault-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--line-bright);
+      border: 1px solid var(--line-bright);
+      margin-bottom: 20px;
+    }
+
+    .vault-cell {
+      background: var(--bg-panel);
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      justify-content: space-between;
+      min-height: 112px;
+      position: relative;
     }
 
-    .treasury-hud:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 16px rgba(0, 255, 255, 0.95), 3px 3px 0px #ff00ff;
-      border-color: #ff00ff;
+    .cell-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
-    .treasury-header {
+    .cell-label span.code {
+      color: var(--text-muted);
+    }
+
+    .address-row {
       display: flex;
       align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .address-full {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      word-break: break-all;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .action-row {
+      display: flex;
       gap: 6px;
-      font-size: 7px;
-      color: #ff00ff;
-      letter-spacing: 0.05em;
+      flex-wrap: wrap;
     }
 
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      background-color: #00ff66;
-      box-shadow: 0 0 6px #00ff66;
-      display: inline-block;
-      animation: blinkDot 1.5s infinite;
-    }
-
-    .treasury-balance {
-      font-size: 10px;
-      color: #00ffff;
-      text-shadow: 1px 1px 0px #000;
-      white-space: nowrap;
-    }
-
-    .treasury-usd {
-      font-size: 6.5px;
-      color: #b3a4c9;
-    }
-
-    @keyframes blinkDot {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    /* Clickable Hotspots */
-    .hotspot {
-      position: absolute;
-      display: block;
+    .hw-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--line-bright);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 9px;
       cursor: pointer;
       text-decoration: none;
-      z-index: 10;
-      transition: all 0.15s ease-in-out;
-      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.1s, color 0.1s, background 0.1s;
     }
 
-    /* Subtle neon glow when hovering over a clickable object */
-    .hotspot:hover {
-      background-color: rgba(255, 0, 255, 0.18);
-      box-shadow: 0 0 12px rgba(0, 255, 255, 0.8), inset 0 0 8px rgba(255, 0, 255, 0.6);
-      border: 1px solid rgba(0, 255, 255, 0.8);
+    .hw-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: #141a29;
     }
 
-    /* Tooltip label on hover */
-    .hotspot::after {
-      content: attr(data-label);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(13, 6, 26, 0.9);
-      color: #00ffff;
-      border: 1px solid #ff00ff;
-      padding: 4px 6px;
-      font-size: 8px;
+    .hw-btn.copied {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .primary-metric {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--cyan);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .primary-metric .unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--magenta);
+      margin-left: 4px;
+    }
+
+    .sub-metric {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .price-change.up { color: var(--green); }
+    .price-change.down { color: var(--red); }
+
+    /* ==========================================
+       ERC-20 TOKENS STRIP (IF PRESENT)
+       ========================================== */
+    .erc20-bar {
+      display: none;
+      border: 1px solid var(--line);
+      background: var(--bg-panel);
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .erc20-bar.visible {
+      display: flex;
+    }
+
+    .erc20-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      padding-right: 10px;
+      border-right: 1px solid var(--line);
+    }
+
+    .erc20-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .erc20-chip .sym {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       CONTROL & FILTER BAR
+       ========================================== */
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      border: 1px solid var(--line-bright);
+      background: var(--bg-panel);
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .collection-tabs {
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--line);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 10px 14px;
+      cursor: pointer;
       white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s ease;
-      margin-bottom: 4px;
-      box-shadow: 2px 2px 0px #000;
-      z-index: 30;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.1s, color 0.1s;
     }
 
-    .hotspot:hover::after {
-      opacity: 1;
+    .tab-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
     }
 
-    /* ==========================================
-       HOTSPOT COORDINATES
-       ========================================== */
-
-    /* Leaderboard Screen (Top Left) */
-    .leaderboard {
-      top: 21%;
-      left: 2%;
-      width: 22%;
-      height: 23%;
+    .tab-btn.active {
+      background: var(--bg-elevated);
+      color: var(--cyan);
+      box-shadow: inset 0 -2px 0 var(--cyan);
     }
 
-    /* Spaceman Poster (Top Right) */
-    .spaceman {
-      top: 3%;
-      left: 76%;
-      width: 22%;
-      height: 29%;
+    .tab-count {
+      font-size: 10px;
+      padding: 1px 5px;
+      background: #06050a;
+      border: 1px solid var(--line);
+      color: var(--text-secondary);
     }
 
-    /* Prizes / Shop Neon Sign */
-    .shop-sign {
-      top: 29%;
-      left: 75%;
-      width: 24%;
-      height: 12%;
+    .tab-btn.active .tab-count {
+      border-color: var(--cyan);
+      color: var(--cyan);
     }
 
-    /* Info / Roadmap Sign (Discord) */
-    .info-sign {
-      top: 39%;
-      left: 63.5%;
-      width: 10.5%;
-      height: 7%;
+    .control-right {
+      display: flex;
+      align-items: stretch;
+      margin-left: auto;
     }
 
-    /* Toilet Door */
-    .toilet-door {
-      top: 38%;
-      left: 43%;
-      width: 13.5%;
-      height: 14.5%;
+    .search-input {
+      background: #07050c;
+      border: none;
+      border-left: 1px solid var(--line);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 0 12px;
+      width: 210px;
+      outline: none;
     }
 
-    /* Jukebox (Radio) */
-    .jukebox {
-      top: 46.5%;
-      left: 63.5%;
-      width: 11.5%;
-      height: 9.5%;
+    .search-input:focus {
+      background: #0d0a18;
+      box-shadow: inset 0 -2px 0 var(--magenta);
     }
 
-    /* Retro PC Terminal (Back Left next to pinball) */
-    .retro-pc {
-      top: 48%;
-      left: 29%;
-      width: 13%;
-      height: 10%;
+    .search-input::placeholder {
+      color: var(--text-muted);
     }
 
-    /* Arcade 1: Front-Left "PLAY" Machine */
-    .arcade-1 {
-      top: 51%;
-      left: 1%;
-      width: 19%;
-      height: 36%;
+    .view-toggle {
+      display: flex;
     }
 
-    /* Arcade 2: Second-Left "SPACE" Machine */
-    .arcade-2 {
-      top: 49.5%;
-      left: 16%;
-      width: 15%;
-      height: 27%;
-    }
-
-    /* Arcade 3: Pinball Machine (Left Middle) */
-    .arcade-3 {
-      top: 52.5%;
-      left: 24%;
-      width: 20%;
-      height: 10%;
-    }
-
-    /* Arcade 4: Right-Side Pink/Yellow Machine & NFTs Machine */
-    .arcade-4 {
-      top: 53%;
-      left: 65%;
-      width: 24%;
-      height: 28%;
-    }
-
-    /* Arcade 5: Front-Right "GALLERY" Machine */
-    .arcade-5 {
-      top: 58%;
-      left: 83%;
-      width: 16%;
-      height: 36%;
-    }
-
-    /* ==========================================
-       SHOPKEEPER GIRL & PIXEL SPEECH BUBBLE
-       ========================================== */
-    .shopkeeper-trigger {
-      position: absolute;
-      top: 47%;
-      left: 84%;
-      width: 11%;
-      height: 7%;
+    .view-btn {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--line);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 0 12px;
       cursor: pointer;
-      z-index: 20;
     }
 
-    .speech-bubble {
-      position: absolute;
-      top: 40.5%;
-      right: 12%;
-      width: 44%;
-      background: #ffffff;
-      color: #000000;
-      border: 3px solid #000000;
-      padding: 8px;
-      font-size: 7.5px;
-      line-height: 1.5;
+    .view-btn.active {
+      background: var(--bg-elevated);
+      color: var(--cyan);
+    }
+
+    /* ==========================================
+       NFT INVENTORY GRID VIEW
+       ========================================== */
+    .nft-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .nft-card {
+      background: var(--bg-panel);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.12s ease;
+    }
+
+    .nft-card:hover {
+      background: var(--bg-hover);
+    }
+
+    .nft-card:hover .nft-id-badge {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .nft-media-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #050408;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nft-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      image-rendering: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .nft-card:hover .nft-media {
+      transform: scale(1.03);
+    }
+
+    .nft-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
       text-align: center;
-      box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.75);
-      z-index: 25;
+      color: var(--text-muted);
+      font-size: 11px;
+      gap: 6px;
+    }
+
+    .nft-fallback-id {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .nft-top-badges {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .nft-std-badge,
+    .nft-qty-badge {
+      background: rgba(6, 5, 10, 0.88);
+      border: 1px solid var(--line-bright);
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .nft-qty-badge {
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .nft-meta {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .nft-collection {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nft-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .nft-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nft-id-badge {
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+      border: 1px solid var(--line);
+      padding: 1px 5px;
+      background: #07050c;
+      flex-shrink: 0;
+    }
+
+    .nft-footer {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================
+       MANIFEST TABLE VIEW
+       ========================================== */
+    .nft-table-wrap {
+      display: none;
+      border: 1px solid var(--line);
+      background: var(--bg-panel);
+      overflow-x: auto;
+    }
+
+    .nft-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nft-table th {
+      background: #08060e;
+      color: var(--text-secondary);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line-bright);
+    }
+
+    .nft-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .nft-table tr {
       cursor: pointer;
-      animation: floatBubble 2.5s ease-in-out infinite;
     }
 
-    /* Speech bubble pointer tail pointing to the girl */
-    .speech-bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      right: 18px;
-      border-width: 10px 8px 0;
-      border-style: solid;
-      border-color: #ffffff transparent;
-      display: block;
-      width: 0;
-      z-index: 2;
+    .nft-table tbody tr:hover {
+      background: var(--bg-hover);
     }
 
-    .speech-bubble::before {
-      content: '';
-      position: absolute;
-      bottom: -14px;
-      right: 15px;
-      border-width: 13px 11px 0;
-      border-style: solid;
-      border-color: #000000 transparent;
-      display: block;
-      width: 0;
-      z-index: 1;
+    .table-thumb {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border: 1px solid var(--line-bright);
+      background: #050408;
+      vertical-align: middle;
     }
 
-    @keyframes floatBubble {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-4px); }
+    /* ==========================================
+       STATUS / LOADING / EMPTY STATES
+       ========================================== */
+    .state-box {
+      border: 1px solid var(--line);
+      background: var(--bg-panel);
+      padding: 48px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .state-title {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      color: var(--cyan);
+    }
+
+    .state-sub {
+      color: var(--text-secondary);
+      font-size: 12px;
+      max-width: 460px;
+    }
+
+    .load-more-wrap {
+      margin-top: 16px;
+      display: none;
+      justify-content: center;
+    }
+
+    .load-more-wrap.visible {
+      display: flex;
+    }
+
+    /* ==========================================
+       INSPECTION MODAL DRAWER
+       ========================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 2, 6, 0.85);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-window {
+      width: 100%;
+      max-width: 860px;
+      max-height: 90vh;
+      background: var(--bg-panel);
+      border: 1px solid var(--cyan);
+      box-shadow: 6px 6px 0px #000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-bar {
+      background: #07050c;
+      border-bottom: 1px solid var(--line-bright);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-bar-title {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      color: var(--cyan);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: 1px solid var(--line-bright);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .modal-body {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      overflow-y: auto;
+    }
+
+    .modal-media-col {
+      background: #050408;
+      border-right: 1px solid var(--line);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-img-frame {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--line-bright);
+      background: #030206;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .modal-img-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .modal-info-col {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .modal-nft-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-kv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .modal-kv {
+      background: #08060e;
+      padding: 8px 10px;
+    }
+
+    .modal-kv-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .modal-kv-val {
+      font-size: 12px;
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-top: 2px;
+      word-break: break-all;
+    }
+
+    .traits-header {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .traits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+      gap: 8px;
+    }
+
+    .trait-box {
+      background: #08060e;
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+    }
+
+    .trait-type {
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trait-val {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==========================================
+       RESPONSIVE BREAKPOINTS
+       ========================================== */
+    @media (max-width: 960px) {
+      .vault-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+      .modal-media-col {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .vault-grid {
+        grid-template-columns: 1fr;
+      }
+      .sys-title,
+      .telemetry-pill.hide-mobile {
+        display: none;
+      }
+      .search-input {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--line);
+        padding: 10px 12px;
+      }
+      .control-right {
+        width: 100%;
+      }
+      .nft-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="arcade-container">
-    <!-- Main Background Image -->
-    <img src="IMG_5676.jpeg" alt="Rugged Arcade" class="arcade-bg">
-
-    <!-- Live ApeChain Team Wallet HUD -->
-    <a href="https://apescan.io/address/0xf3e5ec8b4aaab49186486965529e07b5f61f9020" 
-       target="_blank" 
-       rel="noopener noreferrer" 
-       class="treasury-hud"
-       title="View Team Wallet on ApeScan">
-      <div class="treasury-header">
-        <span class="status-dot"></span>
-        <span>TEAM VAULT</span>
+  <!-- TOP HARDWARE BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-btn" onclick="if(history.length > 1){ history.back(); return false; }">
+        ◄ ARCADE
+      </a>
+      <div class="sys-title">
+        <span class="sys-tag">[SYS:VAULT]</span> RUGGED TREASURY INSPECTOR
       </div>
-      <div class="treasury-balance">
-        <span id="ape-balance">...</span> APE
-      </div>
-      <div class="treasury-usd" id="ape-usd">
-        APECHAIN LIVE ↗
-      </div>
-    </a>
-
-    <!-- Speech Bubble for the Girl Behind the Counter -->
-    <div class="speech-bubble" id="speechBubble" title="Click for next message">
-      WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀
     </div>
-    <div class="shopkeeper-trigger" id="shopkeeper" title="Talk to Clerk"></div>
 
-    <!-- Clickable Links -->
-    <a href="leaderboard.html" class="hotspot leaderboard" data-label="LEADERBOARD"></a>
-    <a href="nft.html" class="hotspot spaceman" data-label="NFTs"></a>
-    <a href="shop.html" class="hotspot shop-sign" data-label="PRIZES / SHOP"></a>
-    <a href="discord.html" class="hotspot info-sign" data-label="DISCORD / INFO"></a>
-    <a href="toilet.html" class="hotspot toilet-door" data-label="TOILETS"></a>
-    <a href="radio.html" class="hotspot jukebox" data-label="RADIO JUKEBOX"></a>
-    <a href="pc.html" class="hotspot retro-pc" data-label="PC TERMINAL (pc.html)"></a>
+    <div class="topbar-right">
+      <div class="telemetry-pill hide-mobile">
+        <span>CHAIN:</span>
+        <strong style="color: var(--text-primary)">APECHAIN (33139)</strong>
+      </div>
+      <div class="telemetry-pill hide-mobile">
+        <span>BLOCK:</span>
+        <strong id="block-height" style="color: var(--cyan)">#--------</strong>
+      </div>
+      <div class="telemetry-pill">
+        <span class="led loading" id="rpc-led"></span>
+        <span id="rpc-ping">SYNCING</span>
+      </div>
+    </div>
+  </header>
 
-    <!-- Arcade Machines 1 - 5 -->
-    <a href="arcade1.html" class="hotspot arcade-1" data-label="ARCADE 1"></a>
-    <a href="arcade2.html" class="hotspot arcade-2" data-label="ARCADE 2"></a>
-    <a href="arcade3.html" class="hotspot arcade-3" data-label="ARCADE 3"></a>
-    <a href="arcade4.html" class="hotspot arcade-4" data-label="ARCADE 4"></a>
-    <a href="arcade5.html" class="hotspot arcade-5" data-label="ARCADE 5"></a>
+  <main class="shell">
+
+    <!-- VAULT TELEMETRY HEADER GRID -->
+    <section class="vault-grid">
+      <!-- Cell 1: Target Address -->
+      <div class="vault-cell">
+        <div class="cell-label">
+          <span>VAULT ADDRESS</span>
+          <span class="code">[01]</span>
+        </div>
+        <div class="address-row">
+          <div class="address-full" id="wallet-address">0xf3e5ec8b4aaab49186486965529e07b5f61f9020</div>
+        </div>
+        <div class="action-row">
+          <button class="hw-btn" id="copy-btn" onclick="copyAddress()">[ COPY HEX ]</button>
+          <a href="https://apescan.io/address/0xf3e5ec8b4aaab49186486965529e07b5f61f9020" target="_blank" rel="noopener" class="hw-btn">APESCAN ↗</a>
+          <a href="https://apechain.blockscout.com/address/0xf3e5ec8b4aaab49186486965529e07b5f61f9020" target="_blank" rel="noopener" class="hw-btn">BLOCKSCOUT ↗</a>
+          <button class="hw-btn" onclick="initVault()">↻ REFRESH</button>
+        </div>
+      </div>
+
+      <!-- Cell 2: Native APE Balance -->
+      <div class="vault-cell">
+        <div class="cell-label">
+          <span>LIQUID BALANCE</span>
+          <span class="code">[02]</span>
+        </div>
+        <div class="primary-metric">
+          <span id="ape-balance">---.--</span><span class="unit">APE</span>
+        </div>
+        <div class="sub-metric">
+          <span id="wei-balance">0 WEI</span>
+        </div>
+      </div>
+
+      <!-- Cell 3: Live USD Valuation -->
+      <div class="vault-cell">
+        <div class="cell-label">
+          <span>ESTIMATED VALUE (USD)</span>
+          <span class="code">[03]</span>
+        </div>
+        <div class="primary-metric" style="color: var(--green);">
+          <span id="usd-balance">$---.--</span>
+        </div>
+        <div class="sub-metric">
+          <span id="ape-spot-price">APE SPOT: $--</span>
+          <span id="ape-24h" class="price-change"></span>
+        </div>
+      </div>
+
+      <!-- Cell 4: On-Chain Inventory Summary -->
+      <div class="vault-cell">
+        <div class="cell-label">
+          <span>INDEXED ASSETS</span>
+          <span class="code">[04]</span>
+        </div>
+        <div class="primary-metric" style="color: var(--text-primary);">
+          <span id="nft-total-count">--</span><span class="unit">NFTs</span>
+        </div>
+        <div class="sub-metric">
+          <span id="collections-count">-- COLLECTIONS</span>
+          <span id="tx-nonce">NONCE: --</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ERC-20 HOLDINGS BAR (Auto-shows if wallet holds ERC-20 tokens) -->
+    <div class="erc20-bar" id="erc20-bar">
+      <span class="erc20-label">ERC-20 TOKENS</span>
+      <div id="erc20-list" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <section class="control-bar">
+      <div class="collection-tabs" id="collection-tabs">
+        <button class="tab-btn active" data-collection="ALL">
+          ALL ASSETS <span class="tab-count" id="tab-all-count">0</span>
+        </button>
+      </div>
+
+      <div class="control-right">
+        <input type="text" id="search-input" class="search-input" placeholder="FILTER NAME OR #ID...">
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-grid-view" onclick="setView('grid')" title="Grid View">GRID</button>
+          <button class="view-btn" id="btn-table-view" onclick="setView('table')" title="Table Manifest">LIST</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NFT INVENTORY CONTAINER -->
+    <section id="inventory-section">
+      <div class="state-box" id="loading-state">
+        <div class="state-title">QUERYING APECHAIN INDEXER...</div>
+        <div class="state-sub">Fetching ERC-721 & ERC-1155 token instances for 0xf3e5...9020</div>
+      </div>
+
+      <div class="nft-grid" id="nft-grid" style="display: none;"></div>
+
+      <div class="nft-table-wrap" id="nft-table-wrap">
+        <table class="nft-table">
+          <thead>
+            <tr>
+              <th style="width:52px;">IMG</th>
+              <th>ASSET NAME</th>
+              <th>TOKEN ID</th>
+              <th>COLLECTION</th>
+              <th>STANDARD</th>
+              <th>QTY</th>
+              <th>CONTRACT</th>
+            </tr>
+          </thead>
+          <tbody id="nft-table-body"></tbody>
+        </table>
+      </div>
+
+      <div class="load-more-wrap" id="load-more-wrap">
+        <button class="hw-btn" id="load-more-btn" onclick="loadNextPage()" style="padding: 10px 24px; font-size: 12px;">
+          [ + LOAD NEXT PAGE FROM INDEXER ]
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- NFT HARDWARE INSPECTION MODAL -->
+  <div class="modal-backdrop" id="nft-modal" onclick="if(event.target === this) closeModal()">
+    <div class="modal-window">
+      <div class="modal-bar">
+        <span class="modal-bar-title" id="modal-header-id">ASSET INSPECTOR // #0</span>
+        <button class="modal-close" onclick="closeModal()">[ ESC / CLOSE ]</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-media-col">
+          <div class="modal-img-frame" id="modal-img-container"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;" id="modal-links"></div>
+        </div>
+        <div class="modal-info-col">
+          <div>
+            <div style="font-size:11px; color:var(--magenta); text-transform:uppercase; letter-spacing:0.08em;" id="modal-collection">COLLECTION</div>
+            <div class="modal-nft-title" id="modal-title">NFT Name</div>
+          </div>
+
+          <div class="modal-kv-grid">
+            <div class="modal-kv">
+              <div class="modal-kv-label">TOKEN ID</div>
+              <div class="modal-kv-val" id="modal-token-id">#0</div>
+            </div>
+            <div class="modal-kv">
+              <div class="modal-kv-label">STANDARD / QTY</div>
+              <div class="modal-kv-val" id="modal-standard">ERC-721 (×1)</div>
+            </div>
+            <div class="modal-kv" style="grid-column: span 2;">
+              <div class="modal-kv-label">CONTRACT ADDRESS</div>
+              <div class="modal-kv-val" id="modal-contract">0x...</div>
+            </div>
+          </div>
+
+          <div id="modal-desc" style="font-size:12px; color:var(--text-secondary); line-height:1.5; display:none;"></div>
+
+          <div>
+            <div class="traits-header">ON-CHAIN ATTRIBUTES / TRAITS</div>
+            <div class="traits-grid" id="modal-traits" style="margin-top: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const phrases = [
-      "WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀",
-      "SWEEP THE FLOOR BEFORE YOU GET REKT! 🧹💎",
-      "DIAMOND HANDS ONLY IN THIS ARCADE! 💎🙌",
-      "SOLD MY RENT MONEY FOR PIXEL JPEGS! 🦍🔥",
-      "NGMI IF YOU DON'T MINT RIGHT NOW! 📈",
-      "1 NFT = 1 NFT. NO CRYING IN THE CASINO! 🎰",
-      "WEN LAMBO? PLAY SOME GAMES FIRST DEGEN! 🏎️💨"
-    ];
+    // ==========================================
+    // CONSTANTS & STATE
+    // ==========================================
+    const WALLET_ADDRESS = "0xf3e5ec8b4aaab49186486965529e07b5f61f9020";
+    const APECHAIN_RPC = "https://rpc.apechain.com/http";
+    const BLOCKSCOUT_API = "https://apechain.blockscout.com/api/v2";
 
-    let currentIndex = 0;
-    const bubble = document.getElementById('speechBubble');
-    const clerk = document.getElementById('shopkeeper');
+    let allNfts = [];
+    let activeCollection = "ALL";
+    let searchQuery = "";
+    let currentView = "grid";
+    let nextPageParams = null;
 
-    function nextPhrase() {
-      currentIndex = (currentIndex + 1) % phrases.length;
-      bubble.textContent = phrases[currentIndex];
+    // Normalize ipfs:// or ar:// URLs to reliable HTTPS gateways
+    function resolveMediaUrl(url) {
+      if (!url || typeof url !== "string") return null;
+      const trimmed = url.trim();
+      if (trimmed.startsWith("ipfs://ipfs/")) {
+        return "https://ipfs.io/ipfs/" + trimmed.slice(12);
+      }
+      if (trimmed.startsWith("ipfs://")) {
+        return "https://ipfs.io/ipfs/" + trimmed.slice(7);
+      }
+      if (trimmed.startsWith("ar://")) {
+        return "https://arweave.net/" + trimmed.slice(5);
+      }
+      return trimmed;
     }
 
-    // Automatically cycle her speech bubble every 4.5 seconds
-    let dialogueInterval = setInterval(nextPhrase, 4500);
+    function shortAddr(addr) {
+      if (!addr || addr.length < 10) return addr || "";
+      return addr.slice(0, 6) + "..." + addr.slice(-4);
+    }
 
-    // Also allow clicking her or the speech bubble to cycle immediately
-    bubble.addEventListener('click', () => {
-      clearInterval(dialogueInterval);
-      nextPhrase();
-      dialogueInterval = setInterval(nextPhrase, 4500);
-    });
-
-    clerk.addEventListener('click', () => {
-      clearInterval(dialogueInterval);
-      nextPhrase();
-      dialogueInterval = setInterval(dialogueInterval);
-      dialogueInterval = setInterval(nextPhrase, 4500);
-    });
+    function copyAddress() {
+      navigator.clipboard.writeText(WALLET_ADDRESS);
+      const btn = document.getElementById("copy-btn");
+      btn.textContent = "[ COPIED ✓ ]";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "[ COPY HEX ]";
+        btn.classList.remove("copied");
+      }, 1800);
+    }
 
     // ==========================================
-    // LIVE APECHAIN TEAM WALLET FETCHER
+    // 1. DIRECT RPC TELEMETRY & NATIVE BALANCE
     // ==========================================
-    const TEAM_WALLET = "0xf3e5ec8b4aaab49186486965529e07b5f61f9020";
-    const APECHAIN_RPC = "https://rpc.apechain.com/http";
-    let clerkPhraseAdded = false;
-
-    async function fetchTeamVault() {
-      const balanceEl = document.getElementById("ape-balance");
-      const usdEl = document.getElementById("ape-usd");
+    async function fetchRpcTelemetry() {
+      const startTime = performance.now();
+      const led = document.getElementById("rpc-led");
+      const pingEl = document.getElementById("rpc-ping");
 
       try {
-        const response = await fetch(APECHAIN_RPC, {
+        const batchPayload = [
+          { jsonrpc: "2.0", method: "eth_getBalance", params: [WALLET_ADDRESS, "latest"], id: 1 },
+          { jsonrpc: "2.0", method: "eth_blockNumber", params: [], id: 2 },
+          { jsonrpc: "2.0", method: "eth_getTransactionCount", params: [WALLET_ADDRESS, "latest"], id: 3 }
+        ];
+
+        const res = await fetch(APECHAIN_RPC, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(batchPayload)
+        });
+
+        const results = await res.json();
+        const pingMs = Math.round(performance.now() - startTime);
+
+        led.className = "led";
+        pingEl.textContent = `RPC ONLINE (${pingMs}ms)`;
+
+        const balHex = results.find(r => r.id === 1)?.result || "0x0";
+        const blockHex = results.find(r => r.id === 2)?.result || "0x0";
+        const nonceHex = results.find(r => r.id === 3)?.result || "0x0";
+
+        const balanceWei = BigInt(balHex);
+        const balanceApe = Number(balanceWei) / 1e18;
+
+        document.getElementById("ape-balance").textContent = balanceApe.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 4
+        });
+
+        document.getElementById("wei-balance").textContent =
+          `${balanceApe.toFixed(6)} APE EXACT`;
+
+        document.getElementById("block-height").textContent =
+          "#" + parseInt(blockHex, 16).toLocaleString();
+
+        document.getElementById("tx-nonce").textContent =
+          `NONCE: ${parseInt(nonceHex, 16)}`;
+
+        await fetchUsdValuation(balanceApe);
+      } catch (err) {
+        console.error("RPC telemetry error:", err);
+        led.className = "led error";
+        pingEl.textContent = "RPC ERR";
+      }
+    }
+
+    async function fetchUsdValuation(balanceApe) {
+      const usdEl = document.getElementById("usd-balance");
+      const spotEl = document.getElementById("ape-spot-price");
+      const changeEl = document.getElementById("ape-24h");
+
+      try {
+        // Primary: CoinGecko spot price
+        const res = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd&include_24hr_change=true"
+        );
+        const data = await res.json();
+        const price = data?.apecoin?.usd;
+        const change = data?.apecoin?.usd_24h_change;
+
+        if (price) {
+          const totalUsd = balanceApe * price;
+          usdEl.textContent = "$" + totalUsd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+          spotEl.textContent = `1 APE = $${price.toFixed(3)}`;
+
+          if (typeof change === "number") {
+            const sign = change >= 0 ? "+" : "";
+            changeEl.textContent = `${sign}${change.toFixed(2)}% (24H)`;
+            changeEl.className = "price-change " + (change >= 0 ? "up" : "down");
+          }
+          return;
+        }
+      } catch (e) {
+        // Fallback: Blockscout address endpoint includes coin exchange_rate
+      }
+
+      try {
+        const bsRes = await fetch(`${BLOCKSCOUT_API}/addresses/${WALLET_ADDRESS}`);
+        const bsData = await bsRes.json();
+        const rate = parseFloat(bsData?.exchange_rate);
+        if (rate) {
+          const totalUsd = balanceApe * rate;
+          usdEl.textContent = "$" + totalUsd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+          spotEl.textContent = `1 APE = $${rate.toFixed(3)}`;
+        } else {
+          usdEl.textContent = "N/A";
+        }
+      } catch {
+        usdEl.textContent = "N/A";
+      }
+    }
+
+    // ==========================================
+    // 2. ERC-20 TOKEN HOLDINGS FETCHER
+    // ==========================================
+    async function fetchErc20Holdings() {
+      try {
+        const res = await fetch(`${BLOCKSCOUT_API}/addresses/${WALLET_ADDRESS}/tokens?type=ERC-20`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = data?.items || [];
+
+        if (items.length === 0) return;
+
+        const bar = document.getElementById("erc20-bar");
+        const list = document.getElementById("erc20-list");
+        list.innerHTML = "";
+
+        items.forEach(item => {
+          const decimals = parseInt(item.token?.decimals || "18", 10);
+          const rawVal = Number(BigInt(item.value || "0")) / Math.pow(10, decimals);
+          if (rawVal <= 0) return;
+
+          const chip = document.createElement("div");
+          chip.className = "erc20-chip";
+          chip.innerHTML = `
+            <span>${rawVal.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+            <span class="sym">${escapeHtml(item.token?.symbol || "TOKEN")}</span>
+          `;
+          list.appendChild(chip);
+        });
+
+        if (list.children.length > 0) {
+          bar.classList.add("visible");
+        }
+      } catch (e) {
+        console.warn("ERC-20 fetch skipped:", e);
+      }
+    }
+
+    // ==========================================
+    // 3. NFT INVENTORY PIPELINE (BLOCKSCOUT + RESERVOIR + ON-CHAIN FALLBACK)
+    // ==========================================
+    async function fetchNftInventory(reset = true) {
+      const loadingBox = document.getElementById("loading-state");
+
+      if (reset) {
+        allNfts = [];
+        nextPageParams = null;
+        loadingBox.style.display = "flex";
+        document.getElementById("nft-grid").style.display = "none";
+        document.getElementById("nft-table-wrap").style.display = "none";
+      }
+
+      try {
+        let url = `${BLOCKSCOUT_API}/addresses/${WALLET_ADDRESS}/nft?type=ERC-721%2CERC-404%2CERC-1155`;
+        if (!reset && nextPageParams) {
+          const qs = new URLSearchParams(nextPageParams).toString();
+          url += `&${qs}`;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Blockscout status ${res.status}`);
+        const data = await res.json();
+
+        const normalized = (data.items || []).map(normalizeBlockscoutNft);
+        allNfts = reset ? normalized : allNfts.concat(normalized);
+        nextPageParams = data.next_page_params || null;
+
+        document.getElementById("load-more-wrap").classList.toggle("visible", !!nextPageParams);
+
+        finalizeInventoryRender();
+
+        // For any NFT missing its image from the indexer, attempt direct on-chain tokenURI resolution
+        normalized.forEach(nft => {
+          if (!nft.image) {
+            resolveOnChainMetadata(nft);
+          }
+        });
+      } catch (primaryErr) {
+        console.warn("Primary Blockscout NFT indexer failed, trying Reservoir fallback:", primaryErr);
+        await fetchReservoirFallback();
+      }
+    }
+
+    function normalizeBlockscoutNft(item) {
+      const meta = item.metadata || {};
+      const rawImage =
+        item.image_url ||
+        meta.image ||
+        meta.image_url ||
+        item.animation_url ||
+        null;
+
+      const attributes = Array.isArray(meta.attributes)
+        ? meta.attributes
+        : Array.isArray(meta.traits)
+        ? meta.traits
+        : [];
+
+      const collectionName =
+        item.token?.name ||
+        meta.collection?.name ||
+        "UNKNOWN COLLECTION";
+
+      const nftName =
+        meta.name ||
+        `${collectionName} #${item.id}`;
+
+      return {
+        uid: `${item.token?.address || "0x"}_${item.id}`,
+        id: String(item.id ?? "0"),
+        name: nftName,
+        description: meta.description || "",
+        image: resolveMediaUrl(rawImage),
+        collection: collectionName,
+        symbol: item.token?.symbol || "NFT",
+        contract: item.token?.address || "",
+        standard: item.token_type || item.token?.type || "ERC-721",
+        quantity: item.value || "1",
+        attributes: attributes
+      };
+    }
+
+    async function fetchReservoirFallback() {
+      try {
+        const res = await fetch(
+          `https://api-apechain.reservoir.tools/users/${WALLET_ADDRESS}/tokens/v10?limit=100`
+        );
+        if (!res.ok) throw new Error("Reservoir fallback failed");
+        const data = await res.json();
+
+        allNfts = (data.tokens || []).map(entry => {
+          const t = entry.token || {};
+          return {
+            uid: `${t.contract}_${t.tokenId}`,
+            id: String(t.tokenId || "0"),
+            name: t.name || `${t.collection?.name || "NFT"} #${t.tokenId}`,
+            description: t.description || "",
+            image: resolveMediaUrl(t.image || t.imageSmall || t.media),
+            collection: t.collection?.name || "UNKNOWN COLLECTION",
+            symbol: t.collection?.symbol || "NFT",
+            contract: t.contract || "",
+            standard: (t.kind || "ERC-721").toUpperCase(),
+            quantity: entry.ownership?.tokenCount || "1",
+            attributes: t.attributes || []
+          };
+        });
+
+        finalizeInventoryRender();
+      } catch (err) {
+        const loadingBox = document.getElementById("loading-state");
+        loadingBox.innerHTML = `
+          <div class="state-title" style="color: var(--red);">INDEXER CONNECTION INTERRUPTED</div>
+          <div class="state-sub">Could not query NFT inventory from ApeChain indexer. Verify on ApeScan or retry.</div>
+          <button class="hw-btn" onclick="initVault()" style="margin-top:8px;">[ ↻ RETRY CONNECTION ]</button>
+        `;
+      }
+    }
+
+    // Direct smart-contract tokenURI(uint256) fallback for unindexed NFT images
+    async function resolveOnChainMetadata(nft) {
+      if (!nft.contract || nft.Standard === "ERC-1155") return;
+      try {
+        const tokenIdHex = BigInt(nft.id).toString(16).padStart(64, "0");
+        // 0xc87b56dd = tokenURI(uint256)
+        const callData = "0xc87b56dd" + tokenIdHex;
+
+        const res = await fetch(APECHAIN_RPC, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             jsonrpc: "2.0",
-            method: "eth_getBalance",
-            params: [TEAM_WALLET, "latest"],
-            id: 1
+            method: "eth_call",
+            params: [{ to: nft.contract, data: callData }, "latest"],
+            id: 99
           })
         });
 
-        const data = await response.json();
-        const balanceWei = BigInt(data.result);
-        const balanceApe = Number(balanceWei) / 1e18;
+        const { result } = await res.json();
+        if (!result || result === "0x") return;
 
-        const formattedApe = balanceApe.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
+        const uri = decodeAbiString(result);
+        const httpUri = resolveMediaUrl(uri);
+        if (!httpUri) return;
 
-        balanceEl.textContent = formattedApe;
-
-        // Add a dynamic line to the clerk's speech bubble once loaded
-        if (!clerkPhraseAdded) {
-          phrases.push(`TEAM VAULT IS STACKED WITH ${formattedApe} APE! 🦍💰`);
-          clerkPhraseAdded = true;
+        let metaJson = null;
+        if (httpUri.startsWith("data:application/json;base64,")) {
+          metaJson = JSON.parse(atob(httpUri.split(",")[1]));
+        } else {
+          const metaRes = await fetch(httpUri);
+          metaJson = await metaRes.json();
         }
 
-        // Optional: Fetch USD value from CoinGecko
-        try {
-          const priceRes = await fetch(
-            "https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd"
-          );
-          const priceData = await priceRes.json();
-          const apeUsd = priceData?.apecoin?.usd;
-
-          if (apeUsd) {
-            const totalUsd = (balanceApe * apeUsd).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            });
-            usdEl.textContent = `≈ $${totalUsd} USD ↗`;
-          }
-        } catch {
-          usdEl.textContent = "APECHAIN LIVE ↗";
+        if (metaJson) {
+          nft.image = resolveMediaUrl(metaJson.image || metaJson.image_url);
+          if (metaJson.name) nft.name = metaJson.name;
+          if (Array.isArray(metaJson.attributes)) nft.attributes = metaJson.attributes;
+          renderFilteredNfts();
         }
-      } catch (err) {
-        console.error("Failed to load ApeChain balance:", err);
-        balanceEl.textContent = "ERR";
+      } catch {
+        // Ignore silent fallback errors
       }
     }
 
-    fetchTeamVault();
-    setInterval(fetchTeamVault, 60000); // Refresh every 60s
-  </script>
+    function decodeAbiString(hex) {
+      const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
+      if (clean.length < 128) return "";
+      const lengthHex = clean.slice(64, 128);
+      const strByteLen = parseInt(lengthHex, 16) * 2;
+      const strHex = clean.slice(128, 128 + strByteLen);
+      let out = "";
+      for (let i = 0; i < strHex.length; i += 2) {
+        out += String.fromCharCode(parseInt(strHex.substr(i, 2), 16));
+      }
+      return out;
+    }
 
+    async function loadNextPage() {
+      const btn = document.getElementById("load-more-btn");
+      btn.textContent = "[ FETCHING NEXT BATCH... ]";
+      await fetchNftInventory(false);
+      btn.textContent = "[ + LOAD NEXT PAGE FROM INDEXER ]";
+    }
+
+    // ==========================================
+    // 4. UI RENDERING & FILTERING
+    // ==========================================
+    function finalizeInventoryRender() {
+      document.getElementById("nft-total-count").textContent = allNfts.length;
+      document.getElementById("tab-all-count").textContent = allNfts.length;
+
+      // Group collections
+      const countsByCol = {};
+      allNfts.forEach(n => {
+        countsByCol[n.collection] = (countsByCol[n.collection] || 0) + 1;
+      });
+
+      const colNames = Object.keys(countsByCol);
+      document.getElementById("collections-count").textContent =
+        `${colNames.length} COLLECTION${colNames.length === 1 ? "" : "S"}`;
+
+      buildCollectionTabs(countsByCol);
+      renderFilteredNfts();
+    }
+
+    function buildCollectionTabs(countsByCol) {
+      const container = document.getElementById("collection-tabs");
+      container.innerHTML = "";
+
+      const allBtn = document.createElement("button");
+      allBtn.className = "tab-btn" + (activeCollection === "ALL" ? " active" : "");
+      allBtn.innerHTML = `ALL ASSETS <span class="tab-count">${allNfts.length}</span>`;
+      allBtn.onclick = () => {
+        activeCollection = "ALL";
+        buildCollectionTabs(countsByCol);
+        renderFilteredNfts();
+      };
+      container.appendChild(allBtn);
+
+      Object.entries(countsByCol).forEach(([col, count]) => {
+        const btn = document.createElement("button");
+        btn.className = "tab-btn" + (activeCollection === col ? " active" : "");
+        btn.innerHTML = `${escapeHtml(col)} <span class="tab-count">${count}</span>`;
+        btn.onclick = () => {
+          activeCollection = col;
+          buildCollectionTabs(countsByCol);
+          renderFilteredNfts();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderFilteredNfts() {
+      const loadingBox = document.getElementById("loading-state");
+      const gridEl = document.getElementById("nft-grid");
+      const tableWrap = document.getElementById("nft-table-wrap");
+      const tableBody = document.getElementById("nft-table-body");
+
+      const filtered = allNfts.filter(nft => {
+        const matchesCol = activeCollection === "ALL" || nft.collection === activeCollection;
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+          !q ||
+          nft.name.toLowerCase().includes(q) ||
+          nft.id.toLowerCase().includes(q) ||
+          nft.collection.toLowerCase().includes(q);
+        return matchesCol && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        loadingBox.style.display = "flex";
+        gridEl.style.display = "none";
+        tableWrap.style.display = "none";
+        loadingBox.innerHTML = `
+          <div class="state-title">ZERO MATCHING ASSETS</div>
+          <div class="state-sub">${
+            allNfts.length === 0
+              ? "This vault address currently holds 0 indexed NFTs on ApeChain."
+              : "No NFTs match your active collection or search filter."
+          }</div>
+        `;
+        return;
+      }
+
+      loadingBox.style.display = "none";
+      gridEl.style.display = currentView === "grid" ? "grid" : "none";
+      tableWrap.style.display = currentView === "table" ? "block" : "none";
+
+      // Render Grid
+      gridEl.innerHTML = "";
+      filtered.forEach(nft => {
+        const card = document.createElement("article");
+        card.className = "nft-card";
+        card.onclick = () => openModal(nft);
+
+        const qtyBadge =
+          parseInt(nft.quantity, 10) > 1
+            ? `<span class="nft-qty-badge">×${escapeHtml(nft.quantity)}</span>`
+            : `<span></span>`;
+
+        const mediaHtml = nft.image
+          ? `<img src="${escapeHtml(nft.image)}" alt="${escapeHtml(nft.name)}" class="nft-media" loading="lazy" onerror="this.outerHTML='<div class=\\'nft-fallback\\'><div class=\\'nft-fallback-id\\'>#${escapeHtml(nft.id)}</div><div>NO MEDIA SIGNAL</div></div>'">`
+          : `<div class="nft-fallback">
+               <div class="nft-fallback-id">#${escapeHtml(nft.id)}</div>
+               <div>NO MEDIA SIGNAL</div>
+             </div>`;
+
+        card.innerHTML = `
+          <div class="nft-media-wrap">
+            ${mediaHtml}
+            <div class="nft-top-badges">
+              <span class="nft-std-badge">${escapeHtml(nft.standard)}</span>
+              ${qtyBadge}
+            </div>
+          </div>
+          <div class="nft-meta">
+            <div>
+              <div class="nft-collection">${escapeHtml(nft.collection)}</div>
+              <div class="nft-title-row">
+                <div class="nft-name" title="${escapeHtml(nft.name)}">${escapeHtml(nft.name)}</div>
+                <span class="nft-id-badge">#${escapeHtml(nft.id.slice(0, 8))}</span>
+              </div>
+            </div>
+            <div class="nft-footer">
+              <span>${shortAddr(nft.contract)}</span>
+              <span style="color: var(--cyan);">INSPECT ▸</span>
+            </div>
+          </div>
+        `;
+        gridEl.appendChild(card);
+      });
+
+      // Render Table
+      tableBody.innerHTML = "";
+      filtered.forEach(nft => {
+        const tr = document.createElement("tr");
+        tr.onclick = () => openModal(nft);
+        const thumb = nft.image
+          ? `<img src="${escapeHtml(nft.image)}" class="table-thumb" loading="lazy" onerror="this.style.display='none'">`
+          : `<div class="table-thumb"></div>`;
+
+        tr.innerHTML = `
+          <td>${thumb}</td>
+          <td style="font-weight:600; color:var(--text-primary);">${escapeHtml(nft.name)}</td>
+          <td style="color:var(--cyan);">#${escapeHtml(nft.id)}</td>
+          <td style="color:var(--text-secondary);">${escapeHtml(nft.collection)}</td>
+          <td>${escapeHtml(nft.standard)}</td>
+          <td>×${escapeHtml(nft.quantity)}</td>
+          <td style="color:var(--text-muted);">${shortAddr(nft.contract)}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function setView(mode) {
+      currentView = mode;
+      document.getElementById("btn-grid-view").classList.toggle("active", mode === "grid");
+      document.getElementById("btn-table-view").classList.toggle("active", mode === "table");
+      renderFilteredNfts();
+    }
+
+    document.getElementById("search-input").addEventListener("input", e => {
+      searchQuery = e.target.value.trim();
+      renderFilteredNfts();
+    });
+
+    // ==========================================
+    // 5. HARDWARE INSPECTION MODAL
+    // ==========================================
+    function openModal(nft) {
+      document.getElementById("modal-header-id").textContent =
+        `ASSET INSPECTOR // ${nft.symbol} #${nft.id}`;
+      document.getElementById("modal-collection").textContent = nft.collection;
+      document.getElementById("modal-title").textContent = nft.name;
+      document.getElementById("modal-token-id").textContent = `#${nft.id}`;
+      document.getElementById("modal-standard").textContent =
+        `${nft.standard} (×${nft.quantity})`;
+      document.getElementById("modal-contract").textContent = nft.contract;
+
+      const descEl = document.getElementById("modal-desc");
+      if (nft.description) {
+        descEl.style.display = "block";
+        descEl.textContent = nft.description;
+      } else {
+        descEl.style.display = "none";
+      }
+
+      const imgContainer = document.getElementById("modal-img-container");
+      imgContainer.innerHTML = nft.image
+        ? `<img src="${escapeHtml(nft.image)}" alt="${escapeHtml(nft.name)}">`
+        : `<div class="nft-fallback"><div class="nft-fallback-id">#${escapeHtml(nft.id)}</div><div>NO MEDIA SIGNAL</div></div>`;
+
+      const linksEl = document.getElementById("modal-links");
+      linksEl.innerHTML = `
+        <a href="https://apescan.io/nft/${nft.contract}/${nft.id}" target="_blank" rel="noopener" class="hw-btn">APESCAN ↗</a>
+        <a href="https://apechain.blockscout.com/token/${nft.contract}/instance/${nft.id}" target="_blank" rel="noopener" class="hw-btn">BLOCKSCOUT ↗</a>
+        ${nft.image ? `<a href="${escapeHtml(nft.image)}" target="_blank" rel="noopener" class="hw-btn">RAW MEDIA ↗</a>` : ""}
+      `;
+
+      const traitsEl = document.getElementById("modal-traits");
+      traitsEl.innerHTML = "";
+
+      if (Array.isArray(nft.attributes) && nft.attributes.length > 0) {
+        nft.attributes.forEach(attr => {
+          const type = attr.trait_type || attr.key || "PROPERTY";
+          const val = attr.value ?? "N/A";
+          const box = document.createElement("div");
+          box.className = "trait-box";
+          box.innerHTML = `
+            <div class="trait-type" title="${escapeHtml(String(type))}">${escapeHtml(String(type))}</div>
+            <div class="trait-val" title="${escapeHtml(String(val))}">${escapeHtml(String(val))}</div>
+          `;
+          traitsEl.appendChild(box);
+        });
+      } else {
+        traitsEl.innerHTML = `<div style="color:var(--text-muted); font-size:11px; grid-column: 1 / -1;">No on-chain trait metadata recorded for this token instance.</div>`;
+      }
+
+      document.getElementById("nft-modal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("nft-modal").classList.remove("open");
+    }
+
+    window.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // ==========================================
+    // BOOTSTRAP
+    // ==========================================
+    function initVault() {
+      fetchRpcTelemetry();
+      fetchErc20Holdings();
+      fetchNftInventory(true);
+    }
+
+    initVault();
+    setInterval(fetchRpcTelemetry, 30000);
+  </script>
 </body>
 </html>
