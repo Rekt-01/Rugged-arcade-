@@ -38,6 +38,66 @@
       height: auto;
     }
 
+    /* ==========================================
+       TEAM WALLET RETRO HUD (TOP LEFT)
+       ========================================== */
+    .treasury-hud {
+      position: absolute;
+      top: 2.5%;
+      left: 3%;
+      z-index: 35;
+      background: rgba(13, 6, 26, 0.92);
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 3px 3px 0px #ff00ff;
+      padding: 7px 10px;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .treasury-hud:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 16px rgba(0, 255, 255, 0.95), 3px 3px 0px #ff00ff;
+      border-color: #ff00ff;
+    }
+
+    .treasury-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 7px;
+      color: #ff00ff;
+      letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #00ff66;
+      box-shadow: 0 0 6px #00ff66;
+      display: inline-block;
+      animation: blinkDot 1.5s infinite;
+    }
+
+    .treasury-balance {
+      font-size: 10px;
+      color: #00ffff;
+      text-shadow: 1px 1px 0px #000;
+      white-space: nowrap;
+    }
+
+    .treasury-usd {
+      font-size: 6.5px;
+      color: #b3a4c9;
+    }
+
+    @keyframes blinkDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
     /* Clickable Hotspots */
     .hotspot {
       position: absolute;
@@ -251,6 +311,24 @@
     <!-- Main Background Image -->
     <img src="IMG_5676.jpeg" alt="Rugged Arcade" class="arcade-bg">
 
+    <!-- Live ApeChain Team Wallet HUD -->
+    <a href="https://apescan.io/address/0xf3e5ec8b4aaab49186486965529e07b5f61f9020" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="treasury-hud"
+       title="View Team Wallet on ApeScan">
+      <div class="treasury-header">
+        <span class="status-dot"></span>
+        <span>TEAM VAULT</span>
+      </div>
+      <div class="treasury-balance">
+        <span id="ape-balance">...</span> APE
+      </div>
+      <div class="treasury-usd" id="ape-usd">
+        APECHAIN LIVE ↗
+      </div>
+    </a>
+
     <!-- Speech Bubble for the Girl Behind the Counter -->
     <div class="speech-bubble" id="speechBubble" title="Click for next message">
       WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀
@@ -307,8 +385,76 @@
     clerk.addEventListener('click', () => {
       clearInterval(dialogueInterval);
       nextPhrase();
+      dialogueInterval = setInterval(dialogueInterval);
       dialogueInterval = setInterval(nextPhrase, 4500);
     });
+
+    // ==========================================
+    // LIVE APECHAIN TEAM WALLET FETCHER
+    // ==========================================
+    const TEAM_WALLET = "0xf3e5ec8b4aaab49186486965529e07b5f61f9020";
+    const APECHAIN_RPC = "https://rpc.apechain.com/http";
+    let clerkPhraseAdded = false;
+
+    async function fetchTeamVault() {
+      const balanceEl = document.getElementById("ape-balance");
+      const usdEl = document.getElementById("ape-usd");
+
+      try {
+        const response = await fetch(APECHAIN_RPC, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getBalance",
+            params: [TEAM_WALLET, "latest"],
+            id: 1
+          })
+        });
+
+        const data = await response.json();
+        const balanceWei = BigInt(data.result);
+        const balanceApe = Number(balanceWei) / 1e18;
+
+        const formattedApe = balanceApe.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        balanceEl.textContent = formattedApe;
+
+        // Add a dynamic line to the clerk's speech bubble once loaded
+        if (!clerkPhraseAdded) {
+          phrases.push(`TEAM VAULT IS STACKED WITH ${formattedApe} APE! 🦍💰`);
+          clerkPhraseAdded = true;
+        }
+
+        // Optional: Fetch USD value from CoinGecko
+        try {
+          const priceRes = await fetch(
+            "https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd"
+          );
+          const priceData = await priceRes.json();
+          const apeUsd = priceData?.apecoin?.usd;
+
+          if (apeUsd) {
+            const totalUsd = (balanceApe * apeUsd).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            });
+            usdEl.textContent = `≈ $${totalUsd} USD ↗`;
+          }
+        } catch {
+          usdEl.textContent = "APECHAIN LIVE ↗";
+        }
+      } catch (err) {
+        console.error("Failed to load ApeChain balance:", err);
+        balanceEl.textContent = "ERR";
+      }
+    }
+
+    fetchTeamVault();
+    setInterval(fetchTeamVault, 60000); // Refresh every 60s
   </script>
 
 </body>
