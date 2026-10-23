@@ -38,7 +38,8 @@
       max-height: 100vh; max-width: 56.25vh;
       transform: translate(-50%, -50%);
       overflow: hidden;
-      background: url('Toilet.JPG') center center / cover no-repeat;
+      /* Updated to use the new image name */
+      background: url('toilet.jpg') center center / cover no-repeat;
     }
 
     @media (min-aspect-ratio: 9/16) {
@@ -67,20 +68,20 @@
       border-radius: 6px;
     }
 
-    /* "LORE" graffiti hotspot on the left wall */
-    .lore-hotspot {
+    /* "ROAD MAP" graffiti hotspot on the left wall */
+    .roadmap-hotspot {
       top: 56%;
       left: 3%;
       width: 12%;
       height: 7%;
     }
-    .lore-hotspot:hover, .lore-hotspot:active {
+    .roadmap-hotspot:hover, .roadmap-hotspot:active {
       background: rgba(255, 0, 122, 0.25);
       border-radius: 4px;
     }
 
-    /* --- PULSING ARROW & TEXT POINTER FOR LORE --- */
-    .lore-pointer {
+    /* --- PULSING ARROW & TEXT POINTER FOR ROAD MAP --- */
+    .roadmap-pointer {
       position: absolute;
       top: 55%;
       left: 15%;
@@ -92,14 +93,14 @@
       animation: bounceArrow 1.2s infinite ease-in-out;
     }
 
-    .lore-arrow-icon {
+    .roadmap-arrow-icon {
       color: #ff007a;
       font-size: 1.2rem;
       font-weight: bold;
       text-shadow: 0 0 8px rgba(255, 0, 122, 0.8);
     }
 
-    .lore-pointer-text {
+    .roadmap-pointer-text {
       background: rgba(0, 0, 0, 0.75);
       color: #00ff66;
       border: 1px solid #ff007a;
@@ -149,7 +150,6 @@
       max-height: 85vh;
       text-align: center;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(200, 195, 180, 0.6);
-      font-family: monospace;
       
       /* Simulating toilet paper roll lines (perforations/ridges) */
       background-image: 
@@ -174,32 +174,34 @@
     }
 
     .modal-title {
-      color: #111;
-      font-size: 1.05rem;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+      color: #d62828;
+      font-size: 1.8rem;
       font-weight: bold;
       margin-bottom: 5px;
-      letter-spacing: 0.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
+      transform: rotate(-3deg);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
 
     .modal-subtitle {
-      color: #555;
-      font-size: 0.75rem;
-      margin-bottom: 12px;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+      color: #003049;
+      font-size: 1rem;
+      margin-bottom: 20px;
       font-weight: bold;
+      transform: rotate(2deg);
     }
 
     .modal-body-text {
       color: #222;
-      font-size: 0.8rem;
       line-height: 1.45;
       margin-bottom: 15px;
       max-height: 52vh;
       overflow-y: auto;
       text-align: left;
       padding-right: 5px;
-      border-top: 1px dashed #ccc;
-      border-bottom: 1px dashed #ccc;
       padding-top: 10px;
       padding-bottom: 10px;
     }
@@ -211,6 +213,36 @@
     .modal-body-text::-webkit-scrollbar-thumb {
       background: #ccc;
       border-radius: 4px;
+    }
+
+    /* --- CRAYON TEXT STYLES --- */
+    .crayon-text {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .step {
+      margin-bottom: 22px;
+    }
+
+    .crayon-red { color: #d62828; text-shadow: 1px 1px 0px rgba(214,40,40,0.3); transform: rotate(1deg); }
+    .crayon-blue { color: #003049; text-shadow: 1px 1px 0px rgba(0,48,73,0.3); transform: rotate(-2deg); }
+    .crayon-green { color: #2a9d8f; text-shadow: 1px 1px 0px rgba(42,157,143,0.3); transform: rotate(-1deg); }
+    .crayon-orange { color: #f77f00; text-shadow: 1px 1px 0px rgba(247,127,0,0.3); transform: rotate(2deg); }
+    .crayon-purple { color: #7209b7; text-shadow: 1px 1px 0px rgba(114,9,183,0.3); transform: rotate(-3deg); }
+
+    .step-title {
+      font-size: 1.3rem;
+      display: block;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: #555;
+      font-family: monospace;
+      display: block;
+      margin-top: 4px;
     }
 
     .modal-action-btn {
@@ -226,6 +258,7 @@
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
       width: 100%;
       transition: background 0.2s ease;
+      margin-top: 10px;
     }
     .modal-action-btn:hover {
       background: #d90429;
@@ -243,55 +276,65 @@
       <!-- Hidden hotspot over the bathroom stall lock/latch pointing back to the bar -->
       <a href="main.html" class="hotspot stall-lock-hotspot" title="Unlock Stall & Return to Bar"></a>
 
-      <!-- Pulsing arrow indicator pointing straight at the LORE graffiti -->
-      <div class="lore-pointer">
-        <div class="lore-arrow-icon">◀</div>
-        <div class="lore-pointer-text">READ LORE</div>
+      <!-- Pulsing arrow indicator pointing straight at the ROAD MAP graffiti -->
+      <div class="roadmap-pointer">
+        <div class="roadmap-arrow-icon">◀</div>
+        <div class="roadmap-pointer-text">ROAD MAP</div>
       </div>
 
-      <!-- Hotspot covering the "LORE" text on the left wall -->
-      <button class="hotspot lore-hotspot" onclick="openLoreModal()" title="Inspect Lore"></button>
+      <!-- Hotspot covering the text on the left wall -->
+      <button class="hotspot roadmap-hotspot" onclick="openRoadmapModal()" title="Inspect Road Map"></button>
 
     </div>
   </div>
 
-  <!-- Lore Popup Window Modal (Styled like Toilet Paper) -->
-  <div class="modal" id="loreModal">
+  <!-- Road Map Popup Window Modal (Styled like Toilet Paper w/ Crayon) -->
+  <div class="modal" id="roadmapModal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeLoreModal()">&times;</span>
-      <div class="modal-title">🧻 RESTROOM ROLL MANIFESTO</div>
-      <div class="modal-subtitle">APECHAIN SURVIVAL GUIDE</div>
+      <span class="close-btn" onclick="closeRoadmapModal()">&times;</span>
+      <div class="modal-title">OFFICIAL ROAD MAP</div>
+      <div class="modal-subtitle">(definitely not financial advice)</div>
 
-      <div class="modal-body-text" id="loreTextContainer">
-        Remember the last time you aped into a project because the promo trailer looked like a Marvel movie? The sleek 3D renders, the cinematic voiceover, the roadmaps promising metaverse penthouses and passive income while you sleep. You felt that little warm spark in your chest—<em>fuck, maybe this is the one that changes things.</em><br><br>
-        And then, forty-eight hours later, the Twitter account is wiped, the Discord says "Invite Invalid," and the founder has vanished to Dubai with your grocery money, leaving you staring at a pixelated rock worth less than a used tissue.<br><br>
-        That gut punch? We’ve all tasted it. It makes you want to throw your laptop through the drywall, touch some grass, and swear off JPEGs forever.<br><br>
-        <strong>The 3:00 AM Google Search Support Group</strong><br>
-        That exact flavor of emotional damage is why we’re sitting here in the trenches today. But instead of rage-quitting or sliding into a deep depression, a couple of smooth-brained anons who don't know the first thing about coding or digital art looked at each other and thought, <em>"How hard can it be to just... not be absolute sociopaths?"</em><br><br>
-        Turns out, it’s really hard. None of us went to art school. None of us have a computer science degree. If you peeked behind our curtain right now, it’s just a bunch of sleep-deprived degenerates frantically Googling "how to fix Solidity revert error" while surviving entirely on caffeine, cheap energy drinks, and pure spite. Our tech stack is held together by copy-pasted StackOverflow answers, duct tape, and sheer denial. We fumbled. We broke things. But because we didn't want to add <em>our</em> incompetence to your financial trauma, we did a free mint. Zero cost, zero financial risk—just an open door to come trip over our shoelaces with us.<br><br>
-        <strong>Planting Our Flag in the ApeChain Wasteland</strong><br>
-        While the rest of the timeline is digital-tourist hopping to whatever new layer-zero chain is pumping engagement farming this week, we locked ourselves in the basement on ApeChain and stayed put.<br><br>
-        It’s cozy down here in the trenches. We don't have a multi-million dollar treasury funded by your hard-earned ETH, but we do have a group chat where someone is perpetually roasting our pixelated art—which, if you squint really hard and tilt your head sideways, sort of looks like a human being. It’s hard to feel like a depressed bagholder when you're crying-laughing at the fact that your project's mascot looks less like a masterpiece and more like an accidental glitch on a 1990s graphing calculator.<br><br>
-        Our roadmap? It's not a PDF with corporate buzzwords. It’s basically just a napkin that someone spilled coffee on, and half of it says "Figure out how buttons work."<br><br>
-        <strong>The Open Door (And Zero Pressure)</strong><br>
-        * <strong>Come as you are:</strong> If you’re a crypto veteran with battle scars from every cycle, welcome home. If you’re a complete newbie who bought a wallet yesterday and thinks a "gas fee" is a tax on driving—welcome twice. There is zero sell-shaming here. We don’t care if you diamond-hand or paper-hand; we’re just glad you're breathing the same air.<br>
-        * <strong>Throw your ideas in the ring:</strong> Everyone is welcome to pitch whatever chaotic nonsense they want. We want to hear your ideas, your weird lore thoughts, and your master plans. But fair warning: <strong>we’re broke too</strong>, so whatever we build has got to be free. There’s zero pressure here—help out if you feel like it, and if you want to lurk in silence for six months, that’s totally fine too. No quotas, no mandatory participation, no corporate boss vibes.<br>
-        * <strong>The Bouncer's List:</strong> Scammers, grifters, and serial rug-devs need not apply. The iron gate is permanently welded shut for anyone whose entire business model relies on making other people cry for liquidity.<br><br>
-        At the end of the day, we’re probably not going to fix the global financial system, and our art looks like a crime against graphic design. But we’re building this together, pixel by clumsy pixel, and we're actually having fun doing it without trying to pick your pockets.<br><br>
-        Pull up a folding chair. You’re early, and for once, you’re actually safe here.
+      <div class="modal-body-text crayon-text" id="roadmapTextContainer">
+        
+        <div class="step crayon-blue">
+          <span class="step-title">PHASE 1: LAUNCH & VIBES 🚀</span>
+          <span class="step-desc">(sell out in 3 secs, dev disappears for a week to play valo)</span>
+        </div>
+        
+        <div class="step crayon-red">
+          <span class="step-title">PHASE 2: METAVERSE 🌐</span>
+          <span class="step-desc">(we buy random digital land in a dead voxel game nobody plays)</span>
+        </div>
+        
+        <div class="step crayon-green">
+          <span class="step-title">PHASE 3: $TOKEN AIRDROP 💰</span>
+          <span class="step-desc">(hyper-inflationary ponzi-nomics, dumps 99.9% on day one)</span>
+        </div>
+        
+        <div class="step crayon-orange">
+          <span class="step-title">PHASE 4: IRL MERCH 🧢</span>
+          <span class="step-desc">(costs $400 for shipping, printed on cheap gildan shirts)</span>
+        </div>
+        
+        <div class="step crayon-purple">
+          <span class="step-title">PHASE 5: WEN MOON? 🌕</span>
+          <span class="step-desc">(dev buys a lambo, moves to dubai, claims we are "building in the bear market")</span>
+        </div>
+
       </div>
 
-      <button class="modal-action-btn" onclick="closeLoreModal()">FLUSH & CLOSE</button>
+      <button class="modal-action-btn" onclick="closeRoadmapModal()">FLUSH & CLOSE</button>
     </div>
   </div>
 
   <script>
-    function openLoreModal() {
-      document.getElementById('loreModal').style.display = 'flex';
+    function openRoadmapModal() {
+      document.getElementById('roadmapModal').style.display = 'flex';
     }
 
-    function closeLoreModal() {
-      document.getElementById('loreModal').style.display = 'none';
+    function closeRoadmapModal() {
+      document.getElementById('roadmapModal').style.display = 'none';
     }
   </script>
 
