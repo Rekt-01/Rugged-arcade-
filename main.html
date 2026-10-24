@@ -184,7 +184,12 @@
       box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.75);
       z-index: 25;
       cursor: pointer;
+      display: none; /* Hidden by default until JS triggers it on load */
       animation: floatBubble 2.5s ease-in-out infinite;
+    }
+
+    .speech-bubble.active {
+      display: block;
     }
 
     .speech-bubble::after {
@@ -243,7 +248,7 @@
 
     <!-- Speech Bubble for the Girl Behind the Counter -->
     <div class="speech-bubble" id="speechBubble" title="Click for next message">
-      WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀
+      Welcome to rugged orphans arcade. Click the items to explore more . Click me again for more information.
     </div>
     <div class="shopkeeper-trigger" id="shopkeeper" title="Talk to Clerk"></div>
 
@@ -266,36 +271,63 @@
 
   <script>
     const phrases = [
-      "WELCOME TO THE ARCADE! WAGMI DEGENS! 🚀",
-      "SWEEP THE FLOOR BEFORE YOU GET REKT! 🧹💎",
-      "DIAMOND HANDS ONLY IN THIS ARCADE! 💎🙌",
-      "SOLD MY RENT MONEY FOR PIXEL JPEGS! 🦍🔥",
-      "NGMI IF YOU DON'T MINT RIGHT NOW! 📈",
-      "1 NFT = 1 NFT. NO CRYING IN THE CASINO! 🎰",
-      "WEN LAMBO? PLAY SOME GAMES FIRST DEGEN! 🏎️💨"
+      "Welcome to rugged orphans arcade. Click the items to explore more . Click me again for more information.",
+      "Check out the toilet! It was the last place I seen the dev... 🚽👀",
+      "Go inspect the jukebox and the PC terminal! 📻💻",
+      "Some of our games are broken—don’t put your money in, they will rug you! 🎰💀",
+      "It's all funny and degen here. Certified for the rugged orphans NFT project! 🦍💎"
     ];
 
     let currentIndex = 0;
     const bubble = document.getElementById('speechBubble');
     const clerk = document.getElementById('shopkeeper');
+    let hideTimer = null;
 
-    function nextPhrase() {
-      currentIndex = (currentIndex + 1) % phrases.length;
+    // Show initial welcome message on page load
+    function showWelcomeMessage() {
+      currentIndex = 0;
       bubble.textContent = phrases[currentIndex];
+      bubble.classList.add('active');
+
+      // Clear any existing timer
+      if (hideTimer) clearTimeout(hideTimer);
+
+      // Hide after 6 seconds giving users enough time to read
+      hideTimer = setTimeout(() => {
+        bubble.classList.remove('active');
+      }, 6000);
     }
 
-    let dialogueInterval = setInterval(nextPhrase, 4500);
+    // Handle clicks on girl or bubble to interact/cycle
+    function handleInteraction() {
+      if (!bubble.classList.contains('active')) {
+        // If hidden, show next message and start read timer
+        currentIndex = (currentIndex + 1) % phrases.length;
+        bubble.textContent = phrases[currentIndex];
+        bubble.classList.add('active');
 
-    bubble.addEventListener('click', () => {
-      clearInterval(dialogueInterval);
-      nextPhrase();
-      dialogueInterval = setInterval(nextPhrase, 4500);
-    });
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          bubble.classList.remove('active');
+        }, 6000);
+      } else {
+        // If already visible, cycle immediately to next message
+        currentIndex = (currentIndex + 1) % phrases.length;
+        bubble.textContent = phrases[currentIndex];
 
-    clerk.addEventListener('click', () => {
-      clearInterval(dialogueInterval);
-      nextPhrase();
-      dialogueInterval = setInterval(nextPhrase, 4500);
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          bubble.classList.remove('active');
+        }, 6000);
+      }
+    }
+
+    bubble.addEventListener('click', handleInteraction);
+    clerk.addEventListener('click', handleInteraction);
+
+    // Trigger welcome message on page load
+    window.addEventListener('load', () => {
+      showWelcomeMessage();
     });
 
     // ==========================================
