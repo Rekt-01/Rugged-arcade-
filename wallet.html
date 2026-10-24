@@ -365,46 +365,61 @@
       gap: 10px;
     }
 
+    /* Enhanced Transaction Card */
     .tx-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 10px;
+      padding: 10px;
       background: var(--card-muted);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
+      gap: 8px;
     }
 
     .tx-left {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
+      overflow: hidden;
     }
 
     .tx-type {
       font-weight: 600;
       font-size: 12px;
+      color: var(--text);
     }
 
-    .tx-hash {
+    .tx-subtext {
       font-size: 10px;
-      font-family: monospace;
       color: var(--text-sub);
+      font-family: monospace;
     }
 
     .tx-right {
-      text-align: right;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .tx-val {
       font-size: 12px;
       font-weight: 600;
+      text-align: right;
     }
 
-    .tx-time {
+    .apescan-link {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--blue);
       font-size: 10px;
-      color: var(--text-sub);
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
     }
+    .apescan-link:hover { background: var(--border); }
 
     .meta-box {
       background: var(--card-muted);
@@ -444,22 +459,20 @@
 
     <div class="wallet-card">
       <div class="addr-section">
-        <!-- ENS Row with Copy -->
         <div class="addr-row">
           <div class="addr-info">
             <span class="addr-label">ENS Name</span>
             <span class="addr-val">team.ruggedorphans.eth</span>
           </div>
-          <button class="copy-btn" onclick="copyText('team.ruggedorphans.eth', this)">Copy ENS</button>
+          <button class="copy-btn" onclick="copyText('team.ruggedorphans.eth', this)">Copy</button>
         </div>
 
-        <!-- Hex Address Row with Copy -->
         <div class="addr-row">
           <div class="addr-info">
             <span class="addr-label">Hex Address</span>
             <span class="addr-val mono">0xf3e5ec8b4aaab49186486965529e07b5f61f9020</span>
           </div>
-          <button class="copy-btn" onclick="copyText('0xf3e5ec8b4aaab49186486965529e07b5f61f9020', this)">Copy Hex</button>
+          <button class="copy-btn" onclick="copyText('0xf3e5ec8b4aaab49186486965529e07b5f61f9020', this)">Copy</button>
         </div>
       </div>
 
@@ -471,7 +484,6 @@
         <div class="bal-sub" id="bal-usd">$---.-- USD</div>
       </div>
 
-      <!-- Multi Sig Warning Notice -->
       <div class="notice-box">
         <span>⚠️</span>
         <span><strong>Multi Sig Wallet:</strong> Only send Ape Chain Assets.</span>
@@ -483,7 +495,6 @@
       </div>
     </div>
 
-    <!-- Rumble Note Banner placed above Collectibles -->
     <div class="rumble-banner">
       🏆 Prizes for Rumbles
     </div>
@@ -527,7 +538,7 @@
         <button class="copy-btn" onclick="closeTxSheet()">Done</button>
       </div>
       <div class="sheet-body" id="tx-list">
-        <div style="text-align: center; padding: 20px; color: var(--text-sub);">Loading transactions...</div>
+        <div style="text-align: center; padding: 20px; color: var(--text-sub);">Loading history...</div>
       </div>
     </div>
   </div>
@@ -673,20 +684,51 @@
     async function openTxSheet() {
       document.getElementById("tx-sheet").classList.add("open");
       const list = document.getElementById("tx-list");
-      list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history...</div>`;
+      list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history & transfers...</div>`;
 
       try {
-        const res = await fetch(`${API}/addresses/${WALLET}/transactions`);
-        const data = await res.json();
-        const items = data.items || [];
+        // Fetch standard transactions and token transfers concurrently
+        const [txRes, nftRes] = await Promise.all([
+          fetch(`${API}/addresses/${WALLET}/transactions`),
+          fetch(`${API}/addresses/${WALLET}/nft/transfers`)
+        ]);
 
-        if (items.length === 0) {
+        const txData = await txRes.json();
+        const nftData = await nftRes.json();
+
+        const txItems = txData.items || [];
+        const nftItems = nftData.items || [];
+
+        if (txItems.length === 0 && nftItems.length === 0) {
           list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">No transactions found.</div>`;
           return;
         }
 
         list.innerHTML = "";
-        items.forEach(tx => {
+
+        // Render NFT Transfers
+        nftItems.forEach(transfer => {
+          const isReceive = transfer.to?.hash?.toLowerCase() === WALLET.toLowerCase();
+          const tokenName = transfer.token?.name || "NFT";
+          const tokenId = transfer.total?.token_id || "";
+
+          const el = document.createElement("div");
+          el.className = "tx-item";
+          el.innerHTML = `
+            <div class="tx-left">
+              <span class="tx-type" style="color: var(--amber);">${isReceive ? '📥 NFT Received' : '📤 NFT Sent'}</span>
+              <span class="tx-subtext">${tokenName} #${tokenId}</span>
+            </div>
+            <div class="tx-right">
+              <button class="copy-btn" onclick="copyText('${transfer.tx_hash}', this)">Copy Hash</button>
+              <a href="https://apescan.io/tx/${transfer.tx_hash}" target="_blank" rel="noopener" class="apescan-link">ApeScan ↗</a>
+            </div>
+          `;
+          list.appendChild(el);
+        });
+
+        // Render Standard Transactions
+        txItems.forEach(tx => {
           const val = Number(BigInt(tx.value || "0")) / 1e18;
           const isOut = tx.from?.hash?.toLowerCase() === WALLET.toLowerCase();
           
@@ -694,18 +736,20 @@
           el.className = "tx-item";
           el.innerHTML = `
             <div class="tx-left">
-              <span class="tx-type">${tx.method || (isOut ? 'Sent' : 'Received')}</span>
-              <span class="tx-hash">${short(tx.hash)}</span>
+              <span class="tx-type">${tx.method || (isOut ? 'Sent APE' : 'Received APE')}</span>
+              <span class="tx-subtext">Block #${tx.block} • ${short(tx.hash)}</span>
             </div>
             <div class="tx-right">
               <div class="tx-val" style="color: ${isOut ? 'var(--text)' : 'var(--green)'}">
                 ${isOut ? '-' : '+'}${val.toFixed(3)} APE
               </div>
-              <div class="tx-time">Block #${tx.block}</div>
+              <button class="copy-btn" onclick="copyText('${tx.hash}', this)">Copy</button>
+              <a href="https://apescan.io/tx/${tx.hash}" target="_blank" rel="noopener" class="apescan-link">↗</a>
             </div>
           `;
           list.appendChild(el);
         });
+
       } catch (e) {
         list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--red);">Error loading activity.</div>`;
       }
