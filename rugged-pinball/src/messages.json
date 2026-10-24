@@ -1,0 +1,72 @@
+{
+    "en": {
+        "menu": {
+            "highScores": "High scores",
+            "settings": "Settings",
+            "howToPlay": "How to play",
+            "about": "About"
+        },
+        "ui": {
+            "newGame": "New game",
+            "yourName": "Your name",
+            "playerName": "Anonymous",
+            "table": "Table",
+            "selectPrevious": "Select previous",
+            "selectNext": "Select next",
+            "closeWindow": "Close window",
+            "nameExplanation": "*Entering your name is only mandatory if you wish to compete in the high scores list",
+            "roundUp": "Round up",
+            "totalPoints": "Total points",
+            "remainingBalls": "Remaining balls"
+        },
+        "messages": {
+            "gotLucky": "Got lucky",
+            "tryAgain": "Try again",
+            "underworldUnlocked": "Underworld unlocked",
+            "escapeBonus": "Escape bonus",
+            "tilt": "Tilt",
+            "multiball": "Multiball",
+            "multiplier": "{count}x multiplier",
+            "loop": "loop #{count}",
+            "groupBonus": "Group bonus",
+            "trickShot": "trickShot #{count}",
+            "newGame": "New game",
+            "gameOver": "Game over"
+        },
+        "settings": {
+            "sound": "Play sound effects",
+            "music": "Play music",
+            "vhs": "VHS effects",
+            "fullscreen": "Fullscreen mode"
+        },
+        "howToPlay": {
+            "gameplay": "Basic pinball rules apply: hit bumpers and make loops to get points. There are hidden triggers in the table that can unlock further possibilities that allow you to increase your score even more. The higher your score, the higher your satisfaction in life. You can also choose to bump the table if you wish to give your ball an added impulse, but don't do it too often or the machine will tilt and you will lose a round!",
+            "keyboard": "Keyboard",
+            "keyboardDescr": "Use the left and right arrow keys to move the left and right flippers. Press the spacebar to bump the table.",
+            "touchscreen": "Touchscreen",
+            "touchscreenDescr": "Tap the left or right side of the screen to move the left or right flippers. Swipe up to bump the table."
+        },
+        "about": {
+            "credits": "Credits",
+            "introduction": "Unless otherwise stated, programming, illustrations, sound design and music by:",
+            "animation": "Animation",
+            "tableDesign": "Table design",
+            "font": "Font",
+            "by": "by",
+            "opensource": "Rugged PinBall is based on the open source Pinball Schminball and can be found on"
+        },
+        "tutorial": {
+            "tutorial": "Tutorial",
+            "skip": "Skip",
+            "flippersKeysL": "Press the left key to move the left flipper.",
+            "flippersKeysR": "Press the right key to move the right flipper.",
+            "flippersTouchL": "Touch the left side of the screen to move the left flipper.",
+            "flippersTouchR": "Touch the right side to move the right flipper.",
+            "bumpKeys": "Hit the spacebar to bump the table.",
+            "bumpTouch": "Swipe up to bump the table.",
+            "bumpWarning1": "Don't bump too much in a short time...",
+            "bumpWarning2": "...the table will tilt and you will lose a ball.",
+            "haveFun": "That's it. Have fun!"
+        }
+    }
+}

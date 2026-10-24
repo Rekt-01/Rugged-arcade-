@@ -1,0 +1,67 @@
+@import "./_typography";
+@import "./_mixins";
+
+.ps-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    &--bordered {
+        border: 1px solid $color-outlines;
+        border-radius: $spacing-medium;
+        padding: $spacing-large $spacing-large $spacing-medium;
+        margin-bottom: $spacing-medium;
+    }
+}
+
+.ps-input-wrapper {
+    display: flex;
+    // justify-content: space-between;
+    align-items: center;
+    margin: $spacing-medium 0;
+
+    &__label {
+        @include titleFont( 24px );
+    }
+
+    &__input {
+        padding: $spacing-medium;
+        background: none;
+        border: none;
+        border-bottom: 2px solid $color-outlines;
+        color: $color-titles-sub;
+        @include titleFont( 24px );
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    @include mobile() {
+        flex-direction: column;
+
+        &__input {
+            text-align: center;
+        }
+    }
+}
+
+.ps-button-wrapper {
+    &__button {
+        @include button();
+        display: block;
+        margin: $spacing-medium auto;
+        width: 250px;
+
+        @include mobile() {
+            width: 100%;
+        }
+    }
+}
+
+.ps-input-explanation {
+    // font-style: italic;
+    color: #b6b6b6;
+    font-size: 85%;
+    display: block;
+}

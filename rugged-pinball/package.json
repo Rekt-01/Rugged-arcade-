@@ -1,0 +1,40 @@
+{
+  "name": "rugged-pinball",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --force",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test": "vitest --environment jsdom --no-watch",
+    "typecheck": "npx -p typescript tsc -p tsconfig.check.json --noEmit"
+  },
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/matter-js": "^0.18.5",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vueform/toggle": "^2.1.3",
+    "axios": "^1.13.5",
+    "bowser": "^2.11.0",
+    "eslint": "^8.44.0",
+    "eslint-plugin-vue": "^8.7.1",
+    "jsdom": "^28.1.0",
+    "lodash.throttle": "^4.1.1",
+    "matter-attractors": "^0.1.6",
+    "matter-js": "^0.19.0",
+    "pathseg": "^1.2.1",
+    "poly-decomp": "^0.3.0",
+    "sass": "^1.51.0",
+    "tiny-script-loader": "^2.2.1",
+    "typescript": "^4.7.4",
+    "vite": "^6.4.1",
+    "vite-plugin-static-copy": "^2.3.2",
+    "vitest": "^3.0.7",
+    "vitest-canvas-mock": "^0.3.3",
+    "vue-i18n": "^11.2.8",
+    "zcanvas": "^6.0.5"
+  }
+}
