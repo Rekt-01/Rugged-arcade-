@@ -639,7 +639,7 @@
         card.onclick = () => openModal(nft);
         card.innerHTML = `
           <div class="nft-media-wrap">
-            <img src="${nft.image}" onerror="this.onerror=null; this.src='https://gateway.pinata.cloud/ipfs/' + '${nft.image}'.split('/ipfs/')[1];" loading="lazy" alt="${nft.name}">
+            <img src="${nft.image}" onerror="handleImageError(this, '${nft.image}')" loading="lazy" alt="${nft.name}">
           </div>
           <div class="nft-info">
             <span class="nft-col-name">${nft.collection}</span>
@@ -648,6 +648,20 @@
         `;
         container.appendChild(card);
       });
+    }
+
+    // Robust multi-gateway fallback on image load error
+    function handleImageError(imgEl, originalUrl) {
+      if (originalUrl.includes("cloudflare-ipfs.com")) {
+        imgEl.src = originalUrl.replace("cloudflare-ipfs.com", "gateway.pinata.cloud");
+      } else if (originalUrl.includes("gateway.pinata.cloud")) {
+        imgEl.src = originalUrl.replace("gateway.pinata.cloud", "ipfs.io");
+      } else if (originalUrl.includes("/ipfs/")) {
+        const hash = originalUrl.split("/ipfs/")[1];
+        imgEl.src = "https://dweb.link/ipfs/" + hash;
+      } else {
+        imgEl.style.display = "none";
+      }
     }
 
     async function resolveOnChainMetadata(nft, index) {
@@ -683,10 +697,9 @@
     async function openTxSheet() {
       document.getElementById("tx-sheet").classList.add("open");
       const list = document.getElementById("tx-list");
-      list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history & transfers...</div>`;
+      list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history...</div>`;
 
       try {
-        // Fetch standard transactions and token transfers
         const [txRes, transRes] = await Promise.all([
           fetch(`${API}/addresses/${WALLET}/transactions`),
           fetch(`${API}/addresses/${WALLET}/token-transfers`)
@@ -705,7 +718,6 @@
 
         list.innerHTML = "";
 
-        // Render Token/NFT Transfers (Incoming & Outgoing)
         transItems.forEach(item => {
           const isReceive = item.to?.hash?.toLowerCase() === WALLET.toLowerCase();
           const tokenName = item.token?.name || item.token?.symbol || "NFT/Token";
@@ -728,7 +740,6 @@
           list.appendChild(el);
         });
 
-        // Render Standard Transactions
         txItems.forEach(tx => {
           const val = Number(BigInt(tx.value || "0")) / 1e18;
           const isOut = tx.from?.hash?.toLowerCase() === WALLET.toLowerCase();
