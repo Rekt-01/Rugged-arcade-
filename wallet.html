@@ -617,10 +617,6 @@
         document.getElementById("nft-count").textContent = `${nfts.length} Items`;
         renderNfts();
 
-        nfts.forEach((nft, index) => {
-          if (!nft.image) resolveOnChainMetadata(nft, index);
-        });
-
       } catch (e) {
         container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 30px 0; color:var(--red);">Failed to load NFTs.</div>`;
       }
@@ -650,48 +646,20 @@
       });
     }
 
-    // Robust multi-gateway fallback on image load error
+    // Comprehensive fallback engine cycling through active gateways on failure
     function handleImageError(imgEl, originalUrl) {
       if (originalUrl.includes("cloudflare-ipfs.com")) {
         imgEl.src = originalUrl.replace("cloudflare-ipfs.com", "gateway.pinata.cloud");
       } else if (originalUrl.includes("gateway.pinata.cloud")) {
         imgEl.src = originalUrl.replace("gateway.pinata.cloud", "ipfs.io");
+      } else if (originalUrl.includes("ipfs.io")) {
+        imgEl.src = originalUrl.replace("ipfs.io", "dweb.link");
       } else if (originalUrl.includes("/ipfs/")) {
         const hash = originalUrl.split("/ipfs/")[1];
-        imgEl.src = "https://dweb.link/ipfs/" + hash;
+        imgEl.src = "https://nftstorage.link/ipfs/" + hash;
       } else {
         imgEl.style.display = "none";
       }
-    }
-
-    async function resolveOnChainMetadata(nft, index) {
-      if (!nft.contract) return;
-      try {
-        const tokenIdHex = BigInt(nft.id).toString(16).padStart(64, "0");
-        const res = await fetch(RPC, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jsonrpc: "2.0", method: "eth_call", params: [{ to: nft.contract, data: "0xc87b56dd" + tokenIdHex }, "latest"], id: 99 })
-        });
-        const json = await res.json();
-        if (!json.result || json.result === "0x") return;
-
-        const clean = json.result.slice(2);
-        const strHex = clean.slice(128, 128 + parseInt(clean.slice(64, 128), 16) * 2);
-        let uri = "";
-        for (let i = 0; i < strHex.length; i += 2) {
-          const code = parseInt(strHex.substr(i, 2), 16);
-          if (code) uri += String.fromCharCode(code);
-        }
-        
-        const metaRes = await fetch(formatMedia(uri.trim()));
-        const metaJson = await metaRes.json();
-        if (metaJson && (metaJson.image || metaJson.image_url)) {
-          nfts[index].image = formatMedia(metaJson.image || metaJson.image_url);
-          if (metaJson.name) nfts[index].name = metaJson.name;
-          renderNfts();
-        }
-      } catch (e) {}
     }
 
     async function openTxSheet() {
