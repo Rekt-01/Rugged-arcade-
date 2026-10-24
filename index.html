@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rugged Orphans | ApeChain</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    body, html {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background: #04010a;
+      overflow: hidden;
+      font-family: 'Press Start 2P', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* iPhone Full-Screen Container */
+    .screen-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      max-width: 460px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 28%, #1d0b40 0%, #05010d 75%);
+      box-shadow: 0 0 50px rgba(0, 84, 250, 0.25);
+    }
+
+    /* Subtle CRT Scanline + Vignette Overlay */
+    .crt-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+      background: 
+        radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.55) 100%),
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.24) 50%);
+      background-size: 100% 100%, 100% 4px;
+    }
+
+    /* ==========================================
+       TOP APECHAIN ARCADE HUD BAR
+    ========================================== */
+    .top-hud {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 12;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .chain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(8, 18, 48, 0.85);
+      border: 2px solid #0054FA;
+      box-shadow: 0 0 12px rgba(0, 84, 250, 0.5);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.48rem;
+      color: #e2eeff;
+      letter-spacing: 0.5px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff88;
+      animation: pulseDot 1.4s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.5; }
+    }
+
+    .credit-counter {
+      font-size: 0.48rem;
+      color: #ffd966;
+      text-shadow: 0 0 8px rgba(255, 217, 102, 0.6);
+      background: rgba(12, 5, 28, 0.75);
+      border: 2px solid rgba(255, 217, 102, 0.4);
+      padding: 6px 9px;
+      border-radius: 6px;
+    }
+
+    /* ==========================================
+       1. THREE.JS SPLASH & CHARACTER OVERLAY
+    ========================================== */
+    #intro-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      transition: opacity 0.55s ease;
+    }
+    #intro-layer.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #three-canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Pop-up Character & Speech Box */
+    #char-popup {
+      position: absolute;
+      bottom: 22px;
+      left: 0;
+      width: 100%;
+      padding: 0 16px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(36px);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1);
+    }
+    #char-popup.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Character Sprite Stage */
+    .sprite-stage {
+      position: relative;
+      width: 148px;
+      height: 148px;
+      margin-bottom: -8px;
+      z-index: 2;
+      filter: drop-shadow(0 0 12px rgba(53, 212, 255, 0.6));
+      animation: charFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes charFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+
+    #char-canvas {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      display: block;
+    }
+
+    /* Retro Arcade Dialogue Box */
+    .speech-bubble {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(16, 8, 38, 0.96) 0%, rgba(8, 3, 20, 0.98) 100%);
+      border: 3px solid #35d4ff;
+      box-shadow: 
+        0 0 24px rgba(0, 84, 250, 0.45),
+        inset 0 0 14px rgba(53, 212, 255, 0.22);
+      border-radius: 10px;
+      padding: 18px 16px 15px;
+      color: #fff;
+      font-size: 0.68rem;
+      line-height: 1.75;
+      text-align: left;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.2s ease;
+    }
+
+    .speech-bubble:active {
+      transform: scale(0.98);
+      border-color: #ffd966;
+    }
+
+    .speaker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .speaker-tag {
+      display: inline-block;
+      background: #ff2a85;
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 0.48rem;
+      border: 2px solid #fff;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .chain-pill {
+      font-size: 0.44rem;
+      color: #35d4ff;
+      opacity: 0.85;
+    }
+
+    #dialogue-text {
+      min-height: 46px;
+      color: #ffd966;
+      text-shadow: 1px 1px 0px #000;
+    }
+
+    #dialogue-text::after {
+      content: '▋';
+      color: #35d4ff;
+      margin-left: 3px;
+      animation: blink 0.6s infinite;
+    }
+    #dialogue-text.done::after {
+      display: none;
+    }
+
+    /* Prominent CTA Button inside Speech Bubble */
+    .tap-continue {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: linear-gradient(90deg, #0054FA 0%, #35d4ff 100%);
+      border: 2px solid #ffffff;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.58rem;
+      color: #ffffff;
+      text-shadow: 1px 1px 0 #000;
+      box-shadow: 0 0 15px rgba(53, 212, 255, 0.6);
+      animation: pulseBtn 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 14px rgba(53, 212, 255, 0.55); }
+      50% { transform: scale(1.025); box-shadow: 0 0 22px rgba(255, 217, 102, 0.85); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.15; }
+    }
+
+    /* ==========================================
+       2. VIDEO LAYER & ENTRANCE HOTSPOTS
+    ========================================== */
+    #video-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: #000;
+    }
+
+    #entrance-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .enter-hotspot {
+      position: absolute;
+      z-index: 30;
+      display: none;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.01);
+      -webkit-tap-highlight-color: rgba(255, 217, 102, 0.25);
+    }
+
+    .enter-hotspot.ready {
+      display: block;
+    }
+
+    #coin-hotspot {
+      bottom: 2%;
+      left: 5%;
+      width: 90%;
+      height: 24%;
+    }
+
+    #door-hotspot {
+      top: 30%;
+      left: 55%;
+      width: 40%;
+      height: 40%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-wrapper">
+    <div class="crt-overlay"></div>
+
+    <!-- STAGE 1 & 2: THREE.JS 3D ARCADE INTRO + TALKING CHARACTER -->
+    <div id="intro-layer">
+      <!-- Top ApeChain Arcade Status Bar -->
+      <div class="top-hud">
+        <div class="chain-badge">
+          <span class="live-dot"></span>
+          <span>APECHAIN // LIVE</span>
+        </div>
+        <div class="credit-counter">CREDIT 01</div>
+      </div>
+
+      <div id="three-canvas-container"></div>
+
+      <div id="char-popup">
+        <div class="sprite-stage">
+          <canvas id="char-canvas" width="256" height="256"></canvas>
+        </div>
+
+        <div class="speech-bubble" id="start-video-trigger">
+          <div class="speaker-header">
+            <div class="speaker-tag" id="speaker-label">ORPHAN #001</div>
+            <div class="chain-pill">APECHAIN ARCADE</div>
+          </div>
+          <div id="dialogue-text"></div>
+          <div class="tap-continue" id="tap-prompt" style="display:none;">
+            TAP TO SKATE IN ▶
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 3: SINGLE-PLAY SKATEBOARD VIDEO -->
+    <div id="video-layer">
+      <video id="entrance-video" playsinline webkit-playsinline preload="auto">
+        <source src="gemini_generated_video_7F077754.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- STAGE 4: ENTRANCE HOTSPOTS -->
+    <div id="coin-hotspot" class="enter-hotspot" title="Insert Coin"></div>
+    <div id="door-hotspot" class="enter-hotspot" title="Enter Arcade"></div>
+  </div>
+
+  <script>
+    /* =====================================================
+       PART 1: LOAD IMG_5633.png & BUILD LIP-SYNC MOUTH FRAMES
+    ===================================================== */
+    const charCanvas = document.getElementById('char-canvas');
+    const charCtx = charCanvas.getContext('2d');
+    charCtx.imageSmoothingEnabled = false;
+
+    const mouthFrames = { closed: null, half: null, open: null };
+    const charImg = new Image();
+    charImg.crossOrigin = "anonymous";
+    charImg.src = 'IMG_5633.png';
+
+    charImg.onload = () => {
+      const W = charImg.width;
+      const H = charImg.height;
+      charCanvas.width = W;
+      charCanvas.height = H;
+      charCtx.imageSmoothingEnabled = false;
+
+      const baseCanvas = document.createElement('canvas');
+      baseCanvas.width = W;
+      baseCanvas.height = H;
+      const bCtx = baseCanvas.getContext('2d');
+      bCtx.imageSmoothingEnabled = false;
+      bCtx.drawImage(charImg, 0, 0);
+
+      let mouthBox = {
+        x: Math.round(W * 0.53125),
+        y: Math.round(H * 0.5625),
+        w: Math.round(W * 0.15625),
+        h: Math.max(2, Math.round(H * 0.03125))
+      };
+
+      try {
+        const imgData = bCtx.getImageData(0, 0, W, H);
+        const data = imgData.data;
+        let minX = W, maxX = 0, minY = H, maxY = 0, foundMouth = false;
+
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4;
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            if (r > 240 && g > 240 && b > 240) data[i + 3] = 0;
+
+            if (x > W * 0.48 && x < W * 0.73 && y > H * 0.53 && y < H * 0.62) {
+              if (r > 175 && g > 60 && g < 120 && b > 70 && b < 135) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+                foundMouth = true;
+              }
+            }
+          }
+        }
+        bCtx.putImageData(imgData, 0, 0);
+
+        if (foundMouth && (maxX - minX) > 4) {
+          mouthBox = { x: minX, y: minY, w: maxX - minX + 1, h: Math.max(2, maxY - minY + 1) };
+        }
+      } catch (e) {}
+
+      mouthFrames.closed = baseCanvas;
+
+      function createTalkingFrame(openMultiplier) {
+        const c = document.createElement('canvas');
+        c.width = W; c.height = H;
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(baseCanvas, 0, 0);
+
+        const pxUnit = mouthBox.h;
+        const jawDrop = Math.round(pxUnit * (openMultiplier * 0.45));
+        const openH = Math.round(pxUnit * openMultiplier);
+
+        const jawX = Math.round(W * 0.40);
+        const jawY = mouthBox.y + pxUnit;
+        const jawW = Math.round(W * 0.32);
+        const jawH = Math.round(H * 0.11);
+
+        const jawSlice = document.createElement('canvas');
+        jawSlice.width = jawW; jawSlice.height = jawH;
+        jawSlice.getContext('2d').drawImage(baseCanvas, jawX, jawY, jawW, jawH, 0, 0, jawW, jawH);
+
+        ctx.drawImage(jawSlice, jawX, jawY + jawDrop);
+        ctx.fillStyle = '#1c0b19';
+        ctx.fillRect(mouthBox.x, mouthBox.y + Math.round(pxUnit * 0.35), mouthBox.w, openH);
+        ctx.fillStyle = '#cf5763';
+        ctx.fillRect(mouthBox.x, mouthBox.y, mouthBox.w, Math.max(2, Math.round(pxUnit * 0.45)));
+        ctx.fillRect(mouthBox.x, mouthBox.y + openH, mouthBox.w, Math.max(2, Math.round(pxUnit * 0.45)));
+
+        if (openMultiplier > 1.1) {
+          ctx.fillStyle = '#ff5c77';
+          const tongueW = Math.round(mouthBox.w * 0.55);
+          const tongueX = mouthBox.x + Math.round((mouthBox.w - tongueW) * 0.4);
+          ctx.fillRect(tongueX, mouthBox.y + Math.round(openH * 0.6), tongueW, Math.max(2, Math.round(openH * 0.4)));
+        }
+        return c;
+      }
+
+      mouthFrames.half = createTalkingFrame(0.85);
+      mouthFrames.open = createTalkingFrame(1.45);
+      setMouthState('closed');
+    };
+
+    function setMouthState(state) {
+      if (!mouthFrames[state]) return;
+      charCtx.clearRect(0, 0, charCanvas.width, charCanvas.height);
+      charCtx.drawImage(mouthFrames[state], 0, 0);
+    }
+
+    /* =====================================================
+       PART 2: PROFESSIONAL THREE.JS 3D ARCADE LOGO DROP
+    ===================================================== */
+    const container = document.getElementById('three-canvas-container');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x05010d, 0.006);
+
+    const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+    const cyanLight = new THREE.PointLight(0x35d4ff, 2.4, 260);
+    cyanLight.position.set(-45, 55, 65);
+    scene.add(cyanLight);
+
+    const pinkLight = new THREE.PointLight(0xff2a85, 2.4, 260);
+    pinkLight.position.set(45, -15, 65);
+    scene.add(pinkLight);
+
+    // Moving Retro Synthwave Floor Grid
+    const gridHelper = new THREE.GridHelper(320, 32, 0x0054FA, 0x2d1259);
+    gridHelper.position.y = -36;
+    scene.add(gridHelper);
+
+    // Subtle rising arcade embers/particles
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(450);
+    for (let i = 0; i < 450; i += 3) {
+      starPos[i]     = (Math.random() - 0.5) * 160;
+      starPos[i + 1] = (Math.random() - 0.5) * 160;
+      starPos[i + 2] = (Math.random() - 0.5) * 120 - 25;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const stars = new THREE.Points(
+      starGeo,
+      new THREE.PointsMaterial({ color: 0x35d4ff, size: 1.3, transparent: true, opacity: 0.7 })
+    );
+    scene.add(stars);
+
+    const PIXEL_FONT = {
+      'W': ["10001","10001","10101","11011","10001"],
+      'E': ["11111","10000","11110","10000","11111"],
+      'L': ["10000","10000","10000","10000","11111"],
+      'C': ["01111","10000","10000","10000","01111"],
+      'O': ["01110","10001","10001","10001","01110"],
+      'M': ["10001","11011","10101","10001","10001"],
+      'T': ["11111","00100","00100","00100","00100"],
+      'R': ["11110","10001","11110","10010","10001"],
+      'U': ["10001","10001","10001","10001","01110"],
+      'G': ["01111","10000","10011","10001","01111"],
+      'D': ["11110","10001","10001","10001","11110"],
+      'P': ["11110","10001","11110","10000","10000"],
+      'H': ["10001","10001","11111","10001","10001"],
+      'A': ["01110","10001","11111","10001","10001"],
+      'N': ["10001","11001","10101","10011","10001"],
+      'S': ["01111","10000","01110","00001","11110"],
+      'I': ["111","010","010","010","111"],
+      ' ': ["000","000","000","000","000"]
+    };
+
+    const lines = [
+      { text: "WELCOME TO",  yOffset: 33, scale: 0.92, color: 0x35d4ff, shade: 0x093b52, lineIndex: 0 },
+      { text: "RUGGED",      yOffset: 21, scale: 1.45, color: 0xff2a85, shade: 0x6b0937, lineIndex: 1 },
+      { text: "ORPHANS",     yOffset: 8,  scale: 1.35, color: 0xffd966, shade: 0x784b00, lineIndex: 2 },
+      { text: "ON APECHAIN", yOffset: -3, scale: 0.86, color: 0x3b82f6, shade: 0x002b80, lineIndex: 3 }
+    ];
+
+    const voxels = [];
+    lines.forEach((line) => {
+      let totalUnits = 0;
+      for (let ch of line.text) totalUnits += (PIXEL_FONT[ch] || PIXEL_FONT[' '])[0].length + 1;
+      totalUnits -= 1;
+      let cursorX = -totalUnits / 2;
+
+      for (let ch of line.text) {
+        const glyph = PIXEL_FONT[ch] || PIXEL_FONT[' '];
+        const gWidth = glyph[0].length;
+        for (let row = 0; row < 5; row++) {
+          for (let col = 0; col < gWidth; col++) {
+            if (glyph[row][col] === '1') {
+              const px = (cursorX + col) * line.scale;
+              const py = (2 - row) * line.scale + line.yOffset;
+              // Front bevel voxel
+              voxels.push({
+                tx: px, ty: py, tz: 0,
+                scale: line.scale * 0.94,
+                baseColor: new THREE.Color(line.color),
+                isFront: true,
+                lineIndex: line.lineIndex
+              });
+              // Deep 3D Extrusion shadow voxel
+              voxels.push({
+                tx: px, ty: py, tz: -line.scale * 1.05,
+                scale: line.scale * 0.94,
+                baseColor: new THREE.Color(line.shade),
+                isFront: false,
+                lineIndex: line.lineIndex
+              });
+            }
+          }
+        }
+        cursorX += gWidth + 1;
+      }
+    });
+
+    const voxelMesh = new THREE.InstancedMesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.22, metalness: 0.45 }),
+      voxels.length
+    );
+    scene.add(voxelMesh);
+    const dummy = new THREE.Object3D();
+    const tempColor = new THREE.Color();
+    const shineColor = new THREE.Color(0xffffff);
+
+    // Crisp, structured arcade drop-in setup (no messy random swirl)
+    voxels.forEach((v, i) => {
+      v.sx = v.tx;
+      v.sy = v.ty + 52; // Drops straight down from above the cabinet
+      v.sz = v.tz - 25;
+      // Staggered cleanly by row + left-to-right column wave
+      v.delay = (v.lineIndex * 0.18) + ((v.tx + 35) * 0.005);
+
+      dummy.position.set(v.sx, v.sy, v.sz);
+      dummy.scale.set(0.001, 0.001, 0.001);
+      dummy.updateMatrix();
+      voxelMesh.setMatrixAt(i, dummy.matrix);
+      voxelMesh.setColorAt(i, v.baseColor);
+    });
+    voxelMesh.instanceColor.needsUpdate = true;
+
+    function updateCameraForMobile() {
+      const w = container.clientWidth, h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      camera.position.z = Math.max(82, (68 / 2) / (Math.tan((camera.fov * Math.PI) / 360) * camera.aspect));
+      camera.position.y = 4;
+      renderer.setSize(w, h);
+    }
+    updateCameraForMobile();
+    window.addEventListener('resize', updateCameraForMobile);
+
+    // BackOut easing for that snappy arcade slam & bounce effect
+    function easeOutBack(x) {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    let startTime = performance.now(), popupTriggered = false;
+
+    function animateThree(now) {
+      requestAnimationFrame(animateThree);
+      const elapsed = (now - startTime) / 1000;
+      gridHelper.position.z = (elapsed * 14) % 10;
+      stars.rotation.y = elapsed * 0.04;
+
+      // Periodic white/gold light shimmer across the 3D letters
+      const shineWaveX = ((elapsed * 45) % 160) - 80;
+
+      for (let i = 0; i < voxels.length; i++) {
+        const v = voxels[i];
+        const localT = Math.max(0, Math.min(1, (elapsed - v.delay) / 0.62));
+
+        if (localT <= 0) {
+          dummy.scale.set(0.001, 0.001, 0.001);
+          dummy.updateMatrix();
+          voxelMesh.setMatrixAt(i, dummy.matrix);
+          continue;
+        }
+
+        const ease = easeOutBack(localT);
+        const idleHover = localT === 1 ? Math.sin(elapsed * 3.0 + v.tx * 0.14) * 0.28 : 0;
+
+        dummy.position.set(
+          v.tx,
+          v.sy + (v.ty - v.sy) * ease + idleHover,
+          v.sz + (v.tz - v.sz) * ease
+        );
+        dummy.rotation.set((1 - localT) * 1.6, 0, 0);
+        dummy.scale.set(v.scale, v.scale, v.scale);
+        dummy.updateMatrix();
+        voxelMesh.setMatrixAt(i, dummy.matrix);
+
+        // Apply metallic shimmer sweep across front voxels once locked in
+        if (v.isFront && localT === 1) {
+          const dist = Math.abs(v.tx - shineWaveX);
+          if (dist < 6) {
+            const blend = (1 - dist / 6) * 0.55;
+            tempColor.copy(v.baseColor).lerp(shineColor, blend);
+            voxelMesh.setColorAt(i, tempColor);
+          } else {
+            voxelMesh.setColorAt(i, v.baseColor);
+          }
+        }
+      }
+
+      voxelMesh.instanceMatrix.needsUpdate = true;
+      voxelMesh.instanceColor.needsUpdate = true;
+      voxelMesh.rotation.y = Math.sin(elapsed * 1.1) * 0.09;
+
+      // Trigger character right after the 3D letters slam into place
+      if (elapsed > 1.25 && !popupTriggered) {
+        popupTriggered = true;
+        triggerCharacterPopup();
+      }
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animateThree);
+
+    /* =====================================================
+       PART 3: SINGLE STREAMLINED SPEECH BUBBLE
+    ===================================================== */
+    const WELCOME_MESSAGE = "Welcome to Rugged Orphans on ApeChain! Tap to skate in.";
+    let typeInterval = null;
+
+    function typeWelcomeMessage() {
+      const dialogueEl = document.getElementById('dialogue-text');
+      const tapPrompt = document.getElementById('tap-prompt');
+
+      dialogueEl.textContent = '';
+      dialogueEl.classList.remove('done');
+
+      let charIndex = 0;
+      let syllableToggle = 0;
+
+      typeInterval = setInterval(() => {
+        const ch = WELCOME_MESSAGE[charIndex];
+        dialogueEl.textContent += ch;
+        charIndex++;
+
+        // Keep mouth lip-sync animation moving while typing
+        if (/[a-zA-Z0-9]/.test(ch)) {
+          syllableToggle++;
+          if (syllableToggle % 3 === 0) setMouthState('closed');
+          else if (/[aeiouAEIOU]/.test(ch)) setMouthState('open');
+          else setMouthState('half');
+        } else {
+          setMouthState('closed');
+        }
+
+        if (charIndex >= WELCOME_MESSAGE.length) {
+          clearInterval(typeInterval);
+          setMouthState('closed');
+          dialogueEl.classList.add('done');
+          tapPrompt.style.display = 'block';
+        }
+      }, 42);
+    }
+
+    function triggerCharacterPopup() {
+      const popup = document.getElementById('char-popup');
+      popup.classList.add('show');
+      typeWelcomeMessage();
+    }
+
+    /* =====================================================
+       PART 4: PLAY VIDEO ONCE & NAVIGATE TO MAIN.HTML
+    ===================================================== */
+    const introLayer = document.getElementById('intro-layer');
+    const video = document.getElementById('entrance-video');
+    const coinHotspot = document.getElementById('coin-hotspot');
+    const doorHotspot = document.getElementById('door-hotspot');
+    let videoStarted = false;
+
+    function startEntranceVideo(e) {
+      if (videoStarted) return;
+      videoStarted = true;
+
+      if (typeInterval) clearInterval(typeInterval);
+
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      setMouthState('closed');
+      introLayer.classList.add('fade-out');
+
+      setTimeout(() => {
+        introLayer.style.display = 'none';
+      }, 600);
+
+      setTimeout(() => {
+        coinHotspot.classList.add('ready');
+        doorHotspot.classList.add('ready');
+      }, 1000);
+
+      video.currentTime = 0;
+      video.loop = false;
+      video.play().catch(() => {
+        video.muted = true;
+        video.play();
+      });
+    }
+
+    // Clicking either the speech bubble or the character starts the skate-in video
+    document.querySelector('.speech-bubble').addEventListener('click', startEntranceVideo);
+    document.querySelector('.sprite-stage').addEventListener('click', startEntranceVideo);
+
+    function goToMainArcade(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+      window.location.href = window.location.origin + basePath + 'main.html';
+    }
+
+    coinHotspot.addEventListener('click', goToMainArcade);
+    coinHotspot.addEventListener('touchend', goToMainArcade);
+    doorHotspot.addEventListener('click', goToMainArcade);
+    doorHotspot.addEventListener('touchend', goToMainArcade);
+  </script>
+</body>
+</html>
