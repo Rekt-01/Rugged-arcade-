@@ -25,7 +25,6 @@
       position: relative;
     }
 
-    /* Subtle CRT scanlines */
     .display::before {
       content: "";
       position: absolute;
@@ -52,7 +51,21 @@
       text-align: center;
       font-size: 8px;
       color: #666;
-      margin-bottom: 30px;
+      margin-bottom: 12px;
+    }
+
+    .coming {
+      text-align: center;
+      font-size: 10px;
+      color: #ff3366;
+      margin-bottom: 22px;
+      text-shadow: 0 0 8px #ff3366;
+      animation: flash 0.7s steps(1) infinite;
+    }
+
+    @keyframes flash {
+      0%, 45% { opacity: 1; }
+      50%, 100% { opacity: 0.25; }
     }
 
     table {
@@ -96,6 +109,7 @@
   <div class="display">
     <h1>HIGH SCORES</h1>
     <div class="sub">RUGGED ARCADE</div>
+    <div class="coming">COMING SOON</div>
 
     <table>
       <thead>
@@ -107,14 +121,14 @@
       </thead>
       <tbody>
         <tr><td class="rank">1</td><td>REKT</td><td class="score">999999</td></tr>
-        <tr><td class="rank">2</td><td>ORPHAN</td><td class="score">850420</td></tr>
-        <tr><td class="rank">3</td><td>APE</td><td class="score">777777</td></tr>
-        <tr><td class="rank">4</td><td>VAULT</td><td class="score">650000</td></tr>
-        <tr><td class="rank">5</td><td>RUG</td><td class="score">420069</td></tr>
-        <tr><td class="rank">6</td><td>----</td><td class="score">000000</td></tr>
-        <tr><td class="rank">7</td><td>----</td><td class="score">000000</td></tr>
-        <tr><td class="rank">8</td><td>----</td><td class="score">000000</td></tr>
-        <tr><td class="rank">9</td><td>----</td><td class="score">000000</td></tr>
+        <tr><td class="rank">2</td><td>MARK 🐊</td><td class="score">850420</td></tr>
+        <tr><td class="rank">3</td><td>SAL</td><td class="score">777777</td></tr>
+        <tr><td class="rank">4</td><td>TRUE G</td><td class="score">650000</td></tr>
+        <tr><td class="rank">5</td><td>APE LORD</td><td class="score">420069</td></tr>
+        <tr><td class="rank">6</td><td>RUG PULL</td><td class="score">333333</td></tr>
+        <tr><td class="rank">7</td><td>DEGEN</td><td class="score">250000</td></tr>
+        <tr><td class="rank">8</td><td>WAGMI</td><td class="score">180000</td></tr>
+        <tr><td class="rank">9</td><td>NGMI</td><td class="score">100000</td></tr>
         <tr><td class="rank">10</td><td>----</td><td class="score">000000</td></tr>
       </tbody>
     </table>
