@@ -111,22 +111,22 @@
       gap: 12px;
     }
 
+    .addr-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ens-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
     .addr-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .addr-info {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .ens-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
     }
 
     .addr-pill {
@@ -181,15 +181,16 @@
     }
 
     .notice-box {
-      background: var(--card-muted);
-      border: 1px solid var(--border);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
       border-radius: 6px;
       padding: 8px 10px;
       font-size: 11px;
-      color: var(--text-sub);
+      color: #fca5a5;
       display: flex;
       align-items: center;
       gap: 6px;
+      font-weight: 500;
     }
 
     .actions-grid {
@@ -419,18 +420,13 @@
       </div>
     </div>
 
-    <!-- Rumble Note Banner -->
-    <div class="rumble-banner">
-      🏆 Prizes for Rumbles
-    </div>
-
     <div class="wallet-card">
-      <div class="addr-row">
-        <div class="addr-info">
-          <span class="ens-name">team.ruggedorphans.eth</span>
-          <span class="addr-pill" id="addr-text">0xf3e5...9020</span>
+      <div class="addr-section">
+        <span class="ens-name">team.ruggedorphans.eth</span>
+        <div class="addr-row">
+          <span class="addr-pill" id="addr-text">0xf3e5ec8b4aaab49186486965529e07b5f61f9020</span>
+          <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
         </div>
-        <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
       </div>
 
       <div class="balance-box">
@@ -441,16 +437,21 @@
         <div class="bal-sub" id="bal-usd">$---.-- USD</div>
       </div>
 
-      <!-- Safe Ape Chain Notice -->
+      <!-- Multi Sig Warning Notice -->
       <div class="notice-box">
         <span>⚠️</span>
-        <span><strong>Safe ApeChain Wallet:</strong> Only send ApeChain assets.</span>
+        <span><strong>Multi Sig Wallet:</strong> Only send Ape Chain Assets.</span>
       </div>
 
       <div class="actions-grid">
         <button class="btn-main primary" onclick="openTxSheet()">Transactions</button>
         <button class="btn-main" onclick="loadAll()">Refresh</button>
       </div>
+    </div>
+
+    <!-- Rumble Note Banner placed above Collectibles -->
+    <div class="rumble-banner">
+      🏆 Prizes for Rumbles
     </div>
 
     <div class="section-bar">
