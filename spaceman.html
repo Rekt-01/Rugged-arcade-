@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coming Soon — Rugged Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000011;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: 'Press Start 2P', monospace;
+      color: #fff;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at bottom, #1a1a3a 0%, #000 70%);
+    }
+
+    .stars::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+        radial-gradient(1px 1px at 40% 70%, #fff, transparent),
+        radial-gradient(1px 1px at 60% 20%, #fff, transparent),
+        radial-gradient(1px 1px at 80% 50%, #fff, transparent),
+        radial-gradient(1px 1px at 10% 80%, #fff, transparent),
+        radial-gradient(1px 1px at 90% 10%, #fff, transparent);
+      background-size: 100% 100%;
+      opacity: 0.7;
+    }
+
+    .earth {
+      position: absolute;
+      bottom: 5%;
+      left: 8%;
+      font-size: 80px;
+      filter: drop-shadow(0 0 10px #4a90d9);
+    }
+
+    .moon {
+      position: absolute;
+      top: 10%;
+      right: 8%;
+      font-size: 60px;
+      filter: drop-shadow(0 0 8px #ccc);
+    }
+
+    .rocket-path {
+      position: absolute;
+      bottom: 15%;
+      left: 18%;
+      animation: fly 8s linear infinite;
+    }
+
+    .rocket {
+      font-size: 50px;
+      transform: rotate(-45deg);
+      filter: drop-shadow(0 0 6px #ffaa00);
+    }
+
+    .smoke {
+      position: absolute;
+      bottom: -10px;
+      left: -20px;
+      font-size: 28px;
+      opacity: 0.7;
+      animation: puff 0.6s ease-out infinite;
+    }
+
+    .smoke:nth-child(2) { animation-delay: 0.2s; left: -35px; font-size: 22px; }
+    .smoke:nth-child(3) { animation-delay: 0.4s; left: -50px; font-size: 16px; }
+
+    @keyframes fly {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(70vw, -60vh) scale(0.6); }
+    }
+
+    @keyframes puff {
+      0%   { opacity: 0.8; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(20px) scale(1.5); }
+    }
+
+    .message {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+    }
+
+    .message h1 {
+      font-size: clamp(16px, 4vw, 28px);
+      color: #ffcc00;
+      text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff6600;
+      margin-bottom: 12px;
+    }
+
+    .message p {
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    .back {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #00ccff;
+      font-size: 9px;
+      text-decoration: none;
+      text-shadow: 0 0 6px #00ccff;
+    }
+    .back:hover { color: #ffcc00; }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <div class="earth">🌍</div>
+  <div class="moon">🌙</div>
+
+  <div class="rocket-path">
+    <div class="smoke">💨</div>
+    <div class="smoke">💨</div>
+    <div class="smoke">💨</div>
+    <div class="rocket">🚀</div>
+  </div>
+
+  <div class="message">
+    <h1>COMING SOON</h1>
+    <p>RUGGED ARCADE</p>
+  </div>
+
+  <a href="main.html" class="back">← BACK TO ARCADE</a>
+</body>
+</html>
