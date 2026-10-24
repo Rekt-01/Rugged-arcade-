@@ -114,29 +114,49 @@
     .addr-section {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-    }
-
-    .ens-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
+      gap: 8px;
     }
 
     .addr-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 6px;
     }
 
-    .addr-pill {
+    .addr-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      overflow: hidden;
+    }
+
+    .addr-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+    }
+
+    .addr-val {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .addr-val.mono {
       font-family: monospace;
       font-size: 11px;
-      color: var(--text-sub);
     }
 
     .copy-btn {
-      background: var(--card-muted);
+      background: var(--card);
       border: 1px solid var(--border);
       color: var(--text);
       font-size: 10px;
@@ -144,7 +164,9 @@
       padding: 4px 8px;
       border-radius: 4px;
       cursor: pointer;
+      flex-shrink: 0;
     }
+    .copy-btn:hover { background: var(--border); }
 
     .balance-box {
       display: flex;
@@ -422,10 +444,22 @@
 
     <div class="wallet-card">
       <div class="addr-section">
-        <span class="ens-name">team.ruggedorphans.eth</span>
+        <!-- ENS Row with Copy -->
         <div class="addr-row">
-          <span class="addr-pill" id="addr-text">0xf3e5ec8b4aaab49186486965529e07b5f61f9020</span>
-          <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
+          <div class="addr-info">
+            <span class="addr-label">ENS Name</span>
+            <span class="addr-val">team.ruggedorphans.eth</span>
+          </div>
+          <button class="copy-btn" onclick="copyText('team.ruggedorphans.eth', this)">Copy ENS</button>
+        </div>
+
+        <!-- Hex Address Row with Copy -->
+        <div class="addr-row">
+          <div class="addr-info">
+            <span class="addr-label">Hex Address</span>
+            <span class="addr-val mono">0xf3e5ec8b4aaab49186486965529e07b5f61f9020</span>
+          </div>
+          <button class="copy-btn" onclick="copyText('0xf3e5ec8b4aaab49186486965529e07b5f61f9020', this)">Copy Hex</button>
         </div>
       </div>
 
@@ -523,11 +557,11 @@
       return str.slice(0, 6) + "..." + str.slice(-4);
     }
 
-    function copyAddr() {
-      navigator.clipboard.writeText(WALLET);
-      const btn = document.getElementById("copy-btn");
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text);
+      const originalText = btn.textContent;
       btn.textContent = "Copied!";
-      setTimeout(() => btn.textContent = "Copy", 1500);
+      setTimeout(() => btn.textContent = originalText, 1500);
     }
 
     async function getBalance() {
