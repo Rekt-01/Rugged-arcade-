@@ -562,24 +562,30 @@
     const RPC = "https://rpc.apechain.com/http";
     const API = "https://apechain.blockscout.com/api/v2";
 
-    // Active, working IPFS gateways (cloudflare-ipfs.com removed as it is dead)
+    // Full list of working IPFS gateways including Pinata & NFTStorage (which resolved Trainer #1028)
     const IPFS_GATEWAYS = [
+      "https://gateway.pinata.cloud/ipfs/",
+      "https://nftstorage.link/ipfs/",
       "https://ipfs.io/ipfs/",
       "https://dweb.link/ipfs/",
       "https://w3s.link/ipfs/",
-      "https://4everland.io/ipfs/",
-      "https://gateway.pinata.cloud/ipfs/"
+      "https://4everland.io/ipfs/"
     ];
 
     let nfts = [];
 
     function extractIpfsPath(url) {
       if (!url || typeof url !== "string") return null;
-      const s = url.trim();
+      let s = url.trim();
       if (s.startsWith("ipfs://ipfs/")) return s.slice(12);
       if (s.startsWith("ipfs://")) return s.slice(7);
       const idx = s.indexOf("/ipfs/");
       if (idx !== -1) return s.slice(idx + 6);
+      // Match subdomain style IPFS gateways: https://<cid>.ipfs.dweb.link/...
+      const subMatch = s.match(/^https?:\/\/([a-z0-9]+)\.ipfs\.[^/]+\/?(.*)$/i);
+      if (subMatch) {
+        return subMatch[2] ? `${subMatch[1]}/${subMatch[2]}` : subMatch[1];
+      }
       if (/^(Qm[1-9A-HJ-NP-Za-km-z]{44}|baf[a-z0-9]+)/i.test(s)) return s;
       return null;
     }
@@ -594,13 +600,16 @@
 
       const ipfsPath = extractIpfsPath(trimmed);
       if (ipfsPath) {
-        return IPFS_GATEWAYS.map(gw => gw + ipfsPath);
+        const list = IPFS_GATEWAYS.map(gw => gw + ipfsPath);
+        list.push(`https://wsrv.nl/?url=${encodeURIComponent("https://ipfs.io/ipfs/" + ipfsPath)}`);
+        return list;
       }
 
       if (trimmed.startsWith("http")) {
         return [
           trimmed,
-          `https://wsrv.nl/?url=${encodeURIComponent(trimmed)}`
+          `https://wsrv.nl/?url=${encodeURIComponent(trimmed)}`,
+          `https://corsproxy.io/?${encodeURIComponent(trimmed)}`
         ];
       }
       return [];
@@ -608,6 +617,11 @@
 
     async function fetchJsonWithFallback(rawUri) {
       const candidates = buildCandidateUrls(rawUri);
+      // Also add CORS-proxied versions in case metadata server blocks browser fetch
+      const trimmed = (rawUri || "").trim();
+      if (trimmed.startsWith("http")) {
+        candidates.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(trimmed)}`);
+      }
       for (const url of candidates) {
         try {
           const res = await fetch(url);
@@ -667,7 +681,6 @@
     async function getNfts() {
       const container = document.getElementById("nft-grid");
       try {
-        // Query Blockscout and Reservoir CDN in parallel
         const [bsRes, resvRes] = await Promise.allSettled([
           fetch(`${API}/addresses/${WALLET}/nft?type=ERC-721%2CERC-404%2CERC-1155`).then(r => r.json()),
           fetch(`https://api-apechain.reservoir.tools/users/${WALLET}/tokens/v10?limit=100`).then(r => r.json())
@@ -718,6 +731,7 @@
             collection: item.token?.name || resvToken.collection?.name || "Unknown",
             contract,
             candidates,
+            step: 0,
             image: candidates[0] || "",
             resolvedOnChain: false
           };
@@ -726,7 +740,7 @@
         document.getElementById("nft-count").textContent = `${nfts.length} Items`;
         renderNfts();
 
-        // Immediately resolve on-chain metadata for any item without candidate URLs
+        // Always pre-fetch on-chain metadata for any NFT missing candidates
         nfts.forEach((nft, index) => {
           if (nft.candidates.length === 0) {
             resolveNftMetadata(index);
@@ -760,7 +774,6 @@
           img.src = nft.image;
           img.alt = nft.name;
           img.loading = "lazy";
-          img.dataset.step = "0";
           img.onerror = () => stepNextGateway(index, img);
           mediaWrap.appendChild(img);
         } else {
@@ -784,11 +797,10 @@
       const nft = nfts[index];
       if (!nft) return;
 
-      const nextStep = parseInt(imgEl.dataset.step || "0", 10) + 1;
-      imgEl.dataset.step = String(nextStep);
+      nft.step = (nft.step || 0) + 1;
 
-      if (nextStep < nft.candidates.length) {
-        nft.image = nft.candidates[nextStep];
+      if (nft.step < nft.candidates.length) {
+        nft.image = nft.candidates[nft.step];
         imgEl.src = nft.image;
       } else if (!nft.resolvedOnChain) {
         resolveNftMetadata(index);
@@ -798,32 +810,28 @@
       }
     }
 
+    // Direct smart-contract tokenURI resolution (does not early-return on duplicate Blockscout URLs)
     async function resolveNftMetadata(index) {
       const nft = nfts[index];
       if (!nft || nft.resolvedOnChain || !nft.contract) return;
       nft.resolvedOnChain = true;
 
-      try {
-        // 1. Try Blockscout single instance endpoint first
-        try {
-          const instRes = await fetch(`${API}/tokens/${nft.contract}/instances/${nft.id}`);
-          if (instRes.ok) {
-            const inst = await instRes.json();
-            const instMeta = inst.metadata || {};
-            const rawImg = inst.image_url || inst.media_url || instMeta.image || instMeta.image_url;
-            if (rawImg) {
-              const newUrls = buildCandidateUrls(rawImg);
-              if (newUrls.length > 0) {
-                nft.candidates = newUrls;
-                nft.image = newUrls[0];
-                updateCardImage(index);
-                return;
-              }
-            }
-          }
-        } catch (e) {}
+      const discoveredRawImages = [];
 
-        // 2. Fallback to direct on-chain tokenURI (ERC-721: 0xc87b56dd) or uri (ERC-1155: 0x0e89341c)
+      // 1. Check Blockscout instance endpoint for any extra fields
+      try {
+        const instRes = await fetch(`${API}/tokens/${nft.contract}/instances/${nft.id}`);
+        if (instRes.ok) {
+          const inst = await instRes.json();
+          const instMeta = inst.metadata || {};
+          [inst.image_url, inst.media_url, instMeta.image, instMeta.image_url, instMeta.animation_url]
+            .filter(Boolean)
+            .forEach(u => discoveredRawImages.push(u));
+        }
+      } catch (e) {}
+
+      // 2. Always query smart contract tokenURI(uint256) / uri(uint256) directly on ApeChain RPC
+      try {
         const tokenIdHex = BigInt(nft.id).toString(16).padStart(64, "0");
         let hexResult = null;
 
@@ -845,38 +853,52 @@
           }
         }
 
-        if (!hexResult) return;
+        if (hexResult) {
+          let uri = decodeAbiString(hexResult);
+          if (uri) {
+            uri = uri.replace("{id}", tokenIdHex).replace("{id}", nft.id);
 
-        let uri = decodeAbiString(hexResult);
-        if (!uri) return;
-        uri = uri.replace("{id}", tokenIdHex);
+            let metaJson = null;
+            if (uri.startsWith("data:application/json;base64,")) {
+              metaJson = JSON.parse(atob(uri.split(",")[1]));
+            } else if (uri.startsWith("data:application/json,")) {
+              metaJson = JSON.parse(decodeURIComponent(uri.split(",")[1]));
+            } else {
+              metaJson = await fetchJsonWithFallback(uri);
+            }
 
-        let metaJson = null;
-        if (uri.startsWith("data:application/json;base64,")) {
-          metaJson = JSON.parse(atob(uri.split(",")[1]));
-        } else if (uri.startsWith("data:application/json,")) {
-          metaJson = JSON.parse(decodeURIComponent(uri.split(",")[1]));
-        } else {
-          metaJson = await fetchJsonWithFallback(uri);
-        }
-
-        if (metaJson) {
-          const rawImg = metaJson.image || metaJson.image_url || metaJson.image_data || metaJson.animation_url;
-          if (metaJson.name) {
-            nft.name = metaJson.name;
-            const titleEl = document.getElementById(`nft-title-${index}`);
-            if (titleEl) titleEl.textContent = nft.name;
-          }
-          if (rawImg) {
-            const newUrls = buildCandidateUrls(rawImg);
-            if (newUrls.length > 0) {
-              nft.candidates = newUrls;
-              nft.image = newUrls[0];
-              updateCardImage(index);
+            if (metaJson) {
+              if (metaJson.name) {
+                nft.name = metaJson.name;
+                const titleEl = document.getElementById(`nft-title-${index}`);
+                if (titleEl) titleEl.textContent = nft.name;
+              }
+              [metaJson.image, metaJson.image_url, metaJson.image_data, metaJson.animation_url]
+                .filter(Boolean)
+                .forEach(u => discoveredRawImages.push(u));
             }
           }
         }
       } catch (e) {}
+
+      // Append any newly discovered candidate URLs that weren't already tried
+      const existing = new Set(nft.candidates);
+      const added = [];
+      discoveredRawImages.forEach(raw => {
+        buildCandidateUrls(raw).forEach(u => {
+          if (!existing.has(u)) {
+            existing.add(u);
+            nft.candidates.push(u);
+            added.push(u);
+          }
+        });
+      });
+
+      if (added.length > 0) {
+        nft.step = nft.candidates.indexOf(added[0]);
+        nft.image = added[0];
+        updateCardImage(index);
+      }
     }
 
     function decodeAbiString(hex) {
@@ -907,7 +929,6 @@
       img.id = `nft-img-${index}`;
       img.src = nft.image;
       img.alt = nft.name;
-      img.dataset.step = "0";
       img.onerror = () => stepNextGateway(index, img);
       wrap.appendChild(img);
     }
@@ -918,7 +939,6 @@
       list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history...</div>`;
 
       try {
-        // Fetch NFT transfers, Token transfers, and native Transactions concurrently
         const [nftTransRes, tokTransRes, txRes] = await Promise.allSettled([
           fetch(`${API}/addresses/${WALLET}/nft/transfers`).then(r => r.json()),
           fetch(`${API}/addresses/${WALLET}/token-transfers`).then(r => r.json()),
@@ -929,7 +949,6 @@
         const tokTransfers = tokTransRes.status === "fulfilled" ? (tokTransRes.value?.items || []) : [];
         const txItems = txRes.status === "fulfilled" ? (txRes.value?.items || []) : [];
 
-        // Combine and deduplicate NFT/Token transfers
         const seenTransfers = new Set();
         const combinedTransfers = [];
 
@@ -950,7 +969,6 @@
 
         list.innerHTML = "";
 
-        // 1. Render NFT & Token Transfers (Incoming & Outgoing)
         combinedTransfers.forEach(item => {
           const isReceive = item.to?.hash?.toLowerCase() === WALLET.toLowerCase();
           const tokenName = item.token?.name || item.token?.symbol || "Collectible";
@@ -975,7 +993,6 @@
           list.appendChild(el);
         });
 
-        // 2. Render Native APE Transactions
         txItems.forEach(tx => {
           const val = Number(BigInt(tx.value || "0")) / 1e18;
           const isOut = tx.from?.hash?.toLowerCase() === WALLET.toLowerCase();
