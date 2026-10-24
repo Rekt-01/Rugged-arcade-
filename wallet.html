@@ -365,7 +365,6 @@
       gap: 10px;
     }
 
-    /* Enhanced Transaction Card */
     .tx-item {
       display: flex;
       justify-content: space-between;
@@ -513,19 +512,19 @@
   </div>
 
   <!-- NFT Sheet -->
-  <div class="sheet-backdrop" id="nft-sheet" onclick="if(event.target === this) closeNftSheet()">
+  <div class="sheet-backdrop" id="nft-modal" onclick="if(event.target === this) closeModal()">
     <div class="sheet">
       <div class="sheet-head">
-        <span class="sheet-title" id="nft-sheet-title">Asset Details</span>
-        <button class="copy-btn" onclick="closeNftSheet()">Done</button>
+        <span class="sheet-title" id="modal-header-id">Asset Details</span>
+        <button class="copy-btn" onclick="closeModal()">Done</button>
       </div>
       <div class="sheet-body">
         <div style="width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; background:#000;">
-          <img id="nft-sheet-img" style="width:100%; height:100%; object-fit:contain;" src="" alt="">
+          <img id="modal-img" style="width:100%; height:100%; object-fit:contain;" src="" alt="">
         </div>
-        <div class="meta-box"><span class="meta-label">Collection</span><span class="meta-val" id="nft-sheet-col">--</span></div>
-        <div class="meta-box"><span class="meta-label">Token ID</span><span class="meta-val" id="nft-sheet-id">--</span></div>
-        <div class="meta-box"><span class="meta-label">Contract</span><span class="meta-val" id="nft-sheet-contract" style="font-family: monospace;">--</span></div>
+        <div class="meta-box"><span class="meta-label">Collection</span><span class="meta-val" id="modal-collection">--</span></div>
+        <div class="meta-box"><span class="meta-label">Token ID</span><span class="meta-val" id="modal-token-id">--</span></div>
+        <div class="meta-box"><span class="meta-label">Contract</span><span class="meta-val" id="modal-contract" style="font-family: monospace;">--</span></div>
       </div>
     </div>
   </div>
@@ -637,7 +636,7 @@
       nfts.forEach((nft, index) => {
         const card = document.createElement("div");
         card.className = "nft-card";
-        card.onclick = () => openNftSheet(index);
+        card.onclick = () => openModal(nft);
         card.innerHTML = `
           <div class="nft-media-wrap">
             <img src="${nft.image}" onerror="this.onerror=null; this.src='https://gateway.pinata.cloud/ipfs/' + '${nft.image}'.split('/ipfs/')[1];" loading="lazy" alt="${nft.name}">
@@ -687,41 +686,43 @@
       list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history & transfers...</div>`;
 
       try {
-        // Fetch standard transactions and token transfers concurrently
-        const [txRes, nftRes] = await Promise.all([
+        // Fetch standard transactions and token transfers
+        const [txRes, transRes] = await Promise.all([
           fetch(`${API}/addresses/${WALLET}/transactions`),
-          fetch(`${API}/addresses/${WALLET}/nft/transfers`)
+          fetch(`${API}/addresses/${WALLET}/token-transfers`)
         ]);
 
         const txData = await txRes.json();
-        const nftData = await nftRes.json();
+        const transData = await transRes.json();
 
         const txItems = txData.items || [];
-        const nftItems = nftData.items || [];
+        const transItems = transData.items || [];
 
-        if (txItems.length === 0 && nftItems.length === 0) {
+        if (txItems.length === 0 && transItems.length === 0) {
           list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">No transactions found.</div>`;
           return;
         }
 
         list.innerHTML = "";
 
-        // Render NFT Transfers
-        nftItems.forEach(transfer => {
-          const isReceive = transfer.to?.hash?.toLowerCase() === WALLET.toLowerCase();
-          const tokenName = transfer.token?.name || "NFT";
-          const tokenId = transfer.total?.token_id || "";
+        // Render Token/NFT Transfers (Incoming & Outgoing)
+        transItems.forEach(item => {
+          const isReceive = item.to?.hash?.toLowerCase() === WALLET.toLowerCase();
+          const tokenName = item.token?.name || item.token?.symbol || "NFT/Token";
+          const tokenId = item.total?.token_id || item.token_id || "";
+          const txHash = item.tx_hash || item.transaction_hash;
+          const blockNum = item.block || item.block_number || "";
 
           const el = document.createElement("div");
           el.className = "tx-item";
           el.innerHTML = `
             <div class="tx-left">
-              <span class="tx-type" style="color: var(--amber);">${isReceive ? '📥 NFT Received' : '📤 NFT Sent'}</span>
-              <span class="tx-subtext">${tokenName} #${tokenId}</span>
+              <span class="tx-type" style="color: ${isReceive ? 'var(--green)' : 'var(--amber)'};">${isReceive ? '📥 Received' : '📤 Sent'} ${tokenName}</span>
+              <span class="tx-subtext">${tokenId ? '#' + tokenId : ''} Block #${blockNum} • ${short(txHash)}</span>
             </div>
             <div class="tx-right">
-              <button class="copy-btn" onclick="copyText('${transfer.tx_hash}', this)">Copy Hash</button>
-              <a href="https://apescan.io/tx/${transfer.tx_hash}" target="_blank" rel="noopener" class="apescan-link">ApeScan ↗</a>
+              <button class="copy-btn" onclick="copyText('${txHash}', this)">Copy</button>
+              <a href="https://apescan.io/tx/${txHash}" target="_blank" rel="noopener" class="apescan-link">↗</a>
             </div>
           `;
           list.appendChild(el);
@@ -731,13 +732,15 @@
         txItems.forEach(tx => {
           const val = Number(BigInt(tx.value || "0")) / 1e18;
           const isOut = tx.from?.hash?.toLowerCase() === WALLET.toLowerCase();
-          
+          const blockNum = tx.block || tx.block_number || "";
+          const methodName = tx.method || (isOut ? 'Sent APE' : 'Received APE');
+
           const el = document.createElement("div");
           el.className = "tx-item";
           el.innerHTML = `
             <div class="tx-left">
-              <span class="tx-type">${tx.method || (isOut ? 'Sent APE' : 'Received APE')}</span>
-              <span class="tx-subtext">Block #${tx.block} • ${short(tx.hash)}</span>
+              <span class="tx-type">${methodName}</span>
+              <span class="tx-subtext">Block #${blockNum} • ${short(tx.hash)}</span>
             </div>
             <div class="tx-right">
               <div class="tx-val" style="color: ${isOut ? 'var(--text)' : 'var(--green)'}">
@@ -759,19 +762,17 @@
       document.getElementById("tx-sheet").classList.remove("open");
     }
 
-    function openNftSheet(index) {
-      const nft = nfts[index];
-      if (!nft) return;
-      document.getElementById("nft-sheet-title").textContent = nft.name;
-      document.getElementById("nft-sheet-img").src = nft.image;
-      document.getElementById("nft-sheet-col").textContent = nft.collection;
-      document.getElementById("nft-sheet-id").textContent = `#${nft.id}`;
-      document.getElementById("nft-sheet-contract").textContent = nft.contract;
-      document.getElementById("nft-sheet").classList.add("open");
+    function openModal(nft) {
+      document.getElementById("modal-header-id").textContent = nft.name;
+      document.getElementById("modal-img").src = nft.image;
+      document.getElementById("modal-collection").textContent = nft.collection;
+      document.getElementById("modal-token-id").textContent = `#${nft.id}`;
+      document.getElementById("modal-contract").textContent = nft.contract;
+      document.getElementById("nft-modal").classList.add("open");
     }
 
-    function closeNftSheet() {
-      document.getElementById("nft-sheet").classList.remove("open");
+    function closeModal() {
+      document.getElementById("nft-modal").classList.remove("open");
     }
 
     function loadAll() {
