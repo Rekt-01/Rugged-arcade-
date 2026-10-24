@@ -16,7 +16,6 @@
       justify-content: center;
       font-family: 'Press Start 2P', monospace;
       color: #eee;
-      overflow: hidden;
     }
 
     .store {
@@ -42,7 +41,6 @@
       color: #888;
     }
 
-    /* Door */
     .door {
       width: 220px;
       height: 320px;
@@ -51,7 +49,7 @@
       border-radius: 8px 8px 4px 4px;
       margin: 0 auto 30px;
       position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,255,255,0.05);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
 
     .door-frame {
@@ -71,13 +69,8 @@
       background: #111;
       border: 3px solid #555;
       border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
     }
 
-    /* Hanging closed sign */
     .sign {
       position: absolute;
       top: 130px;
@@ -88,7 +81,7 @@
       padding: 12px 18px;
       font-size: 11px;
       border: 3px solid #990000;
-      box-shadow: 0 4px 0 #660000, 0 6px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 0 #660000;
       animation: swing 3s ease-in-out infinite;
       z-index: 2;
     }
@@ -108,7 +101,6 @@
       display: block;
       font-size: 7px;
       margin-top: 4px;
-      opacity: 0.9;
     }
 
     @keyframes swing {
@@ -124,10 +116,8 @@
       height: 40px;
       background: #888;
       border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
 
-    /* Connect button */
     .connect {
       display: inline-block;
       background: linear-gradient(180deg, #6a00ff, #4a00cc);
@@ -138,10 +128,43 @@
       font-size: 9px;
       cursor: pointer;
       border-radius: 6px;
-      box-shadow: 0 4px 0 #2a0066, 0 6px 15px rgba(106, 0, 255, 0.4);
-      transition: transform 0.1s;
+      box-shadow: 0 4px 0 #2a0066;
     }
 
-    .connect:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 0 #2a0066, 0 8px
+    .connect:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #2a0066;
+    }
+
+    .back {
+      display: block;
+      margin-top: 25px;
+      color: #00ffff;
+      font-size: 8px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="store">
+    <div class="header">
+      <h1>SHOP</h1>
+      <p>RUGGED ARCADE // WEB3 STORE</p>
+    </div>
+
+    <div class="door">
+      <div class="door-frame"></div>
+      <div class="window"></div>
+      <div class="sign">
+        CLOSED
+        <span>COMING SOON</span>
+      </div>
+      <div class="handle"></div>
+    </div>
+
+    <button class="connect" onclick="alert('Wallet connection coming soon')">CONNECT WALLET</button>
+
+    <a href="main.html" class="back">← BACK TO ARCADE</a>
+  </div>
+</body>
+</html>
