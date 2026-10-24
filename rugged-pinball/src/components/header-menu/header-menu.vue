@@ -48,7 +48,7 @@
                 </li>
                 <li>
                     <a
-                        href="/main.html"
+                        href="/Rugged-arcade-/main.html"
                         class="back-to-arcade"
                         title="Back to Arcade"
                     >Back to Arcade</a>
