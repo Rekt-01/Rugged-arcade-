@@ -125,6 +125,7 @@
       border: 1px solid var(--border);
       padding: 6px 10px;
       border-radius: 6px;
+      gap: 8px;
     }
 
     .addr-info {
@@ -283,8 +284,11 @@
     .nft-media-wrap {
       width: 100%;
       aspect-ratio: 1 / 1;
-      background: #000;
+      background: #0d0f14;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .nft-media-wrap img {
@@ -292,6 +296,14 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    .nft-placeholder {
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 600;
+      text-align: center;
+      padding: 12px;
     }
 
     .nft-info {
@@ -338,7 +350,7 @@
       border-top-right-radius: 14px;
       border: 1px solid var(--border);
       border-bottom: none;
-      max-height: 80vh;
+      max-height: 82vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -387,6 +399,9 @@
       font-weight: 600;
       font-size: 12px;
       color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tx-subtext {
@@ -398,7 +413,7 @@
     .tx-right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
@@ -519,7 +534,7 @@
         <button class="copy-btn" onclick="closeModal()">Done</button>
       </div>
       <div class="sheet-body">
-        <div style="width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; background:#000;">
+        <div style="width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; background:#0d0f14; display:flex; align-items:center; justify-content:center;">
           <img id="modal-img" style="width:100%; height:100%; object-fit:contain;" src="" alt="">
         </div>
         <div class="meta-box"><span class="meta-label">Collection</span><span class="meta-val" id="modal-collection">--</span></div>
@@ -547,19 +562,59 @@
     const RPC = "https://rpc.apechain.com/http";
     const API = "https://apechain.blockscout.com/api/v2";
 
+    // Active, working IPFS gateways (cloudflare-ipfs.com removed as it is dead)
+    const IPFS_GATEWAYS = [
+      "https://ipfs.io/ipfs/",
+      "https://dweb.link/ipfs/",
+      "https://w3s.link/ipfs/",
+      "https://4everland.io/ipfs/",
+      "https://gateway.pinata.cloud/ipfs/"
+    ];
+
     let nfts = [];
 
-    function formatMedia(url) {
-      if (!url) return "";
-      let str = String(url).trim();
-      if (str.startsWith("ipfs://ipfs/")) str = str.replace("ipfs://ipfs/", "");
-      else if (str.startsWith("ipfs://")) str = str.replace("ipfs://", "");
-      else if (str.startsWith("ar://")) return "https://arweave.net/" + str.replace("ar://", "");
-      
-      if (!str.startsWith("http")) {
-        return "https://cloudflare-ipfs.com/ipfs/" + str;
+    function extractIpfsPath(url) {
+      if (!url || typeof url !== "string") return null;
+      const s = url.trim();
+      if (s.startsWith("ipfs://ipfs/")) return s.slice(12);
+      if (s.startsWith("ipfs://")) return s.slice(7);
+      const idx = s.indexOf("/ipfs/");
+      if (idx !== -1) return s.slice(idx + 6);
+      if (/^(Qm[1-9A-HJ-NP-Za-km-z]{44}|baf[a-z0-9]+)/i.test(s)) return s;
+      return null;
+    }
+
+    function buildCandidateUrls(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== "string") return [];
+      const trimmed = rawUrl.trim();
+      if (!trimmed) return [];
+
+      if (trimmed.startsWith("data:")) return [trimmed];
+      if (trimmed.startsWith("ar://")) return ["https://arweave.net/" + trimmed.slice(5)];
+
+      const ipfsPath = extractIpfsPath(trimmed);
+      if (ipfsPath) {
+        return IPFS_GATEWAYS.map(gw => gw + ipfsPath);
       }
-      return str;
+
+      if (trimmed.startsWith("http")) {
+        return [
+          trimmed,
+          `https://wsrv.nl/?url=${encodeURIComponent(trimmed)}`
+        ];
+      }
+      return [];
+    }
+
+    async function fetchJsonWithFallback(rawUri) {
+      const candidates = buildCandidateUrls(rawUri);
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) return await res.json();
+        } catch (e) {}
+      }
+      return null;
     }
 
     function short(str) {
@@ -584,12 +639,26 @@
         const data = await res.json();
         const ape = Number(BigInt(data.result || "0x0")) / 1e18;
         document.getElementById("bal-ape").textContent = ape.toFixed(4);
-
-        const priceRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd");
-        const priceData = await priceRes.json();
-        const spot = priceData?.apecoin?.usd || 0;
-        document.getElementById("bal-usd").textContent = `$${(ape * spot).toFixed(2)} USD`;
         document.getElementById("net-dot").className = "dot";
+
+        let spot = 0;
+        try {
+          const priceRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd");
+          const priceData = await priceRes.json();
+          spot = priceData?.apecoin?.usd || 0;
+        } catch (e) {}
+
+        if (!spot) {
+          try {
+            const bsRes = await fetch(`${API}/addresses/${WALLET}`);
+            const bsData = await bsRes.json();
+            spot = parseFloat(bsData?.exchange_rate) || 0;
+          } catch (e) {}
+        }
+
+        if (spot > 0) {
+          document.getElementById("bal-usd").textContent = `$${(ape * spot).toFixed(2)} USD`;
+        }
       } catch (e) {
         document.getElementById("net-dot").className = "dot err";
       }
@@ -598,30 +667,71 @@
     async function getNfts() {
       const container = document.getElementById("nft-grid");
       try {
-        const res = await fetch(`${API}/addresses/${WALLET}/nft?type=ERC-721%2CERC-1155`);
-        const data = await res.json();
-        const items = data.items || [];
+        // Query Blockscout and Reservoir CDN in parallel
+        const [bsRes, resvRes] = await Promise.allSettled([
+          fetch(`${API}/addresses/${WALLET}/nft?type=ERC-721%2CERC-404%2CERC-1155`).then(r => r.json()),
+          fetch(`https://api-apechain.reservoir.tools/users/${WALLET}/tokens/v10?limit=100`).then(r => r.json())
+        ]);
+
+        const reservoirMap = {};
+        if (resvRes.status === "fulfilled" && Array.isArray(resvRes.value?.tokens)) {
+          resvRes.value.tokens.forEach(entry => {
+            const t = entry.token || {};
+            if (t.contract && t.tokenId !== undefined) {
+              const key = `${t.contract.toLowerCase()}_${t.tokenId}`;
+              reservoirMap[key] = t;
+            }
+          });
+        }
+
+        const items = (bsRes.status === "fulfilled" && Array.isArray(bsRes.value?.items))
+          ? bsRes.value.items
+          : [];
 
         nfts = items.map(item => {
           const meta = item.metadata || {};
-          let img = item.image_url || meta.image || meta.image_url || meta.display_image_url || "";
-          
-          // Hardcoded fallback mapping for specific unindexed items if image is empty
-          if (!img && item.token?.address?.toLowerCase() === "0x535fd28929944a9e5264b36c6411dd78e3fa52a3" && item.id == "577") {
-            img = "https://cloudflare-ipfs.com/ipfs/bafybeicwhs6n52s3mfx75v723z7f6p7w25t4m27r7q2k7v6m5n43q25mbi/577.png";
-          }
+          const contract = item.token?.address || item.token?.address_hash || "";
+          const id = String(item.id ?? "0");
+          const key = `${contract.toLowerCase()}_${id}`;
+          const resvToken = reservoirMap[key] || {};
+
+          const rawImages = [
+            resvToken.image,
+            resvToken.imageSmall,
+            item.image_url,
+            item.media_url,
+            meta.image,
+            meta.image_url,
+            meta.display_image_url,
+            meta.animation_url
+          ].filter(Boolean);
+
+          const candidateSet = new Set();
+          rawImages.forEach(raw => {
+            buildCandidateUrls(raw).forEach(u => candidateSet.add(u));
+          });
+          const candidates = Array.from(candidateSet);
 
           return {
-            id: String(item.id || "0"),
-            name: meta.name || `${item.token?.name || "NFT"} #${item.id}`,
-            collection: item.token?.name || "Unknown",
-            contract: item.token?.address || "",
-            image: formatMedia(img)
+            id,
+            name: meta.name || resvToken.name || `${item.token?.name || "NFT"} #${id}`,
+            collection: item.token?.name || resvToken.collection?.name || "Unknown",
+            contract,
+            candidates,
+            image: candidates[0] || "",
+            resolvedOnChain: false
           };
         });
 
         document.getElementById("nft-count").textContent = `${nfts.length} Items`;
         renderNfts();
+
+        // Immediately resolve on-chain metadata for any item without candidate URLs
+        nfts.forEach((nft, index) => {
+          if (nft.candidates.length === 0) {
+            resolveNftMetadata(index);
+          }
+        });
 
       } catch (e) {
         container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 30px 0; color:var(--red);">Failed to load NFTs.</div>`;
@@ -638,34 +748,168 @@
       nfts.forEach((nft, index) => {
         const card = document.createElement("div");
         card.className = "nft-card";
-        card.onclick = () => openModal(nft);
-        card.innerHTML = `
-          <div class="nft-media-wrap">
-            <img src="${nft.image}" onerror="handleImageError(this, '${nft.image}')" loading="lazy" alt="${nft.name}">
-          </div>
-          <div class="nft-info">
-            <span class="nft-col-name">${nft.collection}</span>
-            <span class="nft-title">${nft.name}</span>
-          </div>
+        card.onclick = () => openModal(index);
+
+        const mediaWrap = document.createElement("div");
+        mediaWrap.className = "nft-media-wrap";
+        mediaWrap.id = `media-wrap-${index}`;
+
+        if (nft.image) {
+          const img = document.createElement("img");
+          img.id = `nft-img-${index}`;
+          img.src = nft.image;
+          img.alt = nft.name;
+          img.loading = "lazy";
+          img.dataset.step = "0";
+          img.onerror = () => stepNextGateway(index, img);
+          mediaWrap.appendChild(img);
+        } else {
+          mediaWrap.innerHTML = `<div class="nft-placeholder">Loading #${nft.id}...</div>`;
+        }
+
+        const info = document.createElement("div");
+        info.className = "nft-info";
+        info.innerHTML = `
+          <span class="nft-col-name">${nft.collection}</span>
+          <span class="nft-title" id="nft-title-${index}">${nft.name}</span>
         `;
+
+        card.appendChild(mediaWrap);
+        card.appendChild(info);
         container.appendChild(card);
       });
     }
 
-    function handleImageError(imgEl, originalUrl) {
-      if (originalUrl.includes("cloudflare-ipfs.com")) {
-        imgEl.src = originalUrl.replace("cloudflare-ipfs.com", "gateway.pinata.cloud");
-      } else if (originalUrl.includes("gateway.pinata.cloud")) {
-        imgEl.src = originalUrl.replace("gateway.pinata.cloud", "ipfs.io");
-      } else if (originalUrl.includes("ipfs.io")) {
-        imgEl.src = originalUrl.replace("ipfs.io", "dweb.link");
-      } else if (originalUrl.includes("/ipfs/")) {
-        const hash = originalUrl.split("/ipfs/")[1];
-        imgEl.src = "https://nftstorage.link/ipfs/" + hash;
+    function stepNextGateway(index, imgEl) {
+      const nft = nfts[index];
+      if (!nft) return;
+
+      const nextStep = parseInt(imgEl.dataset.step || "0", 10) + 1;
+      imgEl.dataset.step = String(nextStep);
+
+      if (nextStep < nft.candidates.length) {
+        nft.image = nft.candidates[nextStep];
+        imgEl.src = nft.image;
+      } else if (!nft.resolvedOnChain) {
+        resolveNftMetadata(index);
       } else {
-        // Fallback to Blockscout instance image proxy if all gateways fail
-        imgEl.src = `https://apescan.io/images/default-nft.png`;
+        const wrap = document.getElementById(`media-wrap-${index}`);
+        if (wrap) wrap.innerHTML = `<div class="nft-placeholder">${nft.name}</div>`;
       }
+    }
+
+    async function resolveNftMetadata(index) {
+      const nft = nfts[index];
+      if (!nft || nft.resolvedOnChain || !nft.contract) return;
+      nft.resolvedOnChain = true;
+
+      try {
+        // 1. Try Blockscout single instance endpoint first
+        try {
+          const instRes = await fetch(`${API}/tokens/${nft.contract}/instances/${nft.id}`);
+          if (instRes.ok) {
+            const inst = await instRes.json();
+            const instMeta = inst.metadata || {};
+            const rawImg = inst.image_url || inst.media_url || instMeta.image || instMeta.image_url;
+            if (rawImg) {
+              const newUrls = buildCandidateUrls(rawImg);
+              if (newUrls.length > 0) {
+                nft.candidates = newUrls;
+                nft.image = newUrls[0];
+                updateCardImage(index);
+                return;
+              }
+            }
+          }
+        } catch (e) {}
+
+        // 2. Fallback to direct on-chain tokenURI (ERC-721: 0xc87b56dd) or uri (ERC-1155: 0x0e89341c)
+        const tokenIdHex = BigInt(nft.id).toString(16).padStart(64, "0");
+        let hexResult = null;
+
+        for (const selector of ["0xc87b56dd", "0x0e89341c"]) {
+          const res = await fetch(RPC, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method: "eth_call",
+              params: [{ to: nft.contract, data: selector + tokenIdHex }, "latest"],
+              id: 88
+            })
+          });
+          const data = await res.json();
+          if (data?.result && data.result !== "0x" && data.result.length > 130) {
+            hexResult = data.result;
+            break;
+          }
+        }
+
+        if (!hexResult) return;
+
+        let uri = decodeAbiString(hexResult);
+        if (!uri) return;
+        uri = uri.replace("{id}", tokenIdHex);
+
+        let metaJson = null;
+        if (uri.startsWith("data:application/json;base64,")) {
+          metaJson = JSON.parse(atob(uri.split(",")[1]));
+        } else if (uri.startsWith("data:application/json,")) {
+          metaJson = JSON.parse(decodeURIComponent(uri.split(",")[1]));
+        } else {
+          metaJson = await fetchJsonWithFallback(uri);
+        }
+
+        if (metaJson) {
+          const rawImg = metaJson.image || metaJson.image_url || metaJson.image_data || metaJson.animation_url;
+          if (metaJson.name) {
+            nft.name = metaJson.name;
+            const titleEl = document.getElementById(`nft-title-${index}`);
+            if (titleEl) titleEl.textContent = nft.name;
+          }
+          if (rawImg) {
+            const newUrls = buildCandidateUrls(rawImg);
+            if (newUrls.length > 0) {
+              nft.candidates = newUrls;
+              nft.image = newUrls[0];
+              updateCardImage(index);
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    function decodeAbiString(hex) {
+      try {
+        const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
+        if (clean.length < 128) return "";
+        const offsetBytes = parseInt(clean.slice(0, 64), 16);
+        const lengthStart = offsetBytes * 2;
+        const strByteLen = parseInt(clean.slice(lengthStart, lengthStart + 64), 16);
+        const strHex = clean.slice(lengthStart + 64, lengthStart + 64 + strByteLen * 2);
+        const bytes = new Uint8Array(strHex.length / 2);
+        for (let i = 0; i < strHex.length; i += 2) {
+          bytes[i / 2] = parseInt(strHex.substr(i, 2), 16);
+        }
+        return new TextDecoder().decode(bytes).replace(/\0/g, "").trim();
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function updateCardImage(index) {
+      const nft = nfts[index];
+      const wrap = document.getElementById(`media-wrap-${index}`);
+      if (!wrap || !nft || !nft.image) return;
+
+      wrap.innerHTML = "";
+      const img = document.createElement("img");
+      img.id = `nft-img-${index}`;
+      img.src = nft.image;
+      img.alt = nft.name;
+      img.dataset.step = "0";
+      img.onerror = () => stepNextGateway(index, img);
+      wrap.appendChild(img);
     }
 
     async function openTxSheet() {
@@ -674,37 +918,54 @@
       list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">Loading history...</div>`;
 
       try {
-        const [txRes, transRes] = await Promise.all([
-          fetch(`${API}/addresses/${WALLET}/transactions`),
-          fetch(`${API}/addresses/${WALLET}/token-transfers`)
+        // Fetch NFT transfers, Token transfers, and native Transactions concurrently
+        const [nftTransRes, tokTransRes, txRes] = await Promise.allSettled([
+          fetch(`${API}/addresses/${WALLET}/nft/transfers`).then(r => r.json()),
+          fetch(`${API}/addresses/${WALLET}/token-transfers`).then(r => r.json()),
+          fetch(`${API}/addresses/${WALLET}/transactions`).then(r => r.json())
         ]);
 
-        const txData = await txRes.json();
-        const transData = await transRes.json();
+        const nftTransfers = nftTransRes.status === "fulfilled" ? (nftTransRes.value?.items || []) : [];
+        const tokTransfers = tokTransRes.status === "fulfilled" ? (tokTransRes.value?.items || []) : [];
+        const txItems = txRes.status === "fulfilled" ? (txRes.value?.items || []) : [];
 
-        const txItems = txData.items || [];
-        const transItems = transData.items || [];
+        // Combine and deduplicate NFT/Token transfers
+        const seenTransfers = new Set();
+        const combinedTransfers = [];
 
-        if (txItems.length === 0 && transItems.length === 0) {
+        [...nftTransfers, ...tokTransfers].forEach(item => {
+          const txHash = item.tx_hash || item.transaction_hash || "";
+          const tokenId = item.total?.token_id || item.token_id || "";
+          const key = `${txHash}_${item.token?.address || ""}_${tokenId}`;
+          if (txHash && !seenTransfers.has(key)) {
+            seenTransfers.add(key);
+            combinedTransfers.push(item);
+          }
+        });
+
+        if (combinedTransfers.length === 0 && txItems.length === 0) {
           list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-sub);">No transactions found.</div>`;
           return;
         }
 
         list.innerHTML = "";
 
-        transItems.forEach(item => {
+        // 1. Render NFT & Token Transfers (Incoming & Outgoing)
+        combinedTransfers.forEach(item => {
           const isReceive = item.to?.hash?.toLowerCase() === WALLET.toLowerCase();
-          const tokenName = item.token?.name || item.token?.symbol || "NFT/Token";
+          const tokenName = item.token?.name || item.token?.symbol || "Collectible";
           const tokenId = item.total?.token_id || item.token_id || "";
-          const txHash = item.tx_hash || item.transaction_hash;
-          const blockNum = item.block || item.block_number || "";
+          const txHash = item.tx_hash || item.transaction_hash || "";
+          const blockNum = item.block_number || item.block || "";
 
           const el = document.createElement("div");
           el.className = "tx-item";
           el.innerHTML = `
             <div class="tx-left">
-              <span class="tx-type" style="color: ${isReceive ? 'var(--green)' : 'var(--amber)'};">${isReceive ? '📥 Received' : '📤 Sent'} ${tokenName}</span>
-              <span class="tx-subtext">${tokenId ? '#' + tokenId : ''} Block #${blockNum} • ${short(txHash)}</span>
+              <span class="tx-type" style="color: ${isReceive ? 'var(--green)' : 'var(--amber)'};">
+                ${isReceive ? '📥 Received' : '📤 Sent'} ${tokenName} ${tokenId ? '#' + tokenId : ''}
+              </span>
+              <span class="tx-subtext">${blockNum ? 'Block #' + blockNum + ' • ' : ''}${short(txHash)}</span>
             </div>
             <div class="tx-right">
               <button class="copy-btn" onclick="copyText('${txHash}', this)">Copy</button>
@@ -714,10 +975,11 @@
           list.appendChild(el);
         });
 
+        // 2. Render Native APE Transactions
         txItems.forEach(tx => {
           const val = Number(BigInt(tx.value || "0")) / 1e18;
           const isOut = tx.from?.hash?.toLowerCase() === WALLET.toLowerCase();
-          const blockNum = tx.block || tx.block_number || "";
+          const blockNum = tx.block_number || tx.block || "";
           const methodName = tx.method || (isOut ? 'Sent APE' : 'Received APE');
 
           const el = document.createElement("div");
@@ -725,7 +987,7 @@
           el.innerHTML = `
             <div class="tx-left">
               <span class="tx-type">${methodName}</span>
-              <span class="tx-subtext">Block #${blockNum} • ${short(tx.hash)}</span>
+              <span class="tx-subtext">${blockNum ? 'Block #' + blockNum + ' • ' : ''}${short(tx.hash)}</span>
             </div>
             <div class="tx-right">
               <div class="tx-val" style="color: ${isOut ? 'var(--text)' : 'var(--green)'}">
@@ -747,9 +1009,12 @@
       document.getElementById("tx-sheet").classList.remove("open");
     }
 
-    function openModal(nft) {
+    function openModal(index) {
+      const nft = nfts[index];
+      if (!nft) return;
       document.getElementById("modal-header-id").textContent = nft.name;
-      document.getElementById("modal-img").src = nft.image;
+      const modalImg = document.getElementById("modal-img");
+      modalImg.src = nft.image || "";
       document.getElementById("modal-collection").textContent = nft.collection;
       document.getElementById("modal-token-id").textContent = `#${nft.id}`;
       document.getElementById("modal-contract").textContent = nft.contract;
