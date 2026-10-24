@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rugged Arcade</title>
-  <!-- Retro Pixel Font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     * {
@@ -23,7 +22,6 @@
       overflow-x: hidden;
     }
 
-    /* Main container that locks hotspots to the image proportions */
     .arcade-container {
       position: relative;
       width: 100%;
@@ -38,9 +36,6 @@
       height: auto;
     }
 
-    /* ==========================================
-       TEAM WALLET RETRO HUD (TOP LEFT)
-       ========================================== */
     .treasury-hud {
       position: absolute;
       top: 2.5%;
@@ -99,7 +94,6 @@
       50% { opacity: 0.3; }
     }
 
-    /* Clickable Hotspots */
     .hotspot {
       position: absolute;
       display: block;
@@ -140,9 +134,6 @@
       opacity: 1;
     }
 
-    /* ==========================================
-       HOTSPOT COORDINATES
-       ========================================== */
     .leaderboard { top: 21%; left: 2%; width: 22%; height: 23%; }
     .spaceman { top: 3%; left: 76%; width: 22%; height: 29%; }
     .shop-sign { top: 29%; left: 75%; width: 24%; height: 12%; }
@@ -156,9 +147,6 @@
     .arcade-4 { top: 53%; left: 65%; width: 24%; height: 28%; }
     .arcade-5 { top: 58%; left: 83%; width: 16%; height: 36%; }
 
-    /* ==========================================
-       SHOPKEEPER GIRL & PIXEL SPEECH BUBBLE
-       ========================================== */
     .shopkeeper-trigger {
       position: absolute;
       top: 47%;
@@ -169,22 +157,23 @@
       z-index: 20;
     }
 
+    /* Speech bubble moved lower and further left so it doesn't cover the jukebox */
     .speech-bubble {
       position: absolute;
-      top: 40.5%;
-      right: 12%;
-      width: 44%;
+      top: 58%;
+      right: 28%;
+      width: 38%;
       background: #ffffff;
       color: #000000;
       border: 3px solid #000000;
       padding: 8px;
-      font-size: 7.5px;
+      font-size: 7px;
       line-height: 1.5;
       text-align: center;
       box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.75);
       z-index: 25;
       cursor: pointer;
-      display: none; /* Hidden by default until JS triggers it on load */
+      display: none;
       animation: floatBubble 2.5s ease-in-out infinite;
     }
 
@@ -196,7 +185,7 @@
       content: '';
       position: absolute;
       bottom: -10px;
-      right: 18px;
+      right: 40px;
       border-width: 10px 8px 0;
       border-style: solid;
       border-color: #ffffff transparent;
@@ -209,7 +198,7 @@
       content: '';
       position: absolute;
       bottom: -14px;
-      right: 15px;
+      right: 37px;
       border-width: 13px 11px 0;
       border-style: solid;
       border-color: #000000 transparent;
@@ -227,10 +216,8 @@
 <body>
 
   <div class="arcade-container">
-    <!-- Main Background Image -->
     <img src="IMG_5676.jpeg" alt="Rugged Arcade" class="arcade-bg">
 
-    <!-- Links directly to wallet.html -->
     <a href="wallet.html" 
        class="treasury-hud"
        title="Open Team Vault & NFT Inventory">
@@ -246,13 +233,11 @@
       </div>
     </a>
 
-    <!-- Speech Bubble for the Girl Behind the Counter -->
     <div class="speech-bubble" id="speechBubble" title="Click for next message">
       Welcome to rugged orphans arcade. Click the items to explore more . Click me again for more information.
     </div>
     <div class="shopkeeper-trigger" id="shopkeeper" title="Talk to Clerk"></div>
 
-    <!-- Clickable Links -->
     <a href="leaderboard.html" class="hotspot leaderboard" data-label="LEADERBOARD"></a>
     <a href="nft.html" class="hotspot spaceman" data-label="NFTs"></a>
     <a href="shop.html" class="hotspot shop-sign" data-label="PRIZES / SHOP"></a>
@@ -261,7 +246,6 @@
     <a href="radio.html" class="hotspot jukebox" data-label="RADIO JUKEBOX"></a>
     <a href="pc.html" class="hotspot retro-pc" data-label="PC TERMINAL (pc.html)"></a>
 
-    <!-- Arcade Machines 1 - 5 -->
     <a href="arcade1.html" class="hotspot arcade-1" data-label="ARCADE 1"></a>
     <a href="arcade2.html" class="hotspot arcade-2" data-label="ARCADE 2"></a>
     <a href="arcade-3.html" class="hotspot arcade-3" data-label="ARCADE 3"></a>
@@ -274,8 +258,7 @@
       "Welcome to rugged orphans arcade. Click the items to explore more . Click me again for more information.",
       "Check out the toilet! It was the last place I seen the dev... 🚽👀",
       "Go inspect the jukebox and the PC terminal! 📻💻",
-      "Some of our games are broken—don’t put your money in, they will rug you! 🎰💀",
-      "It's all funny and degen here. Certified for the rugged orphans NFT project! 🦍💎"
+      "Some of our games are broken—don’t put your money in, they will rug you! 🎰💀"
     ];
 
     let currentIndex = 0;
@@ -283,25 +266,20 @@
     const clerk = document.getElementById('shopkeeper');
     let hideTimer = null;
 
-    // Show initial welcome message on page load
     function showWelcomeMessage() {
       currentIndex = 0;
       bubble.textContent = phrases[currentIndex];
       bubble.classList.add('active');
 
-      // Clear any existing timer
       if (hideTimer) clearTimeout(hideTimer);
 
-      // Hide after 6 seconds giving users enough time to read
       hideTimer = setTimeout(() => {
         bubble.classList.remove('active');
       }, 6000);
     }
 
-    // Handle clicks on girl or bubble to interact/cycle
     function handleInteraction() {
       if (!bubble.classList.contains('active')) {
-        // If hidden, show next message and start read timer
         currentIndex = (currentIndex + 1) % phrases.length;
         bubble.textContent = phrases[currentIndex];
         bubble.classList.add('active');
@@ -311,7 +289,6 @@
           bubble.classList.remove('active');
         }, 6000);
       } else {
-        // If already visible, cycle immediately to next message
         currentIndex = (currentIndex + 1) % phrases.length;
         bubble.textContent = phrases[currentIndex];
 
@@ -325,14 +302,10 @@
     bubble.addEventListener('click', handleInteraction);
     clerk.addEventListener('click', handleInteraction);
 
-    // Trigger welcome message on page load
     window.addEventListener('load', () => {
       showWelcomeMessage();
     });
 
-    // ==========================================
-    // LIVE APECHAIN TEAM WALLET FETCHER
-    // ==========================================
     const TEAM_WALLET = "0xf3e5ec8b4aaab49186486965529e07b5f61f9020";
     const APECHAIN_RPC = "https://rpc.apechain.com/http";
     let clerkPhraseAdded = false;
