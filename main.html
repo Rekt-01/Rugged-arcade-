@@ -89,6 +89,14 @@
       color: #b3a4c9;
     }
 
+    .click-here {
+      font-size: 6px;
+      color: #ffff00;
+      text-align: center;
+      margin-top: 2px;
+      animation: blinkDot 1.2s infinite;
+    }
+
     @keyframes blinkDot {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
@@ -159,9 +167,9 @@
 
     .speech-bubble {
       position: absolute;
-      top: 52%;
-      right: 12%;
-      width: 30%;
+      top: 50%;
+      right: 14%;
+      width: 28%;
       background: #ffffff;
       color: #000000;
       border: 3px solid #000000;
@@ -184,7 +192,7 @@
       content: '';
       position: absolute;
       top: -9px;
-      right: 22px;
+      right: 18px;
       border-width: 0 7px 9px;
       border-style: solid;
       border-color: transparent transparent #ffffff transparent;
@@ -197,7 +205,7 @@
       content: '';
       position: absolute;
       top: -13px;
-      right: 19px;
+      right: 15px;
       border-width: 0 10px 12px;
       border-style: solid;
       border-color: transparent transparent #000000 transparent;
@@ -230,6 +238,7 @@
       <div class="treasury-usd" id="ape-usd">
         OPEN VAULT ▸
       </div>
+      <div class="click-here">CLICK HERE</div>
     </a>
 
     <div class="speech-bubble" id="speechBubble" title="Click for next message">
