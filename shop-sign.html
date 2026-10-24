@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — Rugged Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d061a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      color: #eee;
+      overflow: hidden;
+    }
+
+    .store {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 8px;
+      color: #888;
+    }
+
+    /* Door */
+    .door {
+      width: 220px;
+      height: 320px;
+      background: linear-gradient(180deg, #1a1a2e, #0f0f1a);
+      border: 6px solid #333;
+      border-radius: 8px 8px 4px 4px;
+      margin: 0 auto 30px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,255,255,0.05);
+    }
+
+    .door-frame {
+      position: absolute;
+      inset: 8px;
+      border: 2px solid #444;
+      border-radius: 4px;
+    }
+
+    .window {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 90px;
+      background: #111;
+      border: 3px solid #555;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    /* Hanging closed sign */
+    .sign {
+      position: absolute;
+      top: 130px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      background: #cc0000;
+      color: #fff;
+      padding: 12px 18px;
+      font-size: 11px;
+      border: 3px solid #990000;
+      box-shadow: 0 4px 0 #660000, 0 6px 15px rgba(0,0,0,0.5);
+      animation: swing 3s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    .sign::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 14px;
+      background: #666;
+    }
+
+    .sign span {
+      display: block;
+      font-size: 7px;
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+
+    @keyframes swing {
+      0%, 100% { transform: translateX(-50%) rotate(-3deg); }
+      50% { transform: translateX(-50%) rotate(3deg); }
+    }
+
+    .handle {
+      position: absolute;
+      bottom: 40px;
+      right: 25px;
+      width: 12px;
+      height: 40px;
+      background: #888;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    /* Connect button */
+    .connect {
+      display: inline-block;
+      background: linear-gradient(180deg, #6a00ff, #4a00cc);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      cursor: pointer;
+      border-radius: 6px;
+      box-shadow: 0 4px 0 #2a0066, 0 6px 15px rgba(106, 0, 255, 0.4);
+      transition: transform 0.1s;
+    }
+
+    .connect:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #2a0066, 0 8px
