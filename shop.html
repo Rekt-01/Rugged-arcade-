@@ -4,167 +4,97 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop — Rugged Arcade</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #0d061a;
+      background: #0f0f12;
+      color: #e8e8e8;
+      font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      font-family: 'Press Start 2P', monospace;
-      color: #eee;
+      padding: 16px 24px;
+      border-bottom: 1px solid #222;
     }
 
-    .store {
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .header {
-      margin-bottom: 30px;
-    }
-
-    .header h1 {
-      font-size: 18px;
-      color: #00ffff;
-      text-shadow: 0 0 10px #00ffff;
-      margin-bottom: 8px;
-    }
-
-    .header p {
-      font-size: 8px;
-      color: #888;
-    }
-
-    .door {
-      width: 220px;
-      height: 320px;
-      background: linear-gradient(180deg, #1a1a2e, #0f0f1a);
-      border: 6px solid #333;
-      border-radius: 8px 8px 4px 4px;
-      margin: 0 auto 30px;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-
-    .door-frame {
-      position: absolute;
-      inset: 8px;
-      border: 2px solid #444;
-      border-radius: 4px;
-    }
-
-    .window {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 140px;
-      height: 90px;
-      background: #111;
-      border: 3px solid #555;
-      border-radius: 4px;
-    }
-
-    .sign {
-      position: absolute;
-      top: 130px;
-      left: 50%;
-      transform: translateX(-50%) rotate(-3deg);
-      background: #cc0000;
-      color: #fff;
-      padding: 12px 18px;
-      font-size: 11px;
-      border: 3px solid #990000;
-      box-shadow: 0 4px 0 #660000;
-      animation: swing 3s ease-in-out infinite;
-      z-index: 2;
-    }
-
-    .sign::before {
-      content: "";
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 14px;
-      background: #666;
-    }
-
-    .sign span {
-      display: block;
-      font-size: 7px;
-      margin-top: 4px;
-    }
-
-    @keyframes swing {
-      0%, 100% { transform: translateX(-50%) rotate(-3deg); }
-      50% { transform: translateX(-50%) rotate(3deg); }
-    }
-
-    .handle {
-      position: absolute;
-      bottom: 40px;
-      right: 25px;
-      width: 12px;
-      height: 40px;
-      background: #888;
-      border-radius: 4px;
+    .chain {
+      font-size: 13px;
+      font-weight: 600;
+      color: #aaa;
+      letter-spacing: 0.5px;
     }
 
     .connect {
-      display: inline-block;
-      background: linear-gradient(180deg, #6a00ff, #4a00cc);
-      color: #fff;
+      background: #fff;
+      color: #000;
       border: none;
-      padding: 14px 28px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 9px;
-      cursor: pointer;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
       border-radius: 6px;
-      box-shadow: 0 4px 0 #2a0066;
+      cursor: pointer;
     }
 
-    .connect:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #2a0066;
+    .connect:hover {
+      background: #eee;
+    }
+
+    .center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .center h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    .center p {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
     }
 
     .back {
       display: block;
-      margin-top: 25px;
-      color: #00ffff;
-      font-size: 8px;
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: #666;
       text-decoration: none;
+    }
+
+    .back:hover {
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="store">
-    <div class="header">
-      <h1>SHOP</h1>
-      <p>RUGGED ARCADE // WEB3 STORE</p>
-    </div>
-
-    <div class="door">
-      <div class="door-frame"></div>
-      <div class="window"></div>
-      <div class="sign">
-        CLOSED
-        <span>COMING SOON</span>
-      </div>
-      <div class="handle"></div>
-    </div>
-
-    <button class="connect" onclick="alert('Wallet connection coming soon')">CONNECT WALLET</button>
-
-    <a href="main.html" class="back">← BACK TO ARCADE</a>
+  <div class="top-bar">
+    <div class="chain">APECHAIN</div>
+    <button class="connect" onclick="alert('Wallet connection coming soon')">Connect Wallet</button>
   </div>
+
+  <div class="center">
+    <div>
+      <h1>Coming Soon</h1>
+      <p>Rugged Arcade Shop</p>
+    </div>
+  </div>
+
+  <a href="main.html" class="back">← Back to Arcade</a>
 </body>
 </html>
