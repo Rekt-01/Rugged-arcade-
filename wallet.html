@@ -3,25 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>VAULT // 0xf3e5...9020 — PORTFOLIO DASHBOARD</title>
+  <title>Wallet Vault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #0f1117;
-      --bg-panel: #161922;
-      --bg-hover: #1e222f;
-      --border: #2c3142;
-      --border-focus: #3b82f6;
-      --text-primary: #f3f4f6;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
-      --accent: #3b82f6;
+      --bg: #0a0b0e;
+      --card: #14161d;
+      --card-muted: #1c1f2a;
+      --border: #232736;
+      --text: #ffffff;
+      --text-sub: #8d93a5;
+      --blue: #2563eb;
       --green: #10b981;
       --red: #ef4444;
-      --font-sans: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
     }
 
     * {
@@ -31,948 +28,575 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-      height: 100vh;
-      max-height: 100vh;
-      overflow: hidden;
-      background-color: var(--bg-base);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      font-size: 12px;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .app-layout {
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      max-width: 1440px;
+    }
+
+    .app {
+      max-width: 480px;
+      width: 100%;
       margin: 0 auto;
-      padding: 8px;
-      gap: 8px;
-    }
-
-    .topbar {
+      padding: 14px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 12px;
-      height: 38px;
-      flex-shrink: 0;
-    }
-
-    .topbar-left, .topbar-right {
-      display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 12px;
     }
 
-    .back-btn, .history-trigger-btn {
-      color: var(--text-secondary);
-      background: transparent;
-      border: none;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 11px;
-      cursor: pointer;
-      font-family: var(--font-sans);
-    }
-    .back-btn:hover, .history-trigger-btn:hover { color: var(--text-primary); }
-
-    .history-trigger-btn {
-      background: var(--bg-hover);
-      border: 1px solid var(--border);
-      padding: 2px 8px;
-      border-radius: 4px;
-      color: var(--accent);
-    }
-
-    .sys-title {
-      font-weight: 600;
-      font-size: 12px;
-    }
-
-    .telemetry-item {
+    .nav {
       display: flex;
       align-items: center;
-      gap: 5px;
-      color: var(--text-secondary);
-      font-size: 11px;
-      font-family: var(--font-mono);
+      justify-content: space-between;
+      height: 36px;
     }
-    .telemetry-item strong { color: var(--text-primary); }
 
-    .status-dot {
-      width: 5px;
-      height: 5px;
+    .nav-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--green);
-      display: inline-block;
     }
-    .status-dot.loading { background: #f59e0b; }
-    .status-dot.error { background: var(--red); }
+    .dot.err { background: var(--red); }
 
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1.6fr 1fr 1fr 1fr;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .metric-card {
-      background: var(--bg-panel);
+    .wallet-card {
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 12px;
+      border-radius: var(--radius);
+      padding: 16px;
       display: flex;
       flex-direction: column;
+      gap: 14px;
+    }
+
+    .addr-row {
+      display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
-    .metric-label {
-      font-size: 10px;
+    .addr-pill {
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--text-sub);
       font-weight: 500;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 2px;
     }
 
-    .metric-value-row {
+    .copy-btn {
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .balance-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bal-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .bal-amt {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       display: flex;
       align-items: baseline;
       gap: 6px;
     }
 
-    .metric-primary {
-      font-size: 16px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-    }
-
-    .metric-sub {
-      font-size: 10px;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2px;
-    }
-
-    .address-box {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .address-text {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-primary);
+    .bal-amt span {
+      font-size: 15px;
+      color: var(--text-sub);
       font-weight: 500;
     }
 
-    .btn-action {
-      background: var(--bg-hover);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
+    .bal-sub {
+      font-size: 13px;
+      color: var(--green);
       font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      transition: background 0.15s;
     }
-    .btn-action:hover { background: var(--border); }
 
-    .erc20-bar {
-      display: none;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      align-items: center;
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
-      flex-shrink: 0;
-    }
-    .erc20-bar.visible { display: flex; }
-    .erc20-pill {
-      background: var(--bg-hover);
-      border: 1px solid var(--border);
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      font-size: 10px;
+      margin-top: 4px;
     }
 
-    .control-bar {
+    .btn-main {
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-main:hover { background: var(--border); }
+    .btn-main.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .section-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--bg-panel);
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .count-badge {
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      flex-shrink: 0;
-    }
-
-    .collection-tabs {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-secondary);
+      padding: 2px 8px;
+      border-radius: 12px;
       font-size: 11px;
-      font-weight: 500;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .tab-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
-    .tab-btn.active { background: var(--accent); color: #fff; }
-
-    .tab-count {
-      font-size: 9px;
-      background: rgba(0,0,0,0.2);
-      padding: 1px 4px;
-      border-radius: 8px;
-      margin-left: 3px;
-    }
-
-    .control-right {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .search-input {
-      background: var(--bg-base);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      width: 180px;
-      outline: none;
-    }
-    .search-input:focus { border-color: var(--border-focus); }
-
-    .view-toggle {
-      display: flex;
-      background: var(--bg-base);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .view-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 10px;
-      font-weight: 500;
-      padding: 4px 8px;
-      cursor: pointer;
-    }
-    .view-btn.active { background: var(--bg-hover); color: var(--text-primary); }
-
-    .inventory-container {
-      flex: 1;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow-y: auto;
-      padding: 8px;
-      min-height: 0;
+      color: var(--text);
     }
 
     .nft-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
 
     .nft-card {
-      background: var(--bg-base);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: var(--radius);
       overflow: hidden;
-      cursor: pointer;
       display: flex;
       flex-direction: column;
-      transition: border-color 0.15s;
+      cursor: pointer;
     }
-    .nft-card:hover { border-color: var(--border-focus); }
 
     .nft-media-wrap {
-      position: relative;
       width: 100%;
       aspect-ratio: 1 / 1;
       background: #000;
-      overflow: hidden;
+      position: relative;
     }
 
-    .nft-media {
+    .nft-media-wrap img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
     }
 
-    .nft-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 9px;
-      gap: 2px;
-    }
-
-    .nft-badge-top {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      background: rgba(15, 17, 23, 0.85);
-      border: 1px solid var(--border);
-      padding: 1px 4px;
-      border-radius: 3px;
-      font-size: 9px;
-      color: var(--text-secondary);
-    }
-
-    .nft-meta {
-      padding: 6px 8px;
+    .nft-info {
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
 
-    .nft-collection-name {
-      font-size: 9px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .nft-name-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 4px;
-    }
-
-    .nft-name {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .nft-id {
+    .nft-col-name {
       font-size: 10px;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .nft-table-wrap {
-      display: none;
-      width: 100%;
-      overflow-x: auto;
+    .nft-title {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .nft-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 11px;
-    }
-
-    .nft-table th {
-      background: var(--bg-base);
-      color: var(--text-secondary);
-      font-weight: 500;
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nft-table td {
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-      font-family: var(--font-mono);
-    }
-    .nft-table tr:hover { background: var(--bg-hover); cursor: pointer; }
-
-    .table-thumb {
-      width: 26px;
-      height: 26px;
-      border-radius: 3px;
-      object-fit: cover;
-    }
-
-    .state-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 30px;
-      text-align: center;
-      gap: 6px;
-      color: var(--text-secondary);
-    }
-
-    .load-more-wrap {
-      display: none;
-      justify-content: center;
-      padding-top: 8px;
-    }
-    .load-more-wrap.visible { display: flex; }
-
-    .modal-backdrop {
+    .sheet-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 17, 23, 0.8);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.7);
       z-index: 100;
       display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 12px;
+      align-items: flex-end;
     }
-    .modal-backdrop.open { display: flex; }
+    .sheet-backdrop.open { display: flex; }
 
-    .modal-window {
+    .sheet {
       width: 100%;
-      max-width: 700px;
-      max-height: 85vh;
-      background: var(--bg-panel);
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--card);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-bottom: none;
+      max-height: 85vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      animation: slideUp 0.2s ease-out;
     }
 
-    .modal-header {
-      background: var(--bg-base);
-      border-bottom: 1px solid var(--border);
-      padding: 8px 12px;
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .modal-body {
-      display: grid;
-      grid-template-columns: 260px 1fr;
+    .sheet-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .sheet-body {
+      padding: 16px;
       overflow-y: auto;
-    }
-
-    .modal-media-pane {
-      background: var(--bg-base);
-      border-right: 1px solid var(--border);
-      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
     }
 
-    .modal-img-frame {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: #000;
+    .tx-item {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
+      padding: 10px;
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
     }
-    .modal-img-frame img { width: 100%; height: 100%; object-fit: contain; }
 
-    .modal-info-pane {
-      padding: 12px;
+    .tx-left {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
+      gap: 2px;
     }
 
-    .modal-kv-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
+    .tx-type {
+      font-weight: 600;
+      font-size: 13px;
     }
 
-    .modal-kv-card {
-      background: var(--bg-base);
+    .tx-hash {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-sub);
+    }
+
+    .tx-right {
+      text-align: right;
+    }
+
+    .tx-val {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tx-time {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .meta-box {
+      background: var(--card-muted);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 6px 8px;
-    }
-
-    .modal-kv-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; }
-    .modal-kv-val { font-size: 11px; font-weight: 600; font-family: var(--font-mono); margin-top: 1px; word-break: break-all; }
-
-    .traits-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
       gap: 4px;
     }
 
-    .trait-pill {
-      background: var(--bg-base);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 4px 6px;
+    .meta-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
     }
-    .trait-type { font-size: 8px; color: var(--text-secondary); text-transform: uppercase; }
-    .trait-val { font-size: 10px; font-weight: 600; color: var(--accent); margin-top: 1px; }
 
-    .tx-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 11px;
-      font-family: var(--font-mono);
-    }
-    .tx-table th {
-      background: var(--bg-base);
-      color: var(--text-secondary);
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .tx-table td {
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border);
+    .meta-val {
+      font-size: 12px;
+      font-weight: 600;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
 
-  <div class="app-layout">
+  <div class="app">
     
-    <header class="topbar">
-      <div class="topbar-left">
-        <a href="index.html" class="back-btn" onclick="if(history.length > 1){ history.back(); return false; }">← Back</a>
-        <span class="sys-title">Vault Portfolio Dashboard</span>
+    <div class="nav">
+      <button class="nav-btn" onclick="history.back()">← Back</button>
+      <div class="badge-live">
+        <span class="dot" id="net-dot"></span>
+        <span id="net-text">ApeChain</span>
       </div>
-      <div class="topbar-right">
-        <button class="history-trigger-btn" onclick="openHistoryModal()">Transactions</button>
-        <div class="telemetry-item">
-          <span>Chain:</span>
-          <strong>ApeChain</strong>
-        </div>
-        <div class="telemetry-item">
-          <span>Block:</span>
-          <strong id="block-height">#-------</strong>
-        </div>
-        <div class="telemetry-item">
-          <span class="status-dot loading" id="rpc-led"></span>
-          <span id="rpc-ping">Syncing</span>
-        </div>
-      </div>
-    </header>
-
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-label">Vault Address</div>
-        <div class="address-box">
-          <span class="address-text" id="wallet-address">0xf3e5ec8b4aaab49186486965529e07b5f61f9020</span>
-        </div>
-        <div style="display:flex; gap:4px; margin-top:4px;">
-          <button class="btn-action" id="copy-btn" onclick="copyAddress()">Copy Address</button>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-label">Liquid Balance</div>
-        <div class="metric-value-row">
-          <span class="metric-primary" id="ape-balance">---.--</span>
-          <span style="font-size:10px; color:var(--text-secondary);">APE</span>
-        </div>
-        <div class="metric-sub">
-          <span id="wei-balance">0 WEI</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-label">Estimated Value</div>
-        <div class="metric-value-row">
-          <span class="metric-primary" id="usd-balance" style="color: var(--green);">$---.--</span>
-        </div>
-        <div class="metric-sub">
-          <span id="ape-spot-price">Spot: $--</span>
-          <span id="ape-24h"></span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-label">Indexed Assets</div>
-        <div class="metric-value-row">
-          <span class="metric-primary" id="nft-total-count">--</span>
-          <span style="font-size:10px; color:var(--text-secondary);">NFTs</span>
-        </div>
-        <div class="metric-sub">
-          <span id="collections-count">-- Collections</span>
-          <span id="tx-nonce">Nonce: --</span>
-        </div>
-      </div>
-    </section>
-
-    <div class="erc20-bar" id="erc20-bar">
-      <span style="font-size: 10px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase;">Tokens:</span>
-      <div id="erc20-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
     </div>
 
-    <section class="control-bar">
-      <div class="collection-tabs" id="collection-tabs">
-        <button class="tab-btn active" data-collection="ALL">
-          All Assets <span class="tab-count" id="tab-all-count">0</span>
+    <div class="wallet-card">
+      <div class="addr-row">
+        <span class="addr-pill" id="addr-text">0xf3e5...9020</span>
+        <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
+      </div>
+
+      <div class="balance-box">
+        <div class="bal-title">Total Balance</div>
+        <div class="bal-amt">
+          <span id="bal-ape" style="font-size: 28px; color: #fff; font-weight:700;">--.--</span> <span>APE</span>
+        </div>
+        <div class="bal-sub" id="bal-usd">$---.-- USD</div>
+      </div>
+
+      <div class="actions-grid">
+        <button class="btn-main primary" onclick="openTxSheet()">
+          Transactions
+        </button>
+        <button class="btn-main" onclick="loadAll()">
+          Refresh
         </button>
       </div>
+    </div>
 
-      <div class="control-right">
-        <input type="text" id="search-input" class="search-input" placeholder="Search name or ID...">
-        <div class="view-toggle">
-          <button class="view-btn active" id="btn-grid-view" onclick="setView('grid')">Grid</button>
-          <button class="view-btn" id="btn-table-view" onclick="setView('table')">List</button>
-        </div>
+    <div class="section-bar">
+      <span class="section-title">Collectibles</span>
+      <span class="count-badge" id="nft-count">0 Items</span>
+    </div>
+
+    <div class="nft-grid" id="nft-grid">
+      <div style="grid-column: span 2; padding: 40px 0; text-align: center; color: var(--text-sub);">
+        Loading assets...
       </div>
-    </section>
-
-    <main class="inventory-container" id="inventory-section">
-      <div class="state-box" id="loading-state">
-        <div style="font-weight:600; color:var(--text-primary);">Querying ApeChain Indexer...</div>
-      </div>
-
-      <div class="nft-grid" id="nft-grid" style="display: none;"></div>
-
-      <div class="nft-table-wrap" id="nft-table-wrap">
-        <table class="nft-table">
-          <thead>
-            <tr>
-              <th style="width:36px;">Img</th>
-              <th>Asset Name</th>
-              <th>Token ID</th>
-              <th>Collection</th>
-              <th>Standard</th>
-              <th>Qty</th>
-              <th>Contract</th>
-            </tr>
-          </thead>
-          <tbody id="nft-table-body"></tbody>
-        </table>
-      </div>
-
-      <div class="load-more-wrap" id="load-more-wrap">
-        <button class="btn-action" id="load-more-btn" onclick="loadNextPage()" style="padding: 4px 12px;">Load Next Page</button>
-      </div>
-    </main>
+    </div>
 
   </div>
 
-  <div class="modal-backdrop" id="nft-modal" onclick="if(event.target === this) closeModal()">
-    <div class="modal-window">
-      <div class="modal-header">
-        <span style="font-weight:600; font-size:11px;" id="modal-header-id">Asset Inspector</span>
-        <button class="btn-action" onclick="closeModal()">Close</button>
+  <div class="sheet-backdrop" id="nft-sheet" onclick="if(event.target === this) closeNftSheet()">
+    <div class="sheet">
+      <div class="sheet-head">
+        <span class="sheet-title" id="nft-sheet-title">Asset Details</span>
+        <button class="copy-btn" onclick="closeNftSheet()">Done</button>
       </div>
-      <div class="modal-body">
-        <div class="modal-media-pane">
-          <div class="modal-img-frame" id="modal-img-container"></div>
+      <div class="sheet-body">
+        <div style="width:100%; aspect-ratio:1/1; border-radius:12px; overflow:hidden; background:#000;">
+          <img id="nft-sheet-img" style="width:100%; height:100%; object-fit:contain;" src="" alt="">
         </div>
-        <div class="modal-info-pane">
-          <div>
-            <div style="font-size:10px; color:var(--accent); text-transform:uppercase; font-weight:500;" id="modal-collection">Collection</div>
-            <div style="font-size:14px; font-weight:700; color:var(--text-primary); margin-top:1px;" id="modal-title">NFT Name</div>
-          </div>
+        
+        <div class="meta-box">
+          <span class="meta-label">Collection</span>
+          <span class="meta-val" id="nft-sheet-col">--</span>
+        </div>
 
-          <div class="modal-kv-grid">
-            <div class="modal-kv-card">
-              <div class="modal-kv-label">Token ID</div>
-              <div class="modal-kv-val" id="modal-token-id">#0</div>
-            </div>
-            <div class="modal-kv-card">
-              <div class="modal-kv-label">Standard / Qty</div>
-              <div class="modal-kv-val" id="modal-standard">ERC-721 (×1)</div>
-            </div>
-            <div class="modal-kv-card" style="grid-column: span 2;">
-              <div class="modal-kv-label">Contract Address</div>
-              <div class="modal-kv-val" id="modal-contract">0x...</div>
-            </div>
-          </div>
+        <div class="meta-box">
+          <span class="meta-label">Token ID</span>
+          <span class="meta-val" id="nft-sheet-id">--</span>
+        </div>
 
-          <div id="modal-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.3; display:none;"></div>
-
-          <div>
-            <div style="font-size:10px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:4px;">Attributes</div>
-            <div class="traits-grid" id="modal-traits"></div>
-          </div>
+        <div class="meta-box">
+          <span class="meta-label">Contract</span>
+          <span class="meta-val" id="nft-sheet-contract" style="font-family: monospace;">--</span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="modal-backdrop" id="history-modal" onclick="if(event.target === this) closeHistoryModal()">
-    <div class="modal-window" style="max-width: 800px;">
-      <div class="modal-header">
-        <span style="font-weight:600; font-size:11px;">Wallet Transaction History</span>
-        <button class="btn-action" onclick="closeHistoryModal()">Close</button>
+  <div class="sheet-backdrop" id="tx-sheet" onclick="if(event.target === this) closeTxSheet()">
+    <div class="sheet">
+      <div class="sheet-head">
+        <span class="sheet-title">Activity History</span>
+        <button class="copy-btn" onclick="closeTxSheet()">Done</button>
       </div>
-      <div style="max-height: 70vh; overflow-y: auto; padding: 12px;">
-        <table class="tx-table">
-          <thead>
-            <tr>
-              <th>Hash</th>
-              <th>Method</th>
-              <th>Block</th>
-              <th>From / To</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody id="tx-table-body">
-            <tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Loading transactions...</td></tr>
-          </tbody>
-        </table>
+      <div class="sheet-body" id="tx-list">
+        <div style="text-align: center; padding: 30px; color: var(--text-sub);">Loading transactions...</div>
       </div>
     </div>
   </div>
 
   <script>
-    const WALLET_ADDRESS = "0xf3e5ec8b4aaab49186486965529e07b5f61f9020";
-    const APECHAIN_RPC = "https://rpc.apechain.com/http";
-    const BLOCKSCOUT_API = "https://apechain.blockscout.com/api/v2";
+    const WALLET = "0xf3e5ec8b4aaab49186486965529e07b5f61f9020";
+    const RPC = "https://rpc.apechain.com/http";
+    const API = "https://apechain.blockscout.com/api/v2";
 
-    let allNfts = [];
-    let activeCollection = "ALL";
-    let searchQuery = "";
-    let currentView = "grid";
-    let nextPageParams = null;
+    let nfts = [];
 
-    function resolveMediaUrl(url) {
-      if (!url || typeof url !== "string") return null;
-      let trimmed = url.trim();
-      if (trimmed.startsWith("ipfs://ipfs/")) trimmed = "ipfs://" + trimmed.slice(12);
-      if (trimmed.startsWith("ipfs://")) return "https://nftstorage.link/ipfs/" + trimmed.slice(7);
-      if (trimmed.startsWith("ar://")) return "https://arweave.net/" + trimmed.slice(5);
-      if (trimmed.startsWith("Qm") || trimmed.startsWith("bafy")) return "https://nftstorage.link/ipfs/" + trimmed;
-      return trimmed;
+    function formatMedia(url) {
+      if (!url) return "";
+      let str = String(url).trim();
+      if (str.startsWith("ipfs://ipfs/")) str = str.replace("ipfs://ipfs/", "");
+      else if (str.startsWith("ipfs://")) str = str.replace("ipfs://", "");
+      else if (str.startsWith("ar://")) return "https://arweave.net/" + str.replace("ar://", "");
+      
+      if (!str.startsWith("http")) {
+        return "https://cloudflare-ipfs.com/ipfs/" + str;
+      }
+      return str;
     }
 
-    function shortAddr(addr) {
-      if (!addr || addr.length < 10) return addr || "";
-      return addr.slice(0, 6) + "..." + addr.slice(-4);
+    function short(str) {
+      if (!str || str.length < 10) return str || "";
+      return str.slice(0, 6) + "..." + str.slice(-4);
     }
 
-    function copyAddress() {
-      navigator.clipboard.writeText(WALLET_ADDRESS);
+    function copyAddr() {
+      navigator.clipboard.writeText(WALLET);
       const btn = document.getElementById("copy-btn");
-      btn.textContent = "Copied";
-      setTimeout(() => btn.textContent = "Copy Address", 1500);
+      btn.textContent = "Copied!";
+      setTimeout(() => btn.textContent = "Copy", 1500);
     }
 
-    async function fetchRpcTelemetry() {
-      const startTime = performance.now();
-      const led = document.getElementById("rpc-led");
-      const pingEl = document.getElementById("rpc-ping");
-
+    async function getBalance() {
       try {
-        const batchPayload = [
-          { jsonrpc: "2.0", method: "eth_getBalance", params: [WALLET_ADDRESS, "latest"], id: 1 },
-          { jsonrpc: "2.0", method: "eth_blockNumber", params: [], id: 2 },
-          { jsonrpc: "2.0", method: "eth_getTransactionCount", params: [WALLET_ADDRESS, "latest"], id: 3 }
-        ];
-
-        const res = await fetch(APECHAIN_RPC, {
+        const res = await fetch(RPC, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(batchPayload)
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getBalance",
+            params: [WALLET, "latest"],
+            id: 1
+          })
         });
+        const data = await res.json();
+        const wei = BigInt(data.result || "0x0");
+        const ape = Number(wei) / 1e18;
+        document.getElementById("bal-ape").textContent = ape.toFixed(4);
 
-        const results = await res.json();
-        const pingMs = Math.round(performance.now() - startTime);
-
-        led.className = "status-dot";
-        pingEl.textContent = `${pingMs}ms`;
-
-        const balHex = results.find(r => r.id === 1)?.result || "0x0";
-        const blockHex = results.find(r => r.id === 2)?.result || "0x0";
-        const nonceHex = results.find(r => r.id === 3)?.result || "0x0";
-
-        const balanceWei = BigInt(balHex);
-        const balanceApe = Number(balanceWei) / 1e18;
-
-        document.getElementById("ape-balance").textContent = balanceApe.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-        document.getElementById("wei-balance").textContent = `${balanceApe.toFixed(4)} APE`;
-        document.getElementById("block-height").textContent = "#" + parseInt(blockHex, 16).toLocaleString();
-        document.getElementById("tx-nonce").textContent = `Nonce: ${parseInt(nonceHex, 16)}`;
-
-        await fetchUsdValuation(balanceApe);
-      } catch (err) {
-        led.className = "status-dot error";
-        pingEl.textContent = "Offline";
+        const priceRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd");
+        const priceData = await priceRes.json();
+        const spot = priceData?.apecoin?.usd || 0;
+        document.getElementById("bal-usd").textContent = `$${(ape * spot).toFixed(2)} USD`;
+        document.getElementById("net-dot").className = "dot";
+      } catch (e) {
+        document.getElementById("net-dot").className = "dot err";
       }
     }
 
-    async function fetchUsdValuation(balanceApe) {
-      const usdEl = document.getElementById("usd-balance");
-      const spotEl = document.getElementById("ape-spot-price");
-      const changeEl = document.getElementById("ape-24h");
-
+    async function getNfts() {
+      const container = document.getElementById("nft-grid");
       try {
-        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=apecoin&vs_currencies=usd&include_24hr_change=true");
+        const res = await fetch(`${API}/addresses/${WALLET}/nft?type=ERC-721%2CERC-1155`);
         const data = await res.json();
-        const price = data?.apecoin?.usd;
-        const change = data?.apecoin?.usd_24h_change;
+        const items = data.items || [];
 
-        if (price) {
-          usdEl.textContent = "$" + (balanceApe * price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          spotEl.textContent = `Spot: $${price.toFixed(3)}`;
-          if (typeof change === "number") {
-            changeEl.textContent = `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
-            changeEl.style.color = change >= 0 ? "var(--green)" : "var(--red)";
-          }
-          return;
-        }
-      } catch (e) {}
-    }
-
-    async function fetchErc20Holdings() {
-      try {
-        const res = await fetch(`${BLOCKSCOUT_API}/addresses/${WALLET_ADDRESS}/tokens?type=ERC-20`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const items = data?.items || [];
-        if (items.length === 0) return;
-
-        const bar = document.getElementById("erc20-bar");
-        const list = document.getElementById("erc20-list");
-        list.innerHTML = "";
-
-        items.forEach(item => {
-          const decimals = parseInt(item.token?.decimals || "18", 10);
-          const rawVal = Number(BigInt(item.value || "0")) / Math.pow(10, decimals);
-          if (rawVal <= 0) return;
-
-          const pill = document.createElement("div");
-          pill.className = "erc20-pill";
-          pill.innerHTML = `<strong>${rawVal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> ${escapeHtml(item.token?.symbol || "TOKEN")}`;
-          list.appendChild(pill);
-        });
-
-        if (list.children.length > 0) bar.classList.add("visible");
-      } catch (e) {}
-    }
-
-    async function fetchNftInventory(reset = true) {
-      const loadingBox = document.getElementById("loading-state");
-      if (reset) {
-        allNfts = [];
-        nextPageParams = null;
-        loadingBox.style.display = "flex";
-        document.getElementById("nft-grid").style.display = "none";
-        document.getElementById("nft-table-wrap").style.display = "none";
-      }
-
-      try {
-        let url = `${BLOCKSCOUT_API}/addresses/${WALLET_ADDRESS}/nft?type=ERC-721%2CERC-404%2CERC-1155`;
-        if (!reset && nextPageParams) {
-          url += `&` + new URLSearchParams(nextPageParams).toString();
-        }
-
-        const res = await fetch(url);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-
-        const normalized = (data.items || []).map(normalizeBlockscoutNft);
-        allNfts = reset ? normalized : allNfts.concat(normalized);
-        nextPageParams = data.next_page_params || null;
-
-        document.getElementById("load-more-wrap").classList.toggle("visible", !!nextPageParams);
-        finalizeInventoryRender();
-
-        normalized.forEach(nft => {
-          if (!nft.image) resolveOnChainMetadata(nft);
-        });
-      } catch (err) {
-        await fetchReservoirFallback();
-      }
-    }
-
-    function normalizeBlockscoutNft(item) {
-      const meta = item.metadata || {};
-      const rawImage = item.image_url || meta.image || meta.image_url || meta.animation_url || item.animation_url || null;
-      const attributes = Array.isArray(meta.attributes) ? meta.attributes : Array.isArray(meta.traits) ? meta.traits : [];
-      const collectionName = item.token?.name || meta.collection?.name || "UNKNOWN COLLECTION";
-      const nftName = meta.name || `${collectionName} #${item.id}`;
-
-      return {
-        uid: `${item.token?.address || "0x"}_${item.id}`,
-        id: String(item.id ?? "0"),
-        name: nftName,
-        description: meta.description || "",
-        image: resolveMediaUrl(rawImage),
-        collection: collectionName,
-        symbol: item.token?.symbol || "NFT",
-        contract: item.token?.address || "",
-        standard: item.token_type || item.token?.type || "ERC-721",
-        quantity: item.value || "1",
-        attributes: attributes
-      };
-    }
-
-    async function fetchReservoirFallback() {
-      try {
-        const res = await fetch(`https://api-apechain.reservoir.tools/users/${WALLET_ADDRESS}/tokens/v10?limit=100`);
-        const data = await res.json();
-        allNfts = (data.tokens || []).map(entry => {
-          const t = entry.token || {};
+        nfts = items.map(item => {
+          const meta = item.metadata || {};
+          let img = item.image_url || meta.image || meta.image_url || meta.display_image_url || "";
+          
           return {
-            uid: `${t.contract}_${t.tokenId}`,
-            id: String(t.tokenId || "0"),
-            name: t.name || `${t.collection?.name || "NFT"} #${t.tokenId}`,
-            description: t.description || "",
-            image: resolveMediaUrl(t.image || t.imageSmall || t.media),
-            collection: t.collection?.name || "UNKNOWN COLLECTION",
-            symbol: t.collection?.symbol || "NFT",
-            contract: t.contract || "",
-            standard: (t.kind || "ERC-721").toUpperCase(),
-            quantity: entry.ownership?.tokenCount || "1",
-            attributes: t.attributes || []
+            id: String(item.id || "0"),
+            name: meta.name || `${item.token?.name || "NFT"} #${item.id}`,
+            collection: item.token?.name || "Unknown",
+            contract: item.token?.address || "",
+            image: formatMedia(img)
           };
         });
-        finalizeInventoryRender();
-      } catch (err) {
-        document.getElementById("loading-state").innerHTML = `<div style="color:var(--red);">Failed to connect to indexer.</div>`;
+
+        document.getElementById("nft-count").textContent = `${nfts.length} Items`;
+
+        if (nfts.length === 0) {
+          container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 40px 0; color:var(--text-sub);">No collectibles in this vault.</div>`;
+          return;
+        }
+
+        container.innerHTML = "";
+        nfts.forEach((nft, index) => {
+          const card = document.createElement("div");
+          card.className = "nft-card";
+          card.onclick = () => openNftSheet(index);
+          card.innerHTML = `
+            <div class="nft-media-wrap">
+              <img src="${nft.image}" 
+                   onerror="this.onerror=null; this.src='https://ipfs.io/ipfs/' + '${nft.image}'.split('/ipfs/')[1];" 
+                   loading="lazy" alt="${nft.name}" />
+            </div>
+            <div class="nft-info">
+              <span class="nft-col-name">${nft.collection}</span>
+              <span class="nft-title">${nft.name}</span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        // Resolve unindexed metadata directly on-chain if image is missing
+        nfts.forEach((nft, index) => {
+          if (!nft.image || nft.image === "") {
+            resolveOnChainImage(nft, index);
+          }
+        });
+
+      } catch (e) {
+        container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 40px 0; color:var(--red);">Failed to load NFTs.</div>`;
       }
     }
 
-    // Direct contract tokenURI lookup & JSON parser for unindexed assets
-    async function resolveOnChainMetadata(nft) {
+    // Direct contract tokenURI fallback for missing indexer images
+    async function resolveOnChainImage(nft, index) {
       if (!nft.contract) return;
       try {
         const tokenIdHex = BigInt(nft.id).toString(16).padStart(64, "0");
-        const res = await fetch(APECHAIN_RPC, {
+        const res = await fetch(RPC, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -985,252 +609,120 @@
         const json = await res.json();
         if (!json.result || json.result === "0x") return;
 
-        const uri = decodeAbiString(json.result);
-        const httpUri = resolveMediaUrl(uri);
-        if (!httpUri) return;
-
-        let metaJson = null;
-        if (httpUri.startsWith("data:application/json;base64,")) {
-          metaJson = JSON.parse(atob(httpUri.split(",")[1]));
-        } else {
-          const metaRes = await fetch(httpUri);
-          metaJson = await metaRes.json();
+        // Decode ABI string
+        const clean = json.result.slice(2);
+        const strHex = clean.slice(128, 128 + parseInt(clean.slice(64, 128), 16) * 2);
+        let uri = "";
+        for (let i = 0; i < strHex.length; i += 2) {
+          const code = parseInt(strHex.substr(i, 2), 16);
+          if (code) uri += String.fromCharCode(code);
         }
+        uri = uri.trim();
 
-        if (metaJson) {
-          nft.image = resolveMediaUrl(metaJson.image || metaJson.image_url || metaJson.animation_url);
+        const httpUri = formatMedia(uri);
+        const metaRes = await fetch(httpUri);
+        const metaJson = await metaRes.json();
+        
+        if (metaJson && (metaJson.image || metaJson.image_url)) {
+          nft.image = formatMedia(metaJson.image || metaJson.image_url);
           if (metaJson.name) nft.name = metaJson.name;
-          if (metaJson.description) nft.description = metaJson.description;
-          if (Array.isArray(metaJson.attributes)) nft.attributes = metaJson.attributes;
-          renderFilteredNfts();
+          
+          // Re-render grid item
+          getNftsDomUpdate();
         }
-      } catch (e) {
-        // Fallback to direct contract image guessing or secondary explorer endpoints if needed
-      }
+      } catch (e) {}
     }
 
-    function decodeAbiString(hex) {
-      const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
-      if (clean.length < 128) return "";
-      const strHex = clean.slice(128, 128 + parseInt(clean.slice(64, 128), 16) * 2);
-      let out = "";
-      for (let i = 0; i < strHex.length; i += 2) {
-        const code = parseInt(strHex.substr(i, 2), 16);
-        if (code) out += String.fromCharCode(code);
-      }
-      return out.trim();
-    }
-
-    async function loadNextPage() {
-      await fetchNftInventory(false);
-    }
-
-    function finalizeInventoryRender() {
-      document.getElementById("nft-total-count").textContent = allNfts.length;
-      document.getElementById("tab-all-count").textContent = allNfts.length;
-
-      const countsByCol = {};
-      allNfts.forEach(n => countsByCol[n.collection] = (countsByCol[n.collection] || 0) + 1);
-
-      document.getElementById("collections-count").textContent = `${Object.keys(countsByCol).length} Collections`;
-      buildCollectionTabs(countsByCol);
-      renderFilteredNfts();
-    }
-
-    function buildCollectionTabs(countsByCol) {
-      const container = document.getElementById("collection-tabs");
-      container.innerHTML = `<button class="tab-btn ${activeCollection === "ALL" ? "active" : ""}" onclick="setCollection('ALL')">All Assets <span class="tab-count">${allNfts.length}</span></button>`;
-      
-      Object.entries(countsByCol).forEach(([col, count]) => {
-        container.innerHTML += `<button class="tab-btn ${activeCollection === col ? "active" : ""}" onclick="setCollection('${escapeHtml(col)}')">${escapeHtml(col)} <span class="tab-count">${count}</span></button>`;
-      });
-    }
-
-    function setCollection(col) {
-      activeCollection = col;
-      buildCollectionTabs(Object.fromEntries([...document.querySelectorAll('.tab-btn')].map(b => [b.textContent.split(' ')[0], b.querySelector('.tab-count')?.textContent])));
-      renderFilteredNfts();
-    }
-
-    function renderFilteredNfts() {
-      const loadingBox = document.getElementById("loading-state");
-      const gridEl = document.getElementById("nft-grid");
-      const tableWrap = document.getElementById("nft-table-wrap");
-      const tableBody = document.getElementById("nft-table-body");
-
-      const filtered = allNfts.filter(nft => {
-        const matchesCol = activeCollection === "ALL" || nft.collection === activeCollection;
-        const q = searchQuery.toLowerCase();
-        const matchesSearch = !q || nft.name.toLowerCase().includes(q) || nft.id.toLowerCase().includes(q) || nft.collection.toLowerCase().includes(q);
-        return matchesCol && matchesSearch;
-      });
-
-      if (filtered.length === 0) {
-        loadingBox.style.display = "flex";
-        gridEl.style.display = "none";
-        tableWrap.style.display = "none";
-        loadingBox.innerHTML = `<div style="font-weight:600;">No matching assets found</div>`;
-        return;
-      }
-
-      loadingBox.style.display = "none";
-      gridEl.style.display = currentView === "grid" ? "grid" : "none";
-      tableWrap.style.display = currentView === "table" ? "block" : "none";
-
-      gridEl.innerHTML = "";
-      filtered.forEach(nft => {
+    function getNftsDomUpdate() {
+      const container = document.getElementById("nft-grid");
+      container.innerHTML = "";
+      nfts.forEach((nft, index) => {
         const card = document.createElement("div");
         card.className = "nft-card";
-        card.onclick = () => openModal(nft);
-
-        const mediaHtml = nft.image
-          ? `<img src="${escapeHtml(nft.image)}" class="nft-media" loading="lazy" onerror="this.outerHTML='<div class=\\'nft-fallback\\'><span>#${escapeHtml(nft.id)}</span></div>'">`
-          : `<div class="nft-fallback"><span>#${escapeHtml(nft.id)}</span></div>`;
-
+        card.onclick = () => openNftSheet(index);
         card.innerHTML = `
           <div class="nft-media-wrap">
-            ${mediaHtml}
-            <span class="nft-badge-top">${escapeHtml(nft.standard)}</span>
+            <img src="${nft.image}" 
+                 onerror="this.onerror=null; this.src='https://ipfs.io/ipfs/' + '${nft.image}'.split('/ipfs/')[1];" 
+                 loading="lazy" alt="${nft.name}" />
           </div>
-          <div class="nft-meta">
-            <div class="nft-collection-name">${escapeHtml(nft.collection)}</div>
-            <div class="nft-name-row">
-              <div class="nft-name" title="${escapeHtml(nft.name)}">${escapeHtml(nft.name)}</div>
-              <span class="nft-id">#${escapeHtml(nft.id)}</span>
-            </div>
+          <div class="nft-info">
+            <span class="nft-col-name">${nft.collection}</span>
+            <span class="nft-title">${nft.name}</span>
           </div>
         `;
-        gridEl.appendChild(card);
-      });
-
-      tableBody.innerHTML = "";
-      filtered.forEach(nft => {
-        const tr = document.createElement("tr");
-        tr.onclick = () => openModal(nft);
-        const thumb = nft.image ? `<img src="${escapeHtml(nft.image)}" class="table-thumb" onerror="this.style.display='none'">` : `<div class="table-thumb"></div>`;
-        tr.innerHTML = `
-          <td>${thumb}</td>
-          <td style="font-weight:500; color:var(--text-primary); font-family:var(--font-sans);">${escapeHtml(nft.name)}</td>
-          <td>#${escapeHtml(nft.id)}</td>
-          <td style="color:var(--text-secondary); font-family:var(--font-sans);">${escapeHtml(nft.collection)}</td>
-          <td>${escapeHtml(nft.standard)}</td>
-          <td>×${escapeHtml(nft.quantity)}</td>
-          <td style="color:var(--text-secondary);">${shortAddr(nft.contract)}</td>
-        `;
-        tableBody.appendChild(tr);
+        container.appendChild(card);
       });
     }
 
-    function setView(mode) {
-      currentView = mode;
-      document.getElementById("btn-grid-view").classList.toggle("active", mode === "grid");
-      document.getElementById("btn-table-view").classList.toggle("active", mode === "table");
-      renderFilteredNfts();
-    }
-
-    document.getElementById("search-input").addEventListener("input", e => {
-      searchQuery = e.target.value.trim();
-      renderFilteredNfts();
-    });
-
-    function openModal(nft) {
-      document.getElementById("modal-header-id").textContent = `Asset Inspector // ${nft.symbol} #${nft.id}`;
-      document.getElementById("modal-collection").textContent = nft.collection;
-      document.getElementById("modal-title").textContent = nft.name;
-      document.getElementById("modal-token-id").textContent = `#${nft.id}`;
-      document.getElementById("modal-standard").textContent = `${nft.standard} (×${nft.quantity})`;
-      document.getElementById("modal-contract").textContent = nft.contract;
-
-      const descEl = document.getElementById("modal-desc");
-      if (nft.description) {
-        descEl.style.display = "block";
-        descEl.textContent = nft.description;
-      } else {
-        descEl.style.display = "none";
-      }
-
-      document.getElementById("modal-img-container").innerHTML = nft.image
-        ? `<img src="${escapeHtml(nft.image)}">`
-        : `<div class="nft-fallback"><span>No Image</span></div>`;
-
-      const traitsEl = document.getElementById("modal-traits");
-      traitsEl.innerHTML = "";
-      if (Array.isArray(nft.attributes) && nft.attributes.length > 0) {
-        nft.attributes.forEach(attr => {
-          traitsEl.innerHTML += `
-            <div class="trait-pill">
-              <div class="trait-type">${escapeHtml(attr.trait_type || attr.key || "Property")}</div>
-              <div class="trait-val">${escapeHtml(String(attr.value ?? ""))}</div>
-            </div>`;
-        });
-      } else {
-        traitsEl.innerHTML = `<div style="color:var(--text-secondary); font-size:10px;">No attributes recorded.</div>`;
-      }
-
-      document.getElementById("nft-modal").classList.add("open");
-    }
-
-    function closeModal() {
-      document.getElementById("nft-modal").classList.remove("open");
-    }
-
-    async function openHistoryModal() {
-      document.getElementById("history-modal").classList.add("open");
-      const tbody = document.getElementById("tx-table-body");
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Fetching transactions...</td></tr>`;
+    async function openTxSheet() {
+      document.getElementById("tx-sheet").classList.add("open");
+      const list = document.getElementById("tx-list");
+      list.innerHTML = `<div style="text-align:center; padding: 30px; color:var(--text-sub);">Loading history...</div>`;
 
       try {
-        const res = await fetch(`${BLOCKSCOUT_API}/addresses/${WALLET_ADDRESS}/transactions`);
+        const res = await fetch(`${API}/addresses/${WALLET}/transactions`);
         const data = await res.json();
         const items = data.items || [];
 
         if (items.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No transactions found.</td></tr>`;
+          list.innerHTML = `<div style="text-align:center; padding: 30px; color:var(--text-sub);">No transactions found.</div>`;
           return;
         }
 
-        tbody.innerHTML = "";
+        list.innerHTML = "";
         items.forEach(tx => {
-          const method = tx.method || (tx.to ? "Call" : "Contract Creation");
-          const valApe = Number(BigInt(tx.value || "0")) / 1e18;
-          tbody.innerHTML += `
-            <tr>
-              <td style="color:var(--accent);">${shortAddr(tx.hash)}</td>
-              <td>${escapeHtml(method)}</td>
-              <td>#${tx.block}</td>
-              <td>${shortAddr(tx.from?.hash)} → ${shortAddr(tx.to?.hash)}</td>
-              <td>${valApe.toFixed(4)} APE</td>
-            </tr>
+          const val = Number(BigInt(tx.value || "0")) / 1e18;
+          const isOut = tx.from?.hash?.toLowerCase() === WALLET.toLowerCase();
+          
+          const el = document.createElement("div");
+          el.className = "tx-item";
+          el.innerHTML = `
+            <div class="tx-left">
+              <span class="tx-type">${tx.method || (isOut ? 'Sent' : 'Received')}</span>
+              <span class="tx-hash">${short(tx.hash)}</span>
+            </div>
+            <div class="tx-right">
+              <div class="tx-val" style="color: ${isOut ? 'var(--text)' : 'var(--green)'}">
+                ${isOut ? '-' : '+'}${val.toFixed(3)} APE
+              </div>
+              <div class="tx-time">Block #${tx.block}</div>
+            </div>
           `;
+          list.appendChild(el);
         });
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--red);">Failed to load transactions.</td></tr>`;
+        list.innerHTML = `<div style="text-align:center; padding: 30px; color:var(--red);">Error loading activity.</div>`;
       }
     }
 
-    function closeHistoryModal() {
-      document.getElementById("history-modal").classList.remove("open");
+    function closeTxSheet() {
+      document.getElementById("tx-sheet").classList.remove("open");
     }
 
-    window.addEventListener("keydown", e => {
-      if (e.key === "Escape") {
-        closeModal();
-        closeHistoryModal();
-      }
-    });
+    function openNftSheet(index) {
+      const nft = nfts[index];
+      if (!nft) return;
 
-    function escapeHtml(str) {
-      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      document.getElementById("nft-sheet-title").textContent = nft.name;
+      document.getElementById("nft-sheet-img").src = nft.image;
+      document.getElementById("nft-sheet-col").textContent = nft.collection;
+      document.getElementById("nft-sheet-id").textContent = `#${nft.id}`;
+      document.getElementById("nft-sheet-contract").textContent = nft.contract;
+
+      document.getElementById("nft-sheet").classList.add("open");
     }
 
-    function initVault() {
-      fetchRpcTelemetry();
-      fetchErc20Holdings();
-      fetchNftInventory(true);
+    function closeNftSheet() {
+      document.getElementById("nft-sheet").classList.remove("open");
     }
 
-    initVault();
-    setInterval(fetchRpcTelemetry, 30000);
+    function loadAll() {
+      getBalance();
+      getNfts();
+    }
+
+    loadAll();
   </script>
 </body>
 </html>
