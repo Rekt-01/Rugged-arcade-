@@ -18,6 +18,7 @@
       --blue: #2563eb;
       --green: #10b981;
       --red: #ef4444;
+      --amber: #f59e0b;
       --radius: 12px;
     }
 
@@ -89,6 +90,17 @@
     }
     .dot.err { background: var(--red); }
 
+    .rumble-banner {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--amber);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
     .wallet-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -105,9 +117,21 @@
       align-items: center;
     }
 
+    .addr-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .ens-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
     .addr-pill {
       font-family: monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-sub);
     }
 
@@ -154,6 +178,18 @@
       font-size: 12px;
       color: var(--green);
       font-weight: 500;
+    }
+
+    .notice-box {
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .actions-grid {
@@ -383,9 +419,17 @@
       </div>
     </div>
 
+    <!-- Rumble Note Banner -->
+    <div class="rumble-banner">
+      🏆 Prizes for Rumbles
+    </div>
+
     <div class="wallet-card">
       <div class="addr-row">
-        <span class="addr-pill" id="addr-text">0xf3e5...9020</span>
+        <div class="addr-info">
+          <span class="ens-name">team.ruggedorphans.eth</span>
+          <span class="addr-pill" id="addr-text">0xf3e5...9020</span>
+        </div>
         <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
       </div>
 
@@ -395,6 +439,12 @@
           <span id="bal-ape">--.--</span> <span>APE</span>
         </div>
         <div class="bal-sub" id="bal-usd">$---.-- USD</div>
+      </div>
+
+      <!-- Safe Ape Chain Notice -->
+      <div class="notice-box">
+        <span>⚠️</span>
+        <span><strong>Safe ApeChain Wallet:</strong> Only send ApeChain assets.</span>
       </div>
 
       <div class="actions-grid">
@@ -522,7 +572,6 @@
         document.getElementById("nft-count").textContent = `${nfts.length} Items`;
         renderNfts();
 
-        // Check and fetch metadata on-chain if image is empty
         nfts.forEach((nft, index) => {
           if (!nft.image) resolveOnChainMetadata(nft, index);
         });
