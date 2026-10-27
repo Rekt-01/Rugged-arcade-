@@ -21,7 +21,7 @@
       align-items: center;
     }
 
-    /* iPhone / Mobile Full-Screen Arcade Container */
+    /* Full-Screen Arcade Cabinet Container */
     .screen-wrapper {
       position: relative;
       width: 100vw;
@@ -29,9 +29,9 @@
       max-width: 460px;
       overflow: hidden;
       background:
-        radial-gradient(circle at 50% 22%, rgba(0, 84, 250, 0.28) 0%, transparent 55%),
-        radial-gradient(circle at 50% 32%, #220b47 0%, #05010d 78%);
-      box-shadow: 0 0 65px rgba(0, 84, 250, 0.35), inset 0 0 2px rgba(53, 212, 255, 0.3);
+        radial-gradient(circle at 50% 18%, rgba(0, 84, 250, 0.34) 0%, transparent 52%),
+        radial-gradient(circle at 50% 28%, #240b4d 0%, #05010d 78%);
+      box-shadow: 0 0 70px rgba(0, 84, 250, 0.35), inset 0 0 2px rgba(53, 212, 255, 0.35);
     }
 
     /* Subtle CRT Scanline + Vignette Overlay */
@@ -41,23 +41,52 @@
       z-index: 15;
       pointer-events: none;
       background: 
-        radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.62) 100%),
-        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+        radial-gradient(circle at center, transparent 64%, rgba(0, 0, 0, 0.6) 100%),
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
       background-size: 100% 100%, 100% 4px;
     }
 
     /* ==========================================
-       TOP APECHAIN ARCADE HUD BAR
+       1. INTRO LAYER & NON-OVERLAPPING FLEX HUD
     ========================================== */
-    .top-hud {
+    #intro-layer {
       position: absolute;
-      top: 12px;
-      left: 14px;
-      right: 14px;
-      z-index: 12;
+      inset: 0;
+      z-index: 10;
+      transition: opacity 0.55s ease;
+    }
+    #intro-layer.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Background 3D Canvas */
+    #three-canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Structured Flex Column Layout so UI NEVER overlaps the 3D Logo */
+    .ui-layout {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 14px 14px;
+      pointer-events: none;
+    }
+
+    /* TOP APECHAIN HUD BAR */
+    .top-hud {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
       pointer-events: auto;
     }
 
@@ -67,13 +96,12 @@
       gap: 7px;
       background: rgba(8, 16, 42, 0.88);
       border: 1.5px solid #0054FA;
-      box-shadow: 0 0 12px rgba(0, 84, 250, 0.55);
+      box-shadow: 0 0 12px rgba(0, 84, 250, 0.5);
       padding: 6px 10px;
       border-radius: 6px;
       font-size: 0.44rem;
       color: #e2eeff;
       letter-spacing: 0.5px;
-      backdrop-filter: blur(6px);
     }
 
     .live-dot {
@@ -90,186 +118,159 @@
       50% { transform: scale(1.35); opacity: 0.5; }
     }
 
-    .hud-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .hud-opensea-mini {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: rgba(32, 129, 226, 0.2);
-      border: 1.5px solid #2081E2;
-      box-shadow: 0 0 10px rgba(32, 129, 226, 0.45);
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
-      text-decoration: none;
-    }
-
-    .hud-opensea-mini:hover,
-    .hud-opensea-mini:active {
-      transform: scale(1.08);
-      box-shadow: 0 0 16px rgba(53, 212, 255, 0.85);
-    }
-
     .credit-counter {
       font-size: 0.44rem;
       color: #ffd966;
       text-shadow: 0 0 8px rgba(255, 217, 102, 0.6);
-      background: rgba(12, 5, 28, 0.82);
+      background: rgba(12, 5, 28, 0.85);
       border: 1.5px solid rgba(255, 217, 102, 0.45);
       padding: 6px 9px;
       border-radius: 6px;
     }
 
-    /* ==========================================
-       1. THREE.JS SPLASH, MINT BANNER & CHARACTER
-    ========================================== */
-    #intro-layer {
-      position: absolute;
-      inset: 0;
-      z-index: 10;
-      transition: opacity 0.55s ease;
-    }
-    #intro-layer.fade-out {
-      opacity: 0;
+    /* DEDICATED 3D LOGO STAGE WINDOW (100% unobstructed) */
+    #logo-stage-window {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 190px;
       pointer-events: none;
     }
 
-    #three-canvas-container {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-    }
-
     /* ==========================================
-       FREE MINT COMING SOON + OPENSEA PROMO CARD
+       BOTTOM DECK: COMING SOON + OPENSEA + CHARACTER
     ========================================== */
-    #mint-promo-card {
-      position: absolute;
-      top: 41.5%;
-      left: 16px;
-      right: 16px;
-      z-index: 6;
+    .bottom-deck {
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 9px;
-      padding: 12px 14px;
-      background: linear-gradient(180deg, rgba(14, 9, 36, 0.92) 0%, rgba(7, 3, 20, 0.95) 100%);
-      border: 2px solid rgba(53, 212, 255, 0.75);
-      border-radius: 10px;
-      box-shadow:
-        0 8px 28px rgba(0, 0, 0, 0.75),
-        0 0 20px rgba(0, 84, 250, 0.4),
-        inset 0 0 12px rgba(53, 212, 255, 0.15);
-      backdrop-filter: blur(8px);
-      opacity: 0;
-      transform: translateY(-12px) scale(0.96);
-      pointer-events: none;
-      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.2, 0.9, 0.25, 1);
+      flex-shrink: 0;
+      gap: 6px;
     }
 
-    #mint-promo-card.show {
+    /* Sleek Arcade Marquee + OpenSea Bar (Tucked cleanly below 3D stage) */
+    #promo-bar {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1);
+    }
+    #promo-bar.show {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
       pointer-events: auto;
     }
 
-    .coming-soon-ribbon {
+    /* Coming Soon Neon Ticker Strip */
+    .coming-soon-strip {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      width: 100%;
       padding: 6px 10px;
-      background: linear-gradient(90deg, rgba(255, 42, 133, 0.22) 0%, rgba(255, 217, 102, 0.25) 50%, rgba(255, 42, 133, 0.22) 100%);
-      border: 1.5px solid #ffd966;
+      background: linear-gradient(90deg, rgba(255, 42, 133, 0.16) 0%, rgba(255, 217, 102, 0.22) 50%, rgba(255, 42, 133, 0.16) 100%);
+      border: 1.5px solid rgba(255, 217, 102, 0.75);
       border-radius: 6px;
-      box-shadow: 0 0 12px rgba(255, 217, 102, 0.35);
+      box-shadow: 0 0 14px rgba(255, 217, 102, 0.22);
     }
 
-    .spark-dot {
-      color: #ffd966;
-      font-size: 0.52rem;
-      animation: blink 1s infinite ease-in-out;
-    }
-
-    .coming-soon-text {
-      font-size: 0.5rem;
-      color: #ffd966;
-      text-shadow: 1px 1px 0 #000, 0 0 8px rgba(255, 217, 102, 0.65);
-      letter-spacing: 0.6px;
-      text-align: center;
-    }
-
-    .mint-subtext {
-      font-size: 0.42rem;
-      color: #b8d9ff;
+    .coming-tag {
+      background: #ff2a85;
+      color: #fff;
+      font-size: 0.38rem;
+      padding: 3px 5px;
+      border-radius: 3px;
       letter-spacing: 0.4px;
-      text-align: center;
-      line-height: 1.4;
+      box-shadow: 0 0 8px rgba(255, 42, 133, 0.6);
     }
 
-    /* Official OpenSea CTA Button */
-    .opensea-btn {
+    .coming-text {
+      font-size: 0.42rem;
+      color: #ffd966;
+      letter-spacing: 0.4px;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    /* Official OpenSea Collection Pill Button */
+    .opensea-bar-btn {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 9px;
+      justify-content: space-between;
       width: 100%;
-      padding: 9px 14px;
-      background: linear-gradient(90deg, #1868b7 0%, #2081E2 55%, #2b93ff 100%);
-      border: 2px solid #ffffff;
-      border-radius: 7px;
-      color: #ffffff;
+      padding: 7px 12px;
+      background: linear-gradient(90deg, rgba(16, 42, 86, 0.92) 0%, rgba(28, 96, 178, 0.95) 100%);
+      border: 1.5px solid #35d4ff;
+      border-radius: 8px;
       text-decoration: none;
-      font-size: 0.48rem;
-      letter-spacing: 0.5px;
-      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
-      box-shadow: 0 0 16px rgba(32, 129, 226, 0.65);
-      transition: transform 0.14s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 14px rgba(32, 129, 226, 0.45);
+      transition: transform 0.14s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .opensea-btn:hover,
-    .opensea-btn:active {
-      transform: translateY(-1px) scale(1.015);
-      box-shadow: 0 0 24px rgba(53, 212, 255, 0.95);
-      filter: brightness(1.08);
+    .opensea-bar-btn:hover,
+    .opensea-bar-btn:active {
+      transform: translateY(-1px);
+      border-color: #ffd966;
+      box-shadow: 0 0 20px rgba(53, 212, 255, 0.8);
     }
 
-    .opensea-logo-svg {
-      width: 20px;
-      height: 20px;
+    .os-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .os-logo {
+      width: 22px;
+      height: 22px;
       flex-shrink: 0;
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
     }
 
-    .ext-arrow {
-      font-size: 0.52rem;
+    .os-label-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      text-align: left;
+    }
+
+    .os-title {
+      font-size: 0.44rem;
+      color: #ffffff;
+      letter-spacing: 0.4px;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .os-sub {
+      font-size: 0.35rem;
+      color: #8fd8ff;
+      letter-spacing: 0.3px;
+    }
+
+    .os-cta-pill {
+      font-size: 0.4rem;
       color: #ffd966;
-      margin-left: 2px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 217, 102, 0.5);
+      padding: 4px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
     }
 
     /* ==========================================
        POP-UP CHARACTER & SPEECH BOX
     ========================================== */
     #char-popup {
-      position: absolute;
-      bottom: 14px;
-      left: 0;
       width: 100%;
-      padding: 0 16px;
-      z-index: 5;
       display: flex;
       flex-direction: column;
       align-items: center;
       opacity: 0;
-      transform: translateY(36px);
+      transform: translateY(28px);
       pointer-events: none;
       transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1);
     }
@@ -279,11 +280,10 @@
       pointer-events: auto;
     }
 
-    /* Character Sprite Stage */
     .sprite-stage {
       position: relative;
-      width: 126px;
-      height: 126px;
+      width: 118px;
+      height: 118px;
       margin-bottom: -8px;
       z-index: 2;
       cursor: pointer;
@@ -303,7 +303,6 @@
       display: block;
     }
 
-    /* Retro Arcade Dialogue Box */
     .speech-bubble {
       width: 100%;
       background: linear-gradient(180deg, rgba(16, 8, 38, 0.96) 0%, rgba(8, 3, 20, 0.98) 100%);
@@ -312,9 +311,9 @@
         0 0 24px rgba(0, 84, 250, 0.45),
         inset 0 0 14px rgba(53, 212, 255, 0.22);
       border-radius: 10px;
-      padding: 14px 14px 13px;
+      padding: 13px 14px 12px;
       color: #fff;
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       line-height: 1.65;
       text-align: left;
       position: relative;
@@ -331,27 +330,27 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
 
     .speaker-tag {
       display: inline-block;
       background: #ff2a85;
       color: #fff;
-      padding: 4px 8px;
-      font-size: 0.44rem;
+      padding: 3px 7px;
+      font-size: 0.42rem;
       border: 1.5px solid #fff;
       box-shadow: 2px 2px 0 #000;
     }
 
     .chain-pill {
-      font-size: 0.42rem;
+      font-size: 0.4rem;
       color: #35d4ff;
       opacity: 0.9;
     }
 
     #dialogue-text {
-      min-height: 40px;
+      min-height: 38px;
       color: #ffd966;
       text-shadow: 1px 1px 0px #000;
     }
@@ -366,15 +365,14 @@
       display: none;
     }
 
-    /* Prominent CTA Button inside Speech Bubble */
     .tap-continue {
-      margin-top: 10px;
-      padding: 10px 12px;
+      margin-top: 9px;
+      padding: 9px 12px;
       background: linear-gradient(90deg, #0054FA 0%, #35d4ff 100%);
       border: 2px solid #ffffff;
       border-radius: 6px;
       text-align: center;
-      font-size: 0.54rem;
+      font-size: 0.52rem;
       color: #ffffff;
       text-shadow: 1px 1px 0 #000;
       box-shadow: 0 0 15px rgba(53, 212, 255, 0.6);
@@ -383,7 +381,7 @@
 
     @keyframes pulseBtn {
       0%, 100% { transform: scale(1); box-shadow: 0 0 14px rgba(53, 212, 255, 0.55); }
-      50% { transform: scale(1.025); box-shadow: 0 0 22px rgba(255, 217, 102, 0.85); }
+      50% { transform: scale(1.02); box-shadow: 0 0 22px rgba(255, 217, 102, 0.85); }
     }
 
     @keyframes blink {
@@ -436,94 +434,84 @@
       height: 40%;
     }
 
-    /* Extra-compact screen adjustment (iPhone SE / small viewports) */
+    /* Compact viewport responsiveness */
     @media (max-height: 700px) {
-      #mint-promo-card {
-        top: 38.5%;
-        padding: 9px 12px;
-        gap: 6px;
-      }
-      .sprite-stage {
-        width: 104px;
-        height: 104px;
-      }
-      .speech-bubble {
-        padding: 11px 12px;
-        font-size: 0.56rem;
-      }
+      #logo-stage-window { min-height: 155px; }
+      .sprite-stage { width: 96px; height: 96px; }
+      .speech-bubble { padding: 10px 12px; font-size: 0.54rem; }
+      #dialogue-text { min-height: 32px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="screen-wrapper">
+  <div class="screen-wrapper" id="screen-wrapper">
     <div class="crt-overlay"></div>
 
-    <!-- STAGE 1 & 2: THREE.JS 3D ARCADE INTRO + MINT BANNER + TALKING CHARACTER -->
+    <!-- STAGE 1 & 2: 3D PIXEL DROP + PROMO BAR + TALKING CHARACTER -->
     <div id="intro-layer">
-      <!-- Top ApeChain Arcade Status Bar -->
-      <div class="top-hud">
-        <div class="chain-badge">
-          <span class="live-dot"></span>
-          <span>APECHAIN // LIVE</span>
-        </div>
-
-        <div class="hud-right">
-          <a href="https://opensea.io/collection/rugged-orphans" target="_blank" rel="noopener noreferrer" class="hud-opensea-mini" title="Rugged Orphans on OpenSea">
-            <svg class="opensea-logo-svg" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="45" cy="45" r="45" fill="#2081E2"/>
-              <path d="M22.3 46.6L22.5 46.3L34.9 26.9C35.1 26.6 35.6 26.7 35.7 27.1C37.7 31.6 39.4 37.2 38.6 40.7C38.3 42.1 37.3 44.1 36.2 45.9C36.0 46.2 35.8 46.6 35.6 46.9C35.5 47.1 35.3 47.2 35.1 47.2H22.7C22.3 47.2 22.1 46.9 22.3 46.6Z" fill="white"/>
-              <path d="M68.0 50.9C68.0 51.2 67.8 51.5 67.5 51.6C66.1 52.2 61.3 54.6 59.3 57.6C54.2 65.1 50.3 63.1 41.5 63.1H25.7C21.2 63.1 17.5 59.4 17.5 54.9V53.4C17.5 53.0 17.8 52.7 18.2 52.7H33.5C33.9 52.7 34.1 53.1 34.1 53.5C33.9 54.8 34.2 56.1 35.1 57.1C35.9 58.0 37.1 58.5 38.3 58.5H44.4V53.6H38.6C38.2 53.6 38.0 53.1 38.2 52.8C38.5 52.4 38.8 51.9 39.2 51.3C40.1 49.9 41.2 48.0 42.1 46.0C42.9 44.1 43.6 42.0 43.9 40.1C44.2 38.5 44.1 36.9 43.9 35.3C43.7 33.9 43.3 32.5 42.9 31.2C42.5 30.0 42.0 28.9 41.6 27.8V19.6C41.6 19.1 42.0 18.8 42.4 18.8C42.6 18.8 42.8 18.9 42.9 19.0C43.9 19.8 46.8 22.3 49.6 25.7C51.4 27.9 53.1 30.4 54.3 33.1C55.7 36.1 56.5 39.4 56.2 42.6C56.0 44.3 55.4 45.9 54.4 47.2C53.7 48.1 52.9 48.9 52.0 49.4C51.7 49.6 51.8 50.1 52.1 50.1H67.3C67.7 50.1 68.0 50.5 68.0 50.9Z" fill="white"/>
-            </svg>
-          </a>
-          <div class="credit-counter">FREE MINT</div>
-        </div>
-      </div>
-
-      <!-- 3D Pixel Name Drop Canvas -->
       <div id="three-canvas-container"></div>
 
-      <!-- FREE MINT COMING SOON BANNER + OPENSEA CTA -->
-      <div id="mint-promo-card">
-        <div class="coming-soon-ribbon">
-          <span class="spark-dot">★</span>
-          <span class="coming-soon-text">FREE MINT COMING SOON</span>
-          <span class="spark-dot">★</span>
-        </div>
-        <div class="mint-subtext">DROPPING IN THE COMING WEEKS ON APECHAIN</div>
-        <a
-          href="https://opensea.io/collection/rugged-orphans"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="opensea-btn"
-          id="opensea-main-link"
-        >
-          <!-- Official OpenSea Logo SVG -->
-          <svg class="opensea-logo-svg" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="45" cy="45" r="45" fill="#ffffff"/>
-            <circle cx="45" cy="45" r="41" fill="#2081E2"/>
-            <path d="M22.3 46.6L22.5 46.3L34.9 26.9C35.1 26.6 35.6 26.7 35.7 27.1C37.7 31.6 39.4 37.2 38.6 40.7C38.3 42.1 37.3 44.1 36.2 45.9C36.0 46.2 35.8 46.6 35.6 46.9C35.5 47.1 35.3 47.2 35.1 47.2H22.7C22.3 47.2 22.1 46.9 22.3 46.6Z" fill="white"/>
-            <path d="M68.0 50.9C68.0 51.2 67.8 51.5 67.5 51.6C66.1 52.2 61.3 54.6 59.3 57.6C54.2 65.1 50.3 63.1 41.5 63.1H25.7C21.2 63.1 17.5 59.4 17.5 54.9V53.4C17.5 53.0 17.8 52.7 18.2 52.7H33.5C33.9 52.7 34.1 53.1 34.1 53.5C33.9 54.8 34.2 56.1 35.1 57.1C35.9 58.0 37.1 58.5 38.3 58.5H44.4V53.6H38.6C38.2 53.6 38.0 53.1 38.2 52.8C38.5 52.4 38.8 51.9 39.2 51.3C40.1 49.9 41.2 48.0 42.1 46.0C42.9 44.1 43.6 42.0 43.9 40.1C44.2 38.5 44.1 36.9 43.9 35.3C43.7 33.9 43.3 32.5 42.9 31.2C42.5 30.0 42.0 28.9 41.6 27.8V19.6C41.6 19.1 42.0 18.8 42.4 18.8C42.6 18.8 42.8 18.9 42.9 19.0C43.9 19.8 46.8 22.3 49.6 25.7C51.4 27.9 53.1 30.4 54.3 33.1C55.7 36.1 56.5 39.4 56.2 42.6C56.0 44.3 55.4 45.9 54.4 47.2C53.7 48.1 52.9 48.9 52.0 49.4C51.7 49.6 51.8 50.1 52.1 50.1H67.3C67.7 50.1 68.0 50.5 68.0 50.9Z" fill="white"/>
-          </svg>
-          <span>OPENSEA // RUGGED ORPHANS</span>
-          <span class="ext-arrow">↗</span>
-        </a>
-      </div>
-
-      <!-- Talking Character & Speech Bubble -->
-      <div id="char-popup">
-        <div class="sprite-stage">
-          <canvas id="char-canvas" width="256" height="256"></canvas>
-        </div>
-
-        <div class="speech-bubble" id="start-video-trigger">
-          <div class="speaker-header">
-            <div class="speaker-tag" id="speaker-label">ORPHAN #001</div>
-            <div class="chain-pill">APECHAIN ARCADE</div>
+      <div class="ui-layout">
+        <!-- Top Status Bar -->
+        <div class="top-hud">
+          <div class="chain-badge">
+            <span class="live-dot"></span>
+            <span>APECHAIN // LIVE</span>
           </div>
-          <div id="dialogue-text"></div>
-          <div class="tap-continue" id="tap-prompt" style="display:none;">
-            TAP TO SKATE IN ▶
+          <div class="credit-counter">FREE MINT SOON</div>
+        </div>
+
+        <!-- Dedicated Unobstructed 3D Pixel Name Stage -->
+        <div id="logo-stage-window"></div>
+
+        <!-- Bottom Console: Promo Strip + OpenSea + Character + Dialogue -->
+        <div class="bottom-deck">
+          <div id="promo-bar">
+            <div class="coming-soon-strip">
+              <span class="coming-tag">COMING SOON</span>
+              <span class="coming-text">FREE MINT DROPPING IN WEEKS</span>
+            </div>
+
+            <a
+              href="https://opensea.io/collection/rugged-orphans"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="opensea-bar-btn"
+              id="opensea-link"
+            >
+              <div class="os-left">
+                <!-- Official OpenSea Crest SVG -->
+                <svg class="os-logo" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="45" cy="45" r="45" fill="#ffffff"/>
+                  <circle cx="45" cy="45" r="41" fill="#2081E2"/>
+                  <path d="M22.3 46.6L22.5 46.3L34.9 26.9C35.1 26.6 35.6 26.7 35.7 27.1C37.7 31.6 39.4 37.2 38.6 40.7C38.3 42.1 37.3 44.1 36.2 45.9C36.0 46.2 35.8 46.6 35.6 46.9C35.5 47.1 35.3 47.2 35.1 47.2H22.7C22.3 47.2 22.1 46.9 22.3 46.6Z" fill="white"/>
+                  <path d="M68.0 50.9C68.0 51.2 67.8 51.5 67.5 51.6C66.1 52.2 61.3 54.6 59.3 57.6C54.2 65.1 50.3 63.1 41.5 63.1H25.7C21.2 63.1 17.5 59.4 17.5 54.9V53.4C17.5 53.0 17.8 52.7 18.2 52.7H33.5C33.9 52.7 34.1 53.1 34.1 53.5C33.9 54.8 34.2 56.1 35.1 57.1C35.9 58.0 37.1 58.5 38.3 58.5H44.4V53.6H38.6C38.2 53.6 38.0 53.1 38.2 52.8C38.5 52.4 38.8 51.9 39.2 51.3C40.1 49.9 41.2 48.0 42.1 46.0C42.9 44.1 43.6 42.0 43.9 40.1C44.2 38.5 44.1 36.9 43.9 35.3C43.7 33.9 43.3 32.5 42.9 31.2C42.5 30.0 42.0 28.9 41.6 27.8V19.6C41.6 19.1 42.0 18.8 42.4 18.8C42.6 18.8 42.8 18.9 42.9 19.0C43.9 19.8 46.8 22.3 49.6 25.7C51.4 27.9 53.1 30.4 54.3 33.1C55.7 36.1 56.5 39.4 56.2 42.6C56.0 44.3 55.4 45.9 54.4 47.2C53.7 48.1 52.9 48.9 52.0 49.4C51.7 49.6 51.8 50.1 52.1 50.1H67.3C67.7 50.1 68.0 50.5 68.0 50.9Z" fill="white"/>
+                </svg>
+                <div class="os-label-group">
+                  <span class="os-title">RUGGED ORPHANS</span>
+                  <span class="os-sub">OFFICIAL OPENSEA COLLECTION</span>
+                </div>
+              </div>
+              <span class="os-cta-pill">VIEW ↗</span>
+            </a>
+          </div>
+
+          <div id="char-popup">
+            <div class="sprite-stage">
+              <canvas id="char-canvas" width="256" height="256"></canvas>
+            </div>
+
+            <div class="speech-bubble" id="start-video-trigger">
+              <div class="speaker-header">
+                <div class="speaker-tag" id="speaker-label">ORPHAN #001</div>
+                <div class="chain-pill">APECHAIN ARCADE</div>
+              </div>
+              <div id="dialogue-text"></div>
+              <div class="tap-continue" id="tap-prompt" style="display:none;">
+                TAP TO SKATE IN ▶
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -654,156 +642,225 @@
     }
 
     /* =====================================================
-       PART 2: UPGRADED THREE.JS 3D PIXEL LOGO SLAM DROP
+       PART 2: HIGH-CRAFT 7-ROW 3D ARCADE VOXEL DROP-IN
     ===================================================== */
     const container = document.getElementById('three-canvas-container');
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x05010d, 0.0055);
+    const stageWindow = document.getElementById('logo-stage-window');
+    const wrapperEl = document.getElementById('screen-wrapper');
 
-    const camera = new THREE.PerspectiveCamera(48, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x05010d, 0.005);
+
+    const camera = new THREE.PerspectiveCamera(46, container.clientWidth / container.clientHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // High-contrast Arcade Cabinet Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    // Rich Arcade Cabinet Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
-    keyLight.position.set(15, 45, 70);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.25);
+    keyLight.position.set(18, 55, 80);
     scene.add(keyLight);
 
-    const cyanLight = new THREE.PointLight(0x35d4ff, 2.8, 260);
-    cyanLight.position.set(-48, 52, 65);
+    const cyanLight = new THREE.PointLight(0x35d4ff, 2.8, 280);
+    cyanLight.position.set(-50, 45, 70);
     scene.add(cyanLight);
 
-    const pinkLight = new THREE.PointLight(0xff2a85, 2.8, 260);
-    pinkLight.position.set(48, 12, 65);
+    const pinkLight = new THREE.PointLight(0xff2a85, 2.8, 280);
+    pinkLight.position.set(50, 10, 70);
     scene.add(pinkLight);
 
     // Moving Retro Synthwave Floor Grid
-    const gridHelper = new THREE.GridHelper(320, 32, 0x0054FA, 0x2d1259);
-    gridHelper.position.y = -38;
+    const gridHelper = new THREE.GridHelper(340, 34, 0x0054FA, 0x2d1259);
+    gridHelper.position.y = -40;
     scene.add(gridHelper);
 
-    // Rising Arcade Particles
+    // Ambient Arcade Starfield
     const starGeo = new THREE.BufferGeometry();
-    const starCount = 180;
-    const starPos = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount * 3; i += 3) {
-      starPos[i]     = (Math.random() - 0.5) * 160;
-      starPos[i + 1] = (Math.random() - 0.5) * 160;
-      starPos[i + 2] = (Math.random() - 0.5) * 110 - 20;
+    const starPos = new Float32Array(480);
+    for (let i = 0; i < 480; i += 3) {
+      starPos[i]     = (Math.random() - 0.5) * 170;
+      starPos[i + 1] = (Math.random() - 0.5) * 170;
+      starPos[i + 2] = (Math.random() - 0.5) * 110 - 25;
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
     const stars = new THREE.Points(
       starGeo,
-      new THREE.PointsMaterial({ color: 0x35d4ff, size: 1.35, transparent: true, opacity: 0.75 })
+      new THREE.PointsMaterial({ color: 0x35d4ff, size: 1.3, transparent: true, opacity: 0.7 })
     );
     scene.add(stars);
 
-    const PIXEL_FONT = {
-      'W': ["10001","10001","10101","11011","10001"],
-      'E': ["11111","10000","11110","10000","11111"],
-      'L': ["10000","10000","10000","10000","11111"],
-      'C': ["01111","10000","10000","10000","01111"],
-      'O': ["01110","10001","10001","10001","01110"],
-      'M': ["10001","11011","10101","10001","10001"],
-      'T': ["11111","00100","00100","00100","00100"],
-      'R': ["11110","10001","11110","10010","10001"],
-      'U': ["10001","10001","10001","10001","01110"],
-      'G': ["01111","10000","10011","10001","01111"],
-      'D': ["11110","10001","10001","10001","11110"],
-      'P': ["11110","10001","11110","10000","10000"],
-      'H': ["10001","10001","11111","10001","10001"],
-      'A': ["01110","10001","11111","10001","10001"],
-      'N': ["10001","11001","10101","10011","10001"],
-      'S': ["01111","10000","01110","00001","11110"],
-      'I': ["111","010","010","010","111"],
-      ' ': ["000","000","000","000","000"]
+    // Group that holds the entire 3D Logo & Impact Sparks so we can lock it to #logo-stage-window
+    const logoGroup = new THREE.Group();
+    scene.add(logoGroup);
+
+    // Upgraded High-Definition 7-Row Arcade Pixel Font
+    const ARCADE_FONT_7 = {
+      'W': ["1000001","1000001","1001001","1011101","1110111","1100011","1000001"],
+      'E': ["111111","110000","110000","111110","110000","110000","111111"],
+      'L': ["110000","110000","110000","110000","110000","110000","111111"],
+      'C': ["011111","110001","110000","110000","110000","110001","011111"],
+      'O': ["011110","110011","110011","110011","110011","110011","011110"],
+      'M': ["1100011","1110111","1111111","1101011","1100011","1100011","1100011"],
+      'T': ["111111","001100","001100","001100","001100","001100","001100"],
+      'R': ["111110","110011","110011","111110","110110","110011","110011"],
+      'U': ["110011","110011","110011","110011","110011","110011","011110"],
+      'G': ["011111","110001","110000","110111","110011","110011","011111"],
+      'D': ["111110","110011","110011","110011","110011","110011","111110"],
+      'P': ["111110","110011","110011","111110","110000","110000","110000"],
+      'H': ["110011","110011","110011","111111","110011","110011","110011"],
+      'A': ["011110","110011","110011","111111","110011","110011","110011"],
+      'N': ["1100011","1110011","1111011","1101111","1100111","1100011","1100011"],
+      'S': ["011111","110001","110000","011110","000011","100011","111110"],
+      'I': ["1111","0110","0110","0110","0110","0110","1111"],
+      ' ': ["000","000","000","000","000","000","000"]
     };
 
-    // Positioned cleanly in the upper-top stage so the Mint Banner & Character fit below
+    // Centered around local Y = 0 inside logoGroup (spans local Y from -15 to +15)
     const lines = [
-      { text: "WELCOME TO",  yOffset: 38.5, scale: 0.82, color: 0x35d4ff, rim: 0x99ecff, shade: 0x072d42, lineIndex: 0 },
-      { text: "RUGGED",      yOffset: 28.0, scale: 1.52, color: 0xff2a85, rim: 0xff85b8, shade: 0x590429, lineIndex: 1 },
-      { text: "ORPHANS",     yOffset: 16.5, scale: 1.38, color: 0xffd966, rim: 0xfff0b3, shade: 0x6e4200, lineIndex: 2 },
-      { text: "ON APECHAIN", yOffset: 7.2,  scale: 0.80, color: 0x3b82f6, rim: 0x93c5fd, shade: 0x001f66, lineIndex: 3 }
+      {
+        text: "WELCOME TO",
+        yOffset: 13.0,
+        scale: 0.56,
+        topColor: 0xb8f2ff,
+        midColor: 0x35d4ff,
+        botColor: 0x0077cc,
+        rimColor: 0x104e78,
+        shadeColor: 0x041a2e,
+        lineIndex: 0
+      },
+      {
+        text: "RUGGED",
+        yOffset: 4.5,
+        scale: 1.08,
+        topColor: 0xff94c2,
+        midColor: 0xff2a85,
+        botColor: 0xc80055,
+        rimColor: 0xffd966,
+        shadeColor: 0x3d001b,
+        lineIndex: 1
+      },
+      {
+        text: "ORPHANS",
+        yOffset: -5.2,
+        scale: 0.96,
+        topColor: 0xfff5b8,
+        midColor: 0xffd966,
+        botColor: 0xff8800,
+        rimColor: 0xff2a85,
+        shadeColor: 0x4a2400,
+        lineIndex: 2
+      },
+      {
+        text: "ON APECHAIN",
+        yOffset: -13.2,
+        scale: 0.55,
+        topColor: 0x93c5fd,
+        midColor: 0x3b82f6,
+        botColor: 0x0054FA,
+        rimColor: 0x1e3a8a,
+        shadeColor: 0x061236,
+        lineIndex: 3
+      }
     ];
 
     const voxels = [];
+    const impactOrigins = [];
+
     lines.forEach((line) => {
       let totalUnits = 0;
-      for (let ch of line.text) totalUnits += (PIXEL_FONT[ch] || PIXEL_FONT[' '])[0].length + 1;
+      for (let ch of line.text) totalUnits += (ARCADE_FONT_7[ch] || ARCADE_FONT_7[' '])[0].length + 1;
       totalUnits -= 1;
       let cursorX = -totalUnits / 2;
 
-      let charCounter = 0;
+      const topC = new THREE.Color(line.topColor);
+      const midC = new THREE.Color(line.midColor);
+      const botC = new THREE.Color(line.botColor);
+      const rimC = new THREE.Color(line.rimColor);
+      const shadeC = new THREE.Color(line.shadeColor);
+
+      let charIdx = 0;
       for (let ch of line.text) {
-        const glyph = PIXEL_FONT[ch] || PIXEL_FONT[' '];
+        const glyph = ARCADE_FONT_7[ch] || ARCADE_FONT_7[' '];
         const gWidth = glyph[0].length;
-        for (let row = 0; row < 5; row++) {
+        const charDelay = (line.lineIndex * 0.24) + (charIdx * 0.048);
+
+        if (ch !== ' ' && (line.lineIndex === 1 || line.lineIndex === 2)) {
+          impactOrigins.push({
+            x: (cursorX + gWidth / 2) * line.scale,
+            y: line.yOffset,
+            color: line.lineIndex === 1 ? 0xff2a85 : 0xffd966,
+            impactTime: charDelay + 0.48,
+            fired: false
+          });
+        }
+
+        for (let row = 0; row < 7; row++) {
+          // Calculate vertical 16-bit arcade gradient per row
+          const rowColor = new THREE.Color();
+          if (row <= 2) {
+            rowColor.copy(topC).lerp(midC, row / 2);
+          } else {
+            rowColor.copy(midC).lerp(botC, (row - 2) / 4);
+          }
+
           for (let col = 0; col < gWidth; col++) {
             if (glyph[row][col] === '1') {
               const px = (cursorX + col) * line.scale;
-              const py = (2 - row) * line.scale + line.yOffset;
+              const py = (3 - row) * line.scale + line.yOffset;
 
-              // Layer 1: Crisp Front Face Voxel
+              // Layer 1: Front Gradient Pixel Face
               voxels.push({
                 tx: px, ty: py, tz: 0,
-                scale: line.scale * 0.95,
-                baseColor: new THREE.Color(line.color),
+                scale: line.scale * 0.96,
+                baseColor: rowColor.clone(),
                 isFront: true,
                 lineIndex: line.lineIndex,
-                charIndex: charCounter,
-                row
+                delay: charDelay + (row * 0.008)
               });
-              // Layer 2: Glowing Bevel Middle Layer
+              // Layer 2: Mid Bevel Contrast Rim
               voxels.push({
-                tx: px, ty: py, tz: -line.scale * 0.85,
+                tx: px, ty: py, tz: -line.scale * 0.9,
                 scale: line.scale * 0.98,
-                baseColor: new THREE.Color(line.rim),
+                baseColor: rimC.clone(),
                 isFront: false,
                 lineIndex: line.lineIndex,
-                charIndex: charCounter,
-                row
+                delay: charDelay + (row * 0.008)
               });
-              // Layer 3: Deep 3D Extrusion Shadow Layer
+              // Layer 3: Deep 3D Extruded Housing
               voxels.push({
-                tx: px, ty: py, tz: -line.scale * 1.75,
-                scale: line.scale * 0.96,
-                baseColor: new THREE.Color(line.shade),
+                tx: px, ty: py, tz: -line.scale * 1.85,
+                scale: line.scale * 0.98,
+                baseColor: shadeC.clone(),
                 isFront: false,
                 lineIndex: line.lineIndex,
-                charIndex: charCounter,
-                row
+                delay: charDelay + (row * 0.008)
               });
             }
           }
         }
         cursorX += gWidth + 1;
-        charCounter++;
+        charIdx++;
       }
     });
 
     const voxelMesh = new THREE.InstancedMesh(
       new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.18, metalness: 0.52 }),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.48 }),
       voxels.length
     );
-    scene.add(voxelMesh);
+    logoGroup.add(voxelMesh);
 
     const dummy = new THREE.Object3D();
     const tempColor = new THREE.Color();
     const flashColor = new THREE.Color(0xffffff);
 
-    // Configure per-character arcade drop-in choreography
     voxels.forEach((v, i) => {
-      v.sx = v.tx * 1.25;
-      v.sy = v.ty + 56 + (4 - v.row) * 2.2;
-      v.sz = v.tz + 28;
-      // Staggered by line + character index for a snappy letter-by-letter slam
-      v.delay = (v.lineIndex * 0.22) + (v.charIndex * 0.045) + (v.row * 0.012);
+      v.sx = v.tx * 1.3;
+      v.sy = v.ty + 55;
+      v.sz = v.tz + 32;
 
       dummy.position.set(v.sx, v.sy, v.sz);
       dummy.scale.set(0.001, 0.001, 0.001);
@@ -813,48 +870,123 @@
     });
     voxelMesh.instanceColor.needsUpdate = true;
 
-    let baseCamY = 4;
-    function updateCameraForMobile() {
-      const w = container.clientWidth, h = container.clientHeight;
+    // 3D Impact Spark Particles when letters slam into place
+    const MAX_SPARKS = 140;
+    const sparkMesh = new THREE.InstancedMesh(
+      new THREE.BoxGeometry(0.55, 0.55, 0.55),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }),
+      MAX_SPARKS
+    );
+    logoGroup.add(sparkMesh);
+
+    const sparks = [];
+    for (let i = 0; i < MAX_SPARKS; i++) {
+      sparks.push({ active: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0, color: new THREE.Color() });
+      dummy.scale.set(0.001, 0.001, 0.001);
+      dummy.updateMatrix();
+      sparkMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    let sparkCursor = 0;
+    function spawnImpactSparks(ox, oy, hexColor) {
+      for (let k = 0; k < 8; k++) {
+        const s = sparks[sparkCursor];
+        sparkCursor = (sparkCursor + 1) % MAX_SPARKS;
+        s.active = true;
+        s.x = ox + (Math.random() - 0.5) * 2.5;
+        s.y = oy + (Math.random() - 0.5) * 2.5;
+        s.z = 1.2;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 10 + Math.random() * 18;
+        s.vx = Math.cos(angle) * speed;
+        s.vy = Math.sin(angle) * speed + 6;
+        s.vz = 6 + Math.random() * 12;
+        s.life = 1.0;
+        s.color.setHex(k % 2 === 0 ? 0xffffff : hexColor);
+        sparkMesh.setColorAt(sparkCursor, s.color);
+      }
+      sparkMesh.instanceColor.needsUpdate = true;
+    }
+
+    // Mathematically lock logoGroup inside #logo-stage-window so nothing EVER overlaps it
+    let targetLogoY = 12;
+    function syncLogoToStageWindow() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (!w || !h) return;
+
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      camera.position.z = Math.max(84, (70 / 2) / (Math.tan((camera.fov * Math.PI) / 360) * camera.aspect));
-      camera.position.y = baseCamY;
       renderer.setSize(w, h);
-    }
-    updateCameraForMobile();
-    window.addEventListener('resize', updateCameraForMobile);
 
-    // Snappy elastic arcade slam easing
+      // Fit width of the 3D text (~54 world units wide)
+      const fovRad = (camera.fov * Math.PI) / 180;
+      const camZ = Math.max(78, (56 / 2) / (Math.tan(fovRad / 2) * camera.aspect));
+      camera.position.set(0, 0, camZ);
+
+      const visibleWorldH = 2 * Math.tan(fovRad / 2) * camZ;
+      const wrapRect = wrapperEl.getBoundingClientRect();
+      const stageRect = stageWindow.getBoundingClientRect();
+
+      const stageCenterPx = (stageRect.top - wrapRect.top) + stageRect.height / 2;
+      const ndcY = 1 - 2 * (stageCenterPx / h);
+      targetLogoY = (ndcY * visibleWorldH) / 2;
+
+      // Scale logo cleanly if stage window is compact on short phones
+      const stageWorldH = (stageRect.height / h) * visibleWorldH;
+      const fitScale = Math.min(1.05, Math.max(0.75, (stageWorldH * 0.86) / 31));
+      logoGroup.scale.set(fitScale, fitScale, fitScale);
+      logoGroup.position.y = targetLogoY;
+    }
+
+    syncLogoToStageWindow();
+    window.addEventListener('resize', syncLogoToStageWindow);
+    setTimeout(syncLogoToStageWindow, 60);
+
     function easeOutBack(x) {
-      const c1 = 1.95;
+      const c1 = 2.05;
       const c3 = c1 + 1;
       return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
     }
 
     let startTime = performance.now();
-    let bannerTriggered = false;
+    let prevTime = startTime;
+    let promoTriggered = false;
     let popupTriggered = false;
+    let cameraShake = 0;
 
     function animateThree(now) {
       requestAnimationFrame(animateThree);
+      const dt = Math.min(0.05, (now - prevTime) / 1000);
+      prevTime = now;
       const elapsed = (now - startTime) / 1000;
+
       gridHelper.position.z = (elapsed * 15) % 10;
       stars.rotation.y = elapsed * 0.045;
 
-      // Subtle camera impact shake when "RUGGED" and "ORPHANS" slam in
-      let shakeY = 0;
-      if (elapsed > 0.55 && elapsed < 1.15) {
-        shakeY = Math.sin(elapsed * 55) * 0.45 * (1 - (elapsed - 0.55) / 0.6);
+      // Trigger per-letter impact sparks & subtle camera punch
+      for (let imp of impactOrigins) {
+        if (!imp.fired && elapsed >= imp.impactTime) {
+          imp.fired = true;
+          spawnImpactSparks(imp.x, imp.y, imp.color);
+          cameraShake = 0.55;
+        }
       }
-      camera.position.y = baseCamY + shakeY;
 
-      // Periodic white/gold light shimmer across the 3D letters
-      const shineWaveX = ((elapsed * 48) % 160) - 80;
+      if (cameraShake > 0.01) {
+        camera.position.x = Math.sin(elapsed * 75) * cameraShake;
+        camera.position.y = Math.cos(elapsed * 65) * cameraShake;
+        cameraShake *= 0.86;
+      } else {
+        camera.position.x = 0;
+        camera.position.y = 0;
+      }
+
+      const shineWaveX = ((elapsed * 46) % 140) - 70;
 
       for (let i = 0; i < voxels.length; i++) {
         const v = voxels[i];
-        const localT = Math.max(0, Math.min(1, (elapsed - v.delay) / 0.52));
+        const localT = Math.max(0, Math.min(1, (elapsed - v.delay) / 0.48));
 
         if (localT <= 0) {
           dummy.scale.set(0.001, 0.001, 0.001);
@@ -864,31 +996,28 @@
         }
 
         const ease = easeOutBack(localT);
-        const idleHover = localT === 1 ? Math.sin(elapsed * 3.2 + v.tx * 0.14 + v.lineIndex) * 0.26 : 0;
+        const idleWave = localT === 1 ? Math.sin(elapsed * 3.2 + v.tx * 0.15 + v.lineIndex) * 0.22 : 0;
 
         dummy.position.set(
           v.sx + (v.tx - v.sx) * ease,
-          v.sy + (v.ty - v.sy) * ease + idleHover,
+          v.sy + (v.ty - v.sy) * ease + idleWave,
           v.sz + (v.tz - v.sz) * ease
         );
-        dummy.rotation.set((1 - localT) * 2.1, (1 - localT) * 0.6, 0);
+        dummy.rotation.set((1 - localT) * 2.2, (1 - localT) * 0.7, 0);
 
-        // Impact squash & stretch right as the voxel locks in
-        const impactPop = (localT > 0.78 && localT < 0.98) ? 1.12 : 1.0;
-        dummy.scale.set(v.scale * impactPop, v.scale * impactPop, v.scale);
+        const pop = (localT > 0.82 && localT < 0.98) ? 1.14 : 1.0;
+        dummy.scale.set(v.scale * pop, v.scale * pop, v.scale);
         dummy.updateMatrix();
         voxelMesh.setMatrixAt(i, dummy.matrix);
 
-        // White-hot impact flash when locking into place + continuous specular sweep
         if (v.isFront) {
-          if (localT > 0.8 && localT < 1.0) {
-            const flashBlend = 1 - Math.abs(localT - 0.9) * 10;
-            tempColor.copy(v.baseColor).lerp(flashColor, Math.max(0, flashBlend * 0.85));
+          if (localT > 0.82 && localT < 1.0) {
+            tempColor.copy(v.baseColor).lerp(flashColor, 0.85);
             voxelMesh.setColorAt(i, tempColor);
           } else if (localT === 1) {
             const dist = Math.abs(v.tx - shineWaveX);
-            if (dist < 6.5) {
-              const blend = (1 - dist / 6.5) * 0.6;
+            if (dist < 5.5) {
+              const blend = (1 - dist / 5.5) * 0.65;
               tempColor.copy(v.baseColor).lerp(flashColor, blend);
               voxelMesh.setColorAt(i, tempColor);
             } else {
@@ -898,29 +1027,52 @@
         }
       }
 
-      voxelMesh.instanceMatrix.needsUpdate = true;
-      voxelMesh.instanceColor.needsUpdate = true;
-      voxelMesh.rotation.y = Math.sin(elapsed * 1.15) * 0.09;
+      // Animate 3D impact sparks
+      for (let i = 0; i < MAX_SPARKS; i++) {
+        const s = sparks[i];
+        if (!s.active) continue;
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.z += s.vz * dt;
+        s.vy -= 38 * dt; // Gravity
+        s.life -= dt * 2.1;
 
-      // Reveal the "FREE MINT COMING SOON + OPENSEA" banner right as the logo finishes dropping
-      if (elapsed > 1.15 && !bannerTriggered) {
-        bannerTriggered = true;
-        document.getElementById('mint-promo-card').classList.add('show');
+        if (s.life <= 0) {
+          s.active = false;
+          dummy.scale.set(0.001, 0.001, 0.001);
+        } else {
+          dummy.position.set(s.x, s.y, s.z);
+          dummy.rotation.set(elapsed * 8, elapsed * 6, 0);
+          dummy.scale.set(s.life, s.life, s.life);
+        }
+        dummy.updateMatrix();
+        sparkMesh.setMatrixAt(i, dummy.matrix);
       }
 
-      // Trigger the talking character right after
-      if (elapsed > 1.45 && !popupTriggered) {
+      voxelMesh.instanceMatrix.needsUpdate = true;
+      voxelMesh.instanceColor.needsUpdate = true;
+      sparkMesh.instanceMatrix.needsUpdate = true;
+
+      logoGroup.rotation.y = Math.sin(elapsed * 1.15) * 0.1;
+
+      if (elapsed > 1.15 && !promoTriggered) {
+        promoTriggered = true;
+        document.getElementById('promo-bar').classList.add('show');
+      }
+
+      if (elapsed > 1.4 && !popupTriggered) {
         popupTriggered = true;
         triggerCharacterPopup();
       }
+
       renderer.render(scene, camera);
     }
     requestAnimationFrame(animateThree);
 
     /* =====================================================
-       PART 3: SINGLE STREAMLINED SPEECH BUBBLE
+       PART 3: TALKING CHARACTER & SPEECH BUBBLE
     ===================================================== */
-    const WELCOME_MESSAGE = "Welcome to Rugged Orphans! Free mint dropping in the coming weeks. Tap to skate in!";
+    const WELCOME_MESSAGE = "Welcome to Rugged Orphans on ApeChain! Free mint dropping soon. Tap to skate in!";
     let typeInterval = null;
 
     function typeWelcomeMessage() {
@@ -938,7 +1090,6 @@
         dialogueEl.textContent += ch;
         charIndex++;
 
-        // Keep mouth lip-sync animation moving while typing
         if (/[a-zA-Z0-9]/.test(ch)) {
           syllableToggle++;
           if (syllableToggle % 3 === 0) setMouthState('closed');
@@ -1003,14 +1154,10 @@
       });
     }
 
-    // Ensure clicking the OpenSea links opens OpenSea cleanly without triggering the video
-    document.querySelectorAll('.opensea-btn, .hud-opensea-mini').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
+    document.getElementById('opensea-link').addEventListener('click', (e) => {
+      e.stopPropagation();
     });
 
-    // Clicking either the speech bubble or the character starts the skate-in video
     document.querySelector('.speech-bubble').addEventListener('click', startEntranceVideo);
     document.querySelector('.sprite-stage').addEventListener('click', startEntranceVideo);
 
