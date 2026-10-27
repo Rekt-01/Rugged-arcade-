@@ -459,7 +459,7 @@
             <span class="live-dot"></span>
             <span>APECHAIN // LIVE</span>
           </div>
-          <div class="credit-counter">FREE MINT SOON</div>
+          <div class="credit-counter">COMING SOON</div>
         </div>
 
         <!-- Dedicated Unobstructed 3D Pixel Name Stage -->
@@ -469,8 +469,8 @@
         <div class="bottom-deck">
           <div id="promo-bar">
             <div class="coming-soon-strip">
-              <span class="coming-tag">COMING SOON</span>
-              <span class="coming-text">FREE MINT DROPPING IN WEEKS</span>
+              <span class="coming-tag">FREE MINT</span>
+              <span class="coming-text">COMING SOON ON APECHAIN</span>
             </div>
 
             <a
@@ -718,7 +718,6 @@
       ' ': ["000","000","000","000","000","000","000"]
     };
 
-    // Centered around local Y = 0 inside logoGroup (spans local Y from -15 to +15)
     const lines = [
       {
         text: "WELCOME TO",
@@ -798,7 +797,6 @@
         }
 
         for (let row = 0; row < 7; row++) {
-          // Calculate vertical 16-bit arcade gradient per row
           const rowColor = new THREE.Color();
           if (row <= 2) {
             rowColor.copy(topC).lerp(midC, row / 2);
@@ -811,7 +809,6 @@
               const px = (cursorX + col) * line.scale;
               const py = (3 - row) * line.scale + line.yOffset;
 
-              // Layer 1: Front Gradient Pixel Face
               voxels.push({
                 tx: px, ty: py, tz: 0,
                 scale: line.scale * 0.96,
@@ -820,7 +817,6 @@
                 lineIndex: line.lineIndex,
                 delay: charDelay + (row * 0.008)
               });
-              // Layer 2: Mid Bevel Contrast Rim
               voxels.push({
                 tx: px, ty: py, tz: -line.scale * 0.9,
                 scale: line.scale * 0.98,
@@ -829,7 +825,6 @@
                 lineIndex: line.lineIndex,
                 delay: charDelay + (row * 0.008)
               });
-              // Layer 3: Deep 3D Extruded Housing
               voxels.push({
                 tx: px, ty: py, tz: -line.scale * 1.85,
                 scale: line.scale * 0.98,
@@ -870,7 +865,6 @@
     });
     voxelMesh.instanceColor.needsUpdate = true;
 
-    // 3D Impact Spark Particles when letters slam into place
     const MAX_SPARKS = 140;
     const sparkMesh = new THREE.InstancedMesh(
       new THREE.BoxGeometry(0.55, 0.55, 0.55),
@@ -908,7 +902,6 @@
       sparkMesh.instanceColor.needsUpdate = true;
     }
 
-    // Mathematically lock logoGroup inside #logo-stage-window so nothing EVER overlaps it
     let targetLogoY = 12;
     function syncLogoToStageWindow() {
       const w = container.clientWidth;
@@ -919,7 +912,6 @@
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
 
-      // Fit width of the 3D text (~54 world units wide)
       const fovRad = (camera.fov * Math.PI) / 180;
       const camZ = Math.max(78, (56 / 2) / (Math.tan(fovRad / 2) * camera.aspect));
       camera.position.set(0, 0, camZ);
@@ -932,7 +924,6 @@
       const ndcY = 1 - 2 * (stageCenterPx / h);
       targetLogoY = (ndcY * visibleWorldH) / 2;
 
-      // Scale logo cleanly if stage window is compact on short phones
       const stageWorldH = (stageRect.height / h) * visibleWorldH;
       const fitScale = Math.min(1.05, Math.max(0.75, (stageWorldH * 0.86) / 31));
       logoGroup.scale.set(fitScale, fitScale, fitScale);
@@ -964,7 +955,6 @@
       gridHelper.position.z = (elapsed * 15) % 10;
       stars.rotation.y = elapsed * 0.045;
 
-      // Trigger per-letter impact sparks & subtle camera punch
       for (let imp of impactOrigins) {
         if (!imp.fired && elapsed >= imp.impactTime) {
           imp.fired = true;
@@ -1027,14 +1017,13 @@
         }
       }
 
-      // Animate 3D impact sparks
       for (let i = 0; i < MAX_SPARKS; i++) {
         const s = sparks[i];
         if (!s.active) continue;
         s.x += s.vx * dt;
         s.y += s.vy * dt;
         s.z += s.vz * dt;
-        s.vy -= 38 * dt; // Gravity
+        s.vy -= 38 * dt;
         s.life -= dt * 2.1;
 
         if (s.life <= 0) {
@@ -1072,7 +1061,7 @@
     /* =====================================================
        PART 3: TALKING CHARACTER & SPEECH BUBBLE
     ===================================================== */
-    const WELCOME_MESSAGE = "Welcome to Rugged Orphans on ApeChain! Free mint dropping soon. Tap to skate in!";
+    const WELCOME_MESSAGE = "Welcome to Rugged Orphans! Coming soon on ApeChain. Tap to skate in!";
     let typeInterval = null;
 
     function typeWelcomeMessage() {
