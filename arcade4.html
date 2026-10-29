@@ -48,7 +48,6 @@
             z-index: 1;
             image-rendering: pixelated;
         }
-        /* Landscape Enforcement Overlay */
         #orientation-warning {
             position: fixed;
             inset: 0;
@@ -99,7 +98,6 @@
 </head>
 <body class="text-white antialiased">
 
-<!-- LANDSCAPE WARNING BANNER -->
 <div id="orientation-warning">
     <div class="font-orbitron text-2xl sm:text-4xl font-black text-rose-500 mb-3 tracking-wider">ROTATE DEVICE TO LANDSCAPE</div>
     <p class="text-slate-300 text-sm sm:text-base max-w-md">Rug Arena requires landscape orientation to display the fighting arena and arcade controls properly.</p>
@@ -108,10 +106,8 @@
 <div id="app-wrapper">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- TOP MK HEALTH & HUD BAR -->
     <header class="relative z-10 w-full max-w-5xl px-4 pt-3 pointer-events-none flex flex-col gap-2">
         <div class="flex items-center justify-between gap-3 mk-panel rounded-xl px-4 py-2.5 pointer-events-auto">
-            <!-- CHAD HEALTH -->
             <div class="flex flex-col w-[38%]">
                 <div class="flex justify-between items-center text-xs font-orbitron font-black text-amber-400 mb-1">
                     <span>CHAD</span>
@@ -122,12 +118,10 @@
                 </div>
             </div>
 
-            <!-- EXIT BUTTON -->
             <a href="main.html" class="mk-exit-btn rounded-lg px-3 py-1.5 font-orbitron text-xs font-black text-rose-200 tracking-wider flex items-center justify-center shrink-0">
                 EXIT
             </a>
 
-            <!-- CAPTAIN OTTER HEALTH -->
             <div class="flex flex-col w-[38%]">
                 <div class="flex justify-between items-center text-xs font-orbitron font-black text-rose-400 mb-1">
                     <span id="otterHpText">100%</span>
@@ -140,12 +134,10 @@
         </div>
     </header>
 
-    <!-- FINISH HIM OVERLAY BUTTON -->
     <button id="btnFinish" class="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 font-orbitron text-3xl sm:text-6xl font-black text-amber-300 px-6 py-3 rounded-2xl mk-panel border-4 border-amber-400 z-30 hidden animate-finish cursor-pointer">
         FINISH HIM!
     </button>
 
-    <!-- BOTTOM ARCADE CONTROLS -->
     <footer class="relative z-10 w-full max-w-5xl px-4 pb-3 flex items-center justify-between pointer-events-none">
         <div class="flex gap-3 pointer-events-auto">
             <button id="btnLeft" class="mk-btn w-16 h-14 sm:w-20 sm:h-16 rounded-2xl flex items-center justify-center font-orbitron text-2xl font-black text-white">
@@ -170,9 +162,6 @@
 </div>
 
 <script>
-// ============================================================================
-// 1. PIXEL ART PALETTE & SPRITE GENERATORS (CHAD, OTTER, HAILEY)
-// ============================================================================
 const PALETTE = {
     'K': '#090a0f', 'W': '#ffffff', 'G': '#b8d8d8', 'B': '#1d38b8',
     'J': '#1e293b', 'R': '#e61919', 'S': '#eac096', 'T': '#c49668',
@@ -275,9 +264,8 @@ function createFighterSprite(grid, scale = 4, flipX = false) {
     return c;
 }
 
-// Separate Head and Body for Decapitation Fatality!
 function createHeadSprite(grid, scale = 4, flipX = false) {
-    const headGrid = grid.slice(0, 6); // First 6 rows contain cap and eyes/face
+    const headGrid = grid.slice(0, 6);
     const c = document.createElement('canvas');
     c.width = 16 * scale;
     c.height = headGrid.length * scale;
@@ -300,7 +288,7 @@ function createHeadSprite(grid, scale = 4, flipX = false) {
 }
 
 function createBodySprite(grid, scale = 4, flipX = false) {
-    const bodyGrid = grid.slice(6); // Remaining rows for torso and legs
+    const bodyGrid = grid.slice(6);
     const c = document.createElement('canvas');
     c.width = 16 * scale;
     c.height = bodyGrid.length * scale;
@@ -322,9 +310,6 @@ function createBodySprite(grid, scale = 4, flipX = false) {
     return c;
 }
 
-// ============================================================================
-// 2. WEB AUDIO SYNTHESIZER FOR MK COMBAT
-// ============================================================================
 class SoundFX {
     constructor() { this.ctx = null; }
     init() {
@@ -360,21 +345,16 @@ class SoundFX {
     }
 }
 
-// ============================================================================
-// 3. RUG ARENA GAME ENGINE
-// ============================================================================
 class RugArenaGame {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.sfx = new SoundFX();
 
-        // Load Arena Background Image provided earlier
         this.arenaImg = new Image();
         this.arenaImg.crossOrigin = 'anonymous';
         this.arenaImg.src = 'https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/arena.png';
 
-        // Generate Sprites (Scale 4 -> 64x84 fighters)
         const scale = 4;
         this.sprites = {
             chadR: createFighterSprite(CHAD_GRID, scale, false),
@@ -396,20 +376,19 @@ class RugArenaGame {
         this.shake = 0;
         this.animClock = 0;
 
-        // Fighter Objects
         this.chad = {
             x: 180, y: 0, vx: 0, vy: 0,
             w: 64, h: 84, hp: 100, maxHp: 100,
-            state: 'idle', attackTimer: 0
+            state: 'idle'
         };
         this.otter = {
             x: 0, y: 0, vx: 0, vy: 0,
             w: 64, h: 84, hp: 100, maxHp: 100,
-            state: 'idle', attackTimer: 0, aiTimer: 0, decapitated: false, headFly: null
+            state: 'idle', aiTimer: 0, attackCd: 0, decapitated: false, headFly: null
         };
         this.hailey = { x: 0, y: 0, active: false };
 
-        this.matchState = 'FIGHTING'; // FIGHTING -> FINISH_AVAILABLE -> FATALITY -> VICTORY
+        this.matchState = 'FIGHTING';
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -425,7 +404,6 @@ class RugArenaGame {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
 
-        // Ground baseline on the rug arena carpet
         const floorY = this.height * 0.72;
         this.chad.y = floorY - this.chad.h;
         this.otter.y = floorY - this.otter.h;
@@ -483,7 +461,6 @@ class RugArenaGame {
     triggerAttack(type) {
         if (this.matchState !== 'FIGHTING' || this.chad.state !== 'idle') return;
         this.chad.state = type;
-        this.chad.attackTimer = 0.25;
 
         const dist = Math.abs(this.chad.x - this.otter.x);
         if (dist < 110) {
@@ -508,11 +485,9 @@ class RugArenaGame {
         this.sfx.fatality();
         this.shake = 0.6;
 
-        // CHAD UPPERCUT / DECAPITATION ANIMATION
         this.chad.state = 'punch';
         this.spawnBlood(this.otter.x + 32, this.otter.y + 15, 55);
 
-        // Captain Otter Head Flies Off!
         this.otter.decapitated = true;
         this.otter.headFly = {
             x: this.otter.x + 20,
@@ -521,7 +496,6 @@ class RugArenaGame {
             vy: -480
         };
 
-        // Princess Hailey walks in from the right to hug Chad!
         setTimeout(() => {
             this.hailey.active = true;
         }, 1200);
@@ -555,39 +529,40 @@ class RugArenaGame {
         const o = this.otter;
 
         if (this.matchState === 'FIGHTING') {
-            // Chad Movement
             let move = 0;
             if (this.keys.left) move = -1;
             if (this.keys.right) move = 1;
             c.vx = move * 310;
             c.x = Math.max(40, Math.min(this.width - 120, c.x + c.vx * dt));
 
-            // Face each other
             c.facing = o.x > c.x ? 1 : -1;
             o.facing = c.x > o.x ? 1 : -1;
 
-            // Otter AI Counter-Attack
-            o.aiTimer += dt;
-            if (o.aiTimer > 1.8 && o.hp > 0) {
-                o.aiTimer = 0;
-                const dist = Math.abs(c.x - o.x);
-                if (dist < 130) {
-                    o.state = 'attack';
-                    this.sfx.hit();
-                    c.hp = Math.max(0, c.hp - 10);
-                    this.spawnBlood(c.x + 32, c.y + 30, 10);
-                    this.updateHUD();
-                    setTimeout(() => { o.state = 'idle'; }, 300);
-                    if (c.hp <= 0) {
-                        this.matchState = 'GAMEOVER';
-                    }
-                } else {
-                    o.x += (c.x > o.x ? 1 : -1) * 75 * dt;
+            if (o.attackCd > 0) o.attackCd -= dt;
+
+            // Active AI combat loop for Captain Otter
+            const dist = Math.abs(c.x - o.x);
+            if (dist > 95) {
+                // Walk toward Chad
+                const dir = c.x > o.x ? 1 : -1;
+                o.x += dir * 140 * dt;
+            } else if (o.attackCd <= 0 && o.hp > 0) {
+                // Attack Chad back!
+                o.attackCd = 1.1 + Math.random() * 0.9;
+                o.state = Math.random() > 0.5 ? 'punch' : 'kick';
+                this.sfx.hit();
+                c.hp = Math.max(0, c.hp - 12);
+                this.spawnBlood(c.x + 32, c.y + 30, 14);
+                this.updateHUD();
+
+                setTimeout(() => { o.state = 'idle'; }, 250);
+
+                if (c.hp <= 0) {
+                    this.matchState = 'GAMEOVER';
                 }
             }
         }
 
-        // Decapitated Head Physics
         if (o.headFly) {
             o.headFly.vy += 1200 * dt;
             o.headFly.x += o.headFly.vx * dt;
@@ -598,18 +573,16 @@ class RugArenaGame {
             }
         }
 
-        // Princess Hailey Walking In for Victory Hug
         if (this.hailey.active) {
             if (this.hailey.x > c.x + 55) {
                 this.hailey.x -= 140 * dt;
             }
         }
 
-        // Particles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const pt = this.particles[i];
             pt.x += pt.vx * dt;
-            pt.vy += 800 * dt; // Gravity
+            pt.vy += 800 * dt;
             pt.y += pt.vy * dt;
             pt.alpha -= 1.2 * dt;
             if (pt.alpha <= 0 || pt.y > this.height) this.particles.splice(i, 1);
@@ -625,7 +598,6 @@ class RugArenaGame {
             ctx.translate((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
         }
 
-        // 1. Draw Rug Arena Background Image
         if (this.arenaImg.complete && this.arenaImg.naturalWidth !== 0) {
             ctx.drawImage(this.arenaImg, 0, 0, this.width, this.height);
         } else {
@@ -636,17 +608,13 @@ class RugArenaGame {
         const c = this.chad;
         const o = this.otter;
 
-        // 2. Draw Chad
         const chadSpr = (c.facing === -1) ? this.sprites.chadL : this.sprites.chadR;
         ctx.drawImage(chadSpr, c.x, c.y);
 
-        // 3. Draw Captain Otter (Decapitated Body vs Intact)
         if (o.decapitated) {
-            // Draw Body slumped
             const bodySpr = (o.facing === -1) ? this.sprites.otterBody : this.sprites.otterBody;
             ctx.drawImage(bodySpr, o.x, o.y + 24);
 
-            // Draw Flying Decapitated Head with blood spray trail!
             if (o.headFly) {
                 ctx.drawImage(this.sprites.otterHead, o.headFly.x, o.headFly.y);
             }
@@ -655,15 +623,12 @@ class RugArenaGame {
             ctx.drawImage(otterSpr, o.x, o.y);
         }
 
-        // 4. Draw Princess Hailey When She Arrives
         if (this.hailey.active) {
             ctx.drawImage(this.sprites.hailey, this.hailey.x, this.hailey.y);
-            // Floating Hearts Above Them
             ctx.font = '24px sans-serif';
             ctx.fillText('💖💖', c.x + 20, c.y - 25);
         }
 
-        // 5. Blood Particles
         this.particles.forEach(pt => {
             ctx.globalAlpha = Math.max(0, pt.alpha);
             ctx.fillStyle = pt.color;
