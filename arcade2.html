@@ -49,27 +49,28 @@
             image-rendering: pixelated;
         }
         .dex-panel {
-            background: rgba(3, 7, 18, 0.9);
+            background: rgba(3, 7, 18, 0.92);
             border: 1px solid rgba(16, 185, 129, 0.5);
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
             backdrop-filter: blur(8px);
         }
         .dex-btn {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(59, 130, 246, 0.3));
-            border: 2px solid rgba(52, 211, 153, 0.8);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(59, 130, 246, 0.35));
+            border: 2px solid rgba(52, 211, 153, 0.9);
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-            transition: transform 0.08s, background 0.15s;
+            cursor: pointer;
+            pointer-events: auto;
         }
-        .dex-btn:active, .touch-active {
-            transform: scale(0.92);
+        .dex-btn:active {
+            transform: scale(0.95);
             background: rgba(16, 185, 129, 0.7);
-            box-shadow: 0 0 25px rgba(52, 211, 153, 0.8);
         }
         .dex-exit-btn {
             background: linear-gradient(135deg, rgba(225, 29, 72, 0.3), rgba(159, 18, 57, 0.4));
             border: 1px solid rgba(244, 63, 94, 0.8);
             box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
             text-decoration: none;
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -78,7 +79,7 @@
 <div id="app-wrapper">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- TOP PORTRAIT DEX HUD BAR WITH EXIT BUTTON -->
+    <!-- TOP PORTRAIT DEX HUD BAR -->
     <header class="relative z-10 w-full px-3 pt-3 pointer-events-none flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2 dex-panel rounded-xl px-3 py-2 pointer-events-auto">
             <div class="flex items-center gap-2.5">
@@ -105,8 +106,8 @@
     </header>
 
     <!-- START / GAME OVER MODAL -->
-    <div id="modalScreen" class="absolute inset-0 z-30 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-        <div class="dex-panel rounded-2xl p-6 max-w-sm w-full text-center flex flex-col items-center gap-4 border-emerald-500/60">
+    <div id="modalScreen" class="absolute inset-0 z-30 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 pointer-events-auto">
+        <div class="dex-panel rounded-2xl p-6 max-w-sm w-full text-center flex flex-col items-center gap-4 border-emerald-500/60 pointer-events-auto">
             <div id="modalBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-orbitron">
                 30-SECOND RUSH
             </div>
@@ -339,11 +340,16 @@ class DontFumbleTheBagGame {
         bindTouch('btnLeft', 'left');
         bindTouch('btnRight', 'right');
 
-        document.getElementById('btnAction').onclick = () => {
+        // Robust start button listener for both click and touch
+        const startBtn = document.getElementById('btnAction');
+        const triggerStart = (e) => {
+            e.preventDefault();
             this.sfx.init();
             document.getElementById('modalScreen').classList.add('hidden');
             this.startNewGame();
         };
+        startBtn.addEventListener('click', triggerStart);
+        startBtn.addEventListener('touchend', triggerStart);
     }
 
     startNewGame() {
