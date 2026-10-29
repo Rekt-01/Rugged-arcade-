@@ -13,18 +13,23 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 100vh;
-    overflow: hidden;
-    touch-action: none;
+    overflow-x: hidden;
+    touch-action: manipulation;
+    padding: 10px 0;
   }
   #gameWrap {
     position: relative;
     width: 100%;
     max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   #gameCanvas {
     width: 100%;
+    max-width: 900px;
     height: auto;
     display: block;
     border: 4px solid #8B0000;
@@ -32,25 +37,25 @@
     background: #111;
   }
   #ui {
-    position: absolute; top: 10px; left: 0; right: 0;
+    position: absolute; top: 12px; left: 0; right: 0;
     display: flex; justify-content: space-between; padding: 0 15px;
     pointer-events: none; z-index: 10;
   }
-  .health-container { width: 40%; }
+  .health-container { width: 38%; }
   .name { font-size: clamp(12px, 3vw, 18px); text-shadow: 2px 2px #000; margin-bottom: 2px; color: #ffcc00; }
-  .health-bar { height: 18px; background: #222; border: 2px solid #fff; border-radius: 3px; overflow: hidden; }
+  .health-bar { height: 16px; background: #222; border: 2px solid #fff; border-radius: 3px; overflow: hidden; }
   .health-fill { height: 100%; background: linear-gradient(90deg, #aa0000, #ff5500); width: 100%; transition: width 0.1s; }
   
   #exitBtn {
-    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-    background: rgba(139, 0, 0, 0.9); border: 2px solid #fff; color: #fff;
-    padding: 4px 12px; font-size: 12px; font-weight: bold; cursor: pointer;
-    border-radius: 5px; z-index: 25; text-decoration: none;
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(139, 0, 0, 0.95); border: 2px solid #fff; color: #fff;
+    padding: 4px 14px; font-size: 13px; font-weight: bold; cursor: pointer;
+    border-radius: 5px; z-index: 25; text-decoration: none; box-shadow: 0 2px 5px #000;
   }
   #exitBtn:hover { background: #ff0000; }
 
   #finishBtn {
-    position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
+    position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%);
     font-size: clamp(24px, 7vw, 48px); padding: 12px 24px;
     background: linear-gradient(#aa0000, #440000); color: #ffcc00;
     border: 4px solid #ffcc00; cursor: pointer; display: none; z-index: 100;
@@ -58,36 +63,48 @@
   }
   @keyframes pulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.06); } }
 
+  /* Controls are now placed cleanly BELOW the canvas so gameplay is 100% visible */
   #controls {
-    position: absolute; bottom: 8px; left: 10px; right: 10px;
-    display: flex; justify-content: space-between; z-index: 20; pointer-events: none;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: #110000;
+    border: 3px solid #8B0000;
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
-  .btn-group { display: flex; gap: 8px; pointer-events: auto; }
+  .btn-group { display: flex; gap: 12px; }
   .ctrl-btn {
-    width: 55px; height: 55px; background: rgba(30, 0, 0, 0.75); border: 2px solid rgba(255,255,255,0.9);
-    color: #fff; font-size: 20px; font-weight: bold; border-radius: 10px;
-    touch-action: none; user-select: none;
+    width: 70px; height: 60px; background: rgba(100, 0, 0, 0.85); border: 2px solid #fff;
+    color: #fff; font-size: 22px; font-weight: bold; border-radius: 10px;
+    cursor: pointer; box-shadow: 0 4px 0 #400; user-select: none;
   }
-  .ctrl-btn:active { background: rgba(200,0,0,0.9); transform: translateY(2px); }
+  .ctrl-btn:active { background: #ff0000; transform: translateY(3px); box-shadow: 0 1px 0 #400; }
+  #instructions { margin-top: 10px; font-size: 12px; text-align: center; opacity: 0.8; }
 </style>
 </head>
 <body>
 
 <div id="gameWrap">
-  <a href="main.html" id="exitBtn">EXIT</a>
-  <div id="ui">
-    <div class="health-container">
-      <div class="name">CHAD</div>
-      <div class="health-bar"><div class="health-fill" id="chadHealth"></div></div>
+  <div style="position:relative; width:100%;">
+    <a href="main.html" id="exitBtn">EXIT</a>
+    <div id="ui">
+      <div class="health-container">
+        <div class="name">CHAD</div>
+        <div class="health-bar"><div class="health-fill" id="chadHealth"></div></div>
+      </div>
+      <div class="health-container">
+        <div class="name" style="text-align:right">CAPTAIN OTTER</div>
+        <div class="health-bar"><div class="health-fill" id="otterHealth" style="float:right"></div></div>
+      </div>
     </div>
-    <div class="health-container">
-      <div class="name" style="text-align:right">CAPTAIN OTTER</div>
-      <div class="health-bar"><div class="health-fill" id="otterHealth" style="float:right"></div></div>
-    </div>
-  </div>
 
-  <canvas id="gameCanvas" width="900" height="450"></canvas>
-  <button id="finishBtn">FINISH HIM!</button>
+    <canvas id="gameCanvas" width="900" height="420"></canvas>
+    <button id="finishBtn">FINISH HIM!</button>
+  </div>
 
   <div id="controls">
     <div class="btn-group">
@@ -101,37 +118,22 @@
   </div>
 </div>
 
+<div id="instructions">
+  Desktop: ← → Move | Z: Punch | X: Kick &nbsp;|&nbsp; Mobile: Use buttons below arena
+</div>
+
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const finishBtn = document.getElementById("finishBtn");
 
-// Load images using direct references from your uploaded project files
+// Arena Background
 const arenaImg = new Image();
 arenaImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/arena.png";
 
-const chadImg = new Image();
-chadImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_2.png"; //[span_0](start_span)[span_0](end_span)
-
-const otterImg = new Image();
-otterImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png"; //[span_1](start_span)[span_1](end_span)
-
-// Fallback safety drawers if external images block
-let imagesReady = 0;
-function assetLoaded() {
-  imagesReady++;
-  if (imagesReady >= 3) gameLoop();
-}
-arenaImg.onload = assetLoaded;
-chadImg.onload = assetLoaded;
-otterImg.onload = assetLoaded;
-arenaImg.onerror = assetLoaded;
-chadImg.onerror = assetLoaded;
-otterImg.onerror = assetLoaded;
-
-// Game State & Fighter Positions
-let chad = { x: 150, y: 220, health: 100, maxHealth: 100, width: 120, height: 120, state: "idle", facing: 1 };
-let otter = { x: 630, y: 220, health: 100, maxHealth: 100, width: 120, height: 120, state: "idle", facing: -1, aiTimer: 0 };
+// Fighters
+let chad = { x: 180, y: 230, health: 100, maxHealth: 100, state: "idle", facing: 1 };
+let otter = { x: 620, y: 235, health: 100, maxHealth: 100, state: "idle", facing: -1, aiTimer: 0 };
 let finishing = false;
 let bloodParticles = [];
 
@@ -163,8 +165,8 @@ finishBtn.onclick = finishBtn.ontouchstart = () => {
   if (!finishing && otter.health <= 0) {
     finishing = true;
     finishBtn.style.display = "none";
-    otter.y += 50;
-    spawnBlood(otter.x + 60, otter.y + 40, 50);
+    otter.y += 40;
+    spawnBlood(otter.x, otter.y + 20, 50);
   }
 };
 
@@ -175,10 +177,10 @@ function triggerAttack(fighter, type) {
   setTimeout(() => {
     if (finishing) return;
     const target = (fighter === chad) ? otter : chad;
-    if (Math.abs(fighter.x - target.x) < 120) {
+    if (Math.abs(fighter.x - target.x) < 110) {
       target.health = Math.max(0, target.health - (type === "punch" ? 12 : 18));
       updateBars();
-      spawnBlood(target.x + 60, target.y + 60, 12);
+      spawnBlood(target.x, target.y + 20, 12);
       if (target === otter && otter.health <= 0) {
         finishBtn.style.display = "block";
       }
@@ -211,7 +213,7 @@ function updateAI() {
   const dist = chad.x - otter.x;
   otter.facing = dist > 0 ? 1 : -1;
 
-  if (Math.abs(dist) > 110) {
+  if (Math.abs(dist) > 100) {
     otter.x += otter.facing * 2.5;
   } else if (otter.aiTimer % 70 === 0) {
     triggerAttack(otter, Math.random() > 0.5 ? "punch" : "kick");
@@ -228,8 +230,8 @@ function update() {
     chad.facing = moveDir;
   }
 
-  chad.x = Math.max(30, Math.min(canvas.width - 150, chad.x));
-  otter.x = Math.max(30, Math.min(canvas.width - 150, otter.x));
+  chad.x = Math.max(40, Math.min(canvas.width - 80, chad.x));
+  otter.x = Math.max(40, Math.min(canvas.width - 80, otter.x));
 
   updateAI();
 
@@ -243,10 +245,75 @@ function update() {
   }
 }
 
+// DRAW CHAD (Coded Pixel Character with US Hat & Sunglasses)[span_0](start_span)[span_0](end_span)
+function drawChad(x, y, facing, state) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (facing === -1) { ctx.scale(-1, 1); ctx.translate(-60, 0); }
+
+  // Body / Hoodie
+  ctx.fillStyle = "#1d3557"; ctx.fillRect(10, 50, 40, 50);
+  ctx.fillStyle = "#e63946"; ctx.fillRect(15, 45, 30, 20); // Hoodie red
+  
+  // Head
+  ctx.fillStyle = "#f3c68f"; ctx.fillRect(15, 15, 30, 35);
+  
+  // Sunglasses
+  ctx.fillStyle = "#111"; ctx.fillRect(20, 22, 22, 10);
+  ctx.fillStyle = "#6930c3"; ctx.fillRect(22, 24, 8, 6); ctx.fillRect(32, 24, 8, 6);
+
+  // USA Cap
+  ctx.fillStyle = "#1d3557"; ctx.fillRect(12, 5, 36, 14); // Hat crown
+  ctx.fillStyle = "#e63946"; ctx.fillRect(5, 14, 46, 5);  // Brim
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(14, 7, 6, 6); ctx.fillRect(24, 7, 6, 6); // Stars pattern
+
+  // Punch/Kick action frame offset
+  if (state === "punch") {
+    ctx.fillStyle = "#f3c68f"; ctx.fillRect(50, 60, 25, 12);
+  } else if (state === "kick") {
+    ctx.fillStyle = "#1d3557"; ctx.fillRect(45, 90, 30, 14);
+  }
+
+  ctx.restore();
+}
+
+// DRAW CAPTAIN OTTER (Coded Pixel Character with Captain Hat & Whiskers)[span_1](start_span)[span_1](end_span)
+function drawOtter(x, y, facing, state) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (facing === -1) { ctx.scale(-1, 1); ctx.translate(-60, 0); }
+
+  // Body / Uniform
+  ctx.fillStyle = "#5c4033"; ctx.fillRect(12, 55, 36, 45);
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(22, 55, 16, 30); // White chest
+
+  // Head (Otter brown)
+  ctx.fillStyle = "#6b4423"; ctx.fillRect(15, 18, 32, 40);
+  ctx.fillStyle = "#d7ccc8"; ctx.fillRect(20, 35, 22, 20); // Muzzle
+
+  // Eyes (Blue)
+  ctx.fillStyle = "#00b4d8"; ctx.fillRect(20, 24, 6, 6); ctx.fillRect(34, 24, 6, 6);
+  // Nose
+  ctx.fillStyle = "#111"; ctx.fillRect(26, 38, 8, 6);
+
+  // Captain's Hat
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(10, 8, 40, 12); // White top
+  ctx.fillStyle = "#111"; ctx.fillRect(10, 16, 40, 5);    // Dark band
+  ctx.fillStyle = "#ffb703"; ctx.fillRect(26, 11, 8, 8);   // Gold Anchor badge
+
+  if (state === "punch") {
+    ctx.fillStyle = "#6b4423"; ctx.fillRect(48, 65, 22, 12);
+  } else if (state === "kick") {
+    ctx.fillStyle = "#5c4033"; ctx.fillRect(45, 90, 28, 12);
+  }
+
+  ctx.restore();
+}
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Background
+  // Arena Background
   if (arenaImg.complete && arenaImg.naturalWidth !== 0) {
     ctx.drawImage(arenaImg, 0, 0, canvas.width, canvas.height);
   } else {
@@ -254,27 +321,9 @@ function render() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Draw Chad
-  ctx.save();
-  if (chad.facing === -1) {
-    ctx.translate(chad.x + chad.width, chad.y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(chadImg, 0, 0, chad.width, chad.height);
-  } else {
-    ctx.drawImage(chadImg, chad.x, chad.y, chad.width, chad.height);
-  }
-  ctx.restore();
-
-  // Draw Captain Otter
-  ctx.save();
-  if (otter.facing === -1) {
-    ctx.translate(otter.x + otter.width, otter.y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(otterImg, 0, 0, otter.width, otter.height);
-  } else {
-    ctx.drawImage(otterImg, otter.x, otter.y, otter.width, otter.height);
-  }
-  ctx.restore();
+  // Draw Coded Characters
+  drawChad(chad.x, chad.y, chad.facing, chad.state);
+  drawOtter(otter.x, otter.y, otter.facing, otter.state);
 
   // Blood
   ctx.fillStyle = "#cc0000";
@@ -290,8 +339,7 @@ function gameLoop() {
 }
 
 updateBars();
-// Fallback kickstart in case image load events stall on mobile
-setTimeout(gameLoop, 500);
+gameLoop();
 </script>
 </body>
 </html>
