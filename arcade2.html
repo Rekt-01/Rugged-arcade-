@@ -49,28 +49,30 @@
             image-rendering: pixelated;
         }
         .dex-panel {
-            background: rgba(3, 7, 18, 0.92);
-            border: 1px solid rgba(16, 185, 129, 0.5);
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
-            backdrop-filter: blur(8px);
+            background: rgba(3, 7, 18, 0.95);
+            border: 1px solid rgba(16, 185, 129, 0.6);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(10px);
         }
         .dex-btn {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(59, 130, 246, 0.35));
-            border: 2px solid rgba(52, 211, 153, 0.9);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(59, 130, 246, 0.4));
+            border: 2px solid rgba(52, 211, 153, 1);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
             cursor: pointer;
             pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
         }
         .dex-btn:active {
             transform: scale(0.95);
-            background: rgba(16, 185, 129, 0.7);
+            background: rgba(16, 185, 129, 0.8);
         }
         .dex-exit-btn {
-            background: linear-gradient(135deg, rgba(225, 29, 72, 0.3), rgba(159, 18, 57, 0.4));
-            border: 1px solid rgba(244, 63, 94, 0.8);
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.35), rgba(159, 18, 57, 0.45));
+            border: 1px solid rgba(244, 63, 94, 0.9);
             box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
             text-decoration: none;
             pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -106,7 +108,7 @@
     </header>
 
     <!-- START / GAME OVER MODAL -->
-    <div id="modalScreen" class="absolute inset-0 z-30 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 pointer-events-auto">
+    <div id="modalScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 pointer-events-auto" style="pointer-events: auto;">
         <div class="dex-panel rounded-2xl p-6 max-w-sm w-full text-center flex flex-col items-center gap-4 border-emerald-500/60 pointer-events-auto">
             <div id="modalBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-orbitron">
                 30-SECOND RUSH
@@ -117,8 +119,8 @@
             <p id="modalText" class="text-xs text-slate-300 leading-relaxed">
                 Catch as many falling bananas 🍌 as you can before the 30-second timer runs out. Watch out for the rug pull!
             </p>
-            <div class="w-full flex flex-col gap-2.5">
-                <button id="btnAction" class="dex-btn w-full py-3 rounded-xl font-orbitron text-sm font-black text-emerald-200 tracking-wider">
+            <div class="w-full flex flex-col gap-2.5 pointer-events-auto">
+                <button id="btnAction" type="button" class="dex-btn w-full py-3.5 rounded-xl font-orbitron text-sm font-black text-emerald-200 tracking-wider">
                     START TRADING
                 </button>
                 <a href="main.html" class="dex-exit-btn w-full py-2.5 rounded-xl font-orbitron text-xs font-bold text-rose-200 block text-center">
@@ -340,16 +342,19 @@ class DontFumbleTheBagGame {
         bindTouch('btnLeft', 'left');
         bindTouch('btnRight', 'right');
 
-        // Robust start button listener for both click and touch
+        // Bulletproof start listener
         const startBtn = document.getElementById('btnAction');
-        const triggerStart = (e) => {
-            e.preventDefault();
+        const startGameAction = (e) => {
+            if (e) e.preventDefault();
             this.sfx.init();
+            document.getElementById('modalScreen').style.display = 'none';
             document.getElementById('modalScreen').classList.add('hidden');
             this.startNewGame();
         };
-        startBtn.addEventListener('click', triggerStart);
-        startBtn.addEventListener('touchend', triggerStart);
+
+        startBtn.addEventListener('click', startGameAction);
+        startBtn.addEventListener('touchend', startGameAction);
+        startBtn.addEventListener('pointerdown', startGameAction);
     }
 
     startNewGame() {
@@ -412,7 +417,9 @@ class DontFumbleTheBagGame {
                 this.timeLeft = 0;
                 this.gameState = 'GAMEOVER';
                 this.sfx.rugCrash();
-                document.getElementById('modalScreen').classList.remove('hidden');
+                const modal = document.getElementById('modalScreen');
+                modal.style.display = 'flex';
+                modal.classList.remove('hidden');
                 document.getElementById('modalBadge').className = "px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-orbitron";
                 document.getElementById('modalBadge').textContent = "TOTAL RUG PULL";
                 document.getElementById('modalTitle').textContent = "THE DEV RUGGED!";
