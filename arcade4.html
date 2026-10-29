@@ -206,7 +206,7 @@ const OTTER_GRID = [
     "..KNNNNNNMMNNNK.",
     "..KNNNMMMMMMMMK.",
     "..KNNMMKKMMKKMK.",
-    "...KNNMMMMMMMMK.",
+    "...KNNNNMMMMMMK.",
     "...KNNNMMMMMMK..",
     "..KNNNNMMMMMMNK.",
     ".KNNNNNMMMMMMNNK",
@@ -386,7 +386,7 @@ class RugArenaGame {
             w: 64, h: 84, hp: 100, maxHp: 100,
             state: 'idle', aiTimer: 0, attackCd: 0, decapitated: false, headFly: null
         };
-        this.hailey = { x: 0, y: 0, active: false };
+        this.hailey = { x: 0, y: 0, active: false, walkingAway: false };
 
         this.matchState = 'FIGHTING';
 
@@ -496,9 +496,14 @@ class RugArenaGame {
             vy: -480
         };
 
+        // Hailey arrives, then they leave hand in hand!
         setTimeout(() => {
             this.hailey.active = true;
-        }, 1200);
+        }, 1000);
+
+        setTimeout(() => {
+            this.hailey.walkingAway = true;
+        }, 2600);
     }
 
     spawnBlood(x, y, count) {
@@ -540,14 +545,11 @@ class RugArenaGame {
 
             if (o.attackCd > 0) o.attackCd -= dt;
 
-            // Active AI combat loop for Captain Otter
             const dist = Math.abs(c.x - o.x);
             if (dist > 95) {
-                // Walk toward Chad
                 const dir = c.x > o.x ? 1 : -1;
                 o.x += dir * 140 * dt;
             } else if (o.attackCd <= 0 && o.hp > 0) {
-                // Attack Chad back!
                 o.attackCd = 1.1 + Math.random() * 0.9;
                 o.state = Math.random() > 0.5 ? 'punch' : 'kick';
                 this.sfx.hit();
@@ -573,10 +575,17 @@ class RugArenaGame {
             }
         }
 
-        if (this.hailey.active) {
+        if (this.hailey.active && !this.hailey.walkingAway) {
             if (this.hailey.x > c.x + 55) {
                 this.hailey.x -= 140 * dt;
             }
+        }
+
+        // Walk off hand in hand to the right
+        if (this.hailey.walkingAway) {
+            c.facing = 1;
+            c.x += 110 * dt;
+            this.hailey.x += 110 * dt;
         }
 
         for (let i = this.particles.length - 1; i >= 0; i--) {
@@ -625,8 +634,17 @@ class RugArenaGame {
 
         if (this.hailey.active) {
             ctx.drawImage(this.sprites.hailey, this.hailey.x, this.hailey.y);
-            ctx.font = '24px sans-serif';
-            ctx.fillText('💖💖', c.x + 20, c.y - 25);
+            if (this.hailey.walkingAway) {
+                // Hand in hand connection line & hearts
+                ctx.strokeStyle = '#f43f5e';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(c.x + c.w - 10, c.y + 50);
+                ctx.lineTo(this.hailey.x + 10, this.hailey.y + 50);
+                ctx.stroke();
+                ctx.font = '22px sans-serif';
+                ctx.fillText('💖 WAGMI 💖', c.x + 15, c.y - 25);
+            }
         }
 
         this.particles.forEach(pt => {
