@@ -377,7 +377,8 @@ class RugArenaGame {
             otterL: createFighterSprite(OTTER_GRID, scale, true),
             otterHead: createHeadSprite(OTTER_GRID, scale, false),
             otterBody: createBodySprite(OTTER_GRID, scale, false),
-            hailey: createFighterSprite(HAILEY_GRID, scale, true)
+            haileyL: createFighterSprite(HAILEY_GRID, scale, true),
+            haileyR: createFighterSprite(HAILEY_GRID, scale, false)
         };
 
         this.width = window.innerWidth;
@@ -389,6 +390,7 @@ class RugArenaGame {
         this.particles = [];
         this.shake = 0;
         this.introTimer = 1.4;
+        this.walkCycle = 0;
 
         this.chad = {
             x: 0, y: 0, vx: 0, vy: 0,
@@ -413,7 +415,6 @@ class RugArenaGame {
         requestAnimationFrame((t) => this.loop(t));
     }
 
-    // Place fighters at opposite ends of the arena
     resetPositions() {
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -445,7 +446,6 @@ class RugArenaGame {
         this.otter.y = floorY - this.otter.h;
         this.hailey.y = floorY - 84;
 
-        // If rotating from portrait to landscape or match hasn't had hits yet, re-anchor to opposite sides
         if (!this.hasMoved || (this.chad.hp === 100 && this.otter.hp === 100) || oldW < 500) {
             this.resetPositions();
             this.introTimer = 1.2;
@@ -570,12 +570,9 @@ class RugArenaGame {
         };
 
         setTimeout(() => {
+            this.chad.state = 'idle';
             this.hailey.active = true;
-        }, 1000);
-
-        setTimeout(() => {
-            this.hailey.walkingAway = true;
-        }, 2600);
+        }, 900);
     }
 
     spawnBlood(x, y, count) {
@@ -621,7 +618,6 @@ class RugArenaGame {
             if (o.attackCd > 0) o.attackCd -= dt;
 
             const dist = Math.abs(c.x - o.x);
-            // Keep a minimum 72px spacing so the sprites never overlap into each other
             if (dist > 82) {
                 const dir = c.x > o.x ? 1 : -1;
                 o.x += dir * 135 * dt;
@@ -651,16 +647,20 @@ class RugArenaGame {
             }
         }
 
+        // Hailey walks up right next to Chad, then they walk off side-by-side hand in hand
         if (this.hailey.active && !this.hailey.walkingAway) {
-            if (this.hailey.x > c.x + 55) {
-                this.hailey.x -= 140 * dt;
+            this.walkCycle += dt * 10;
+            if (this.hailey.x > c.x + 42) {
+                this.hailey.x -= 160 * dt;
+            } else {
+                this.hailey.x = c.x + 42;
+                this.hailey.walkingAway = true;
             }
-        }
-
-        if (this.hailey.walkingAway) {
+        } else if (this.hailey.walkingAway) {
+            this.walkCycle += dt * 10;
             c.facing = 1;
-            c.x += 110 * dt;
-            this.hailey.x += 110 * dt;
+            c.x += 115 * dt;
+            this.hailey.x = c.x + 42;
         }
 
         for (let i = this.particles.length - 1; i >= 0; i--) {
@@ -692,12 +692,7 @@ class RugArenaGame {
         const c = this.chad;
         const o = this.otter;
 
-        // Draw Chad (with lunge offset when punching/kicking)
-        const chadLunge = (c.state !== 'idle') ? (c.facing * 12) : 0;
-        const chadSpr = (c.facing === -1) ? this.sprites.chadL : this.sprites.chadR;
-        ctx.drawImage(chadSpr, c.x + chadLunge, c.y);
-
-        // Draw Captain Otter
+        // Draw Captain Otter first so Chad & Hailey walk in front of his slumped body
         if (o.decapitated) {
             ctx.drawImage(this.sprites.otterBody, o.x, o.y + 24);
             if (o.headFly) {
@@ -709,19 +704,29 @@ class RugArenaGame {
             ctx.drawImage(otterSpr, o.x + otterLunge, o.y);
         }
 
+        // Subtle walking bounce when leaving together
+        const chadBob = this.hailey.walkingAway ? Math.abs(Math.sin(this.walkCycle)) * 4 : 0;
+        const haileyBob = this.hailey.active ? Math.abs(Math.cos(this.walkCycle)) * 4 : 0;
+
+        // Draw Chad
+        const chadLunge = (c.state !== 'idle') ? (c.facing * 12) : 0;
+        const chadSpr = (c.facing === -1) ? this.sprites.chadL : this.sprites.chadR;
+        ctx.drawImage(chadSpr, c.x + chadLunge, c.y - chadBob);
+
         // Draw Princess Hailey
         if (this.hailey.active) {
-            ctx.drawImage(this.sprites.hailey, this.hailey.x, this.hailey.y);
+            const haileySpr = this.hailey.walkingAway ? this.sprites.haileyR : this.sprites.haileyL;
+            ctx.drawImage(haileySpr, this.hailey.x, this.hailey.y - haileyBob);
+
             if (this.hailey.walkingAway) {
-                ctx.strokeStyle = '#f43f5e';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(c.x + c.w - 10, c.y + 50);
-                ctx.lineTo(this.hailey.x + 10, this.hailey.y + 50);
-                ctx.stroke();
+                // Clasped pixel hands right between them (no weird red string!)
+                ctx.fillStyle = '#eac096';
+                ctx.fillRect(c.x + 48, c.y + 48 - chadBob, 10, 8);
+
                 ctx.font = '900 18px Orbitron';
                 ctx.fillStyle = '#fde047';
-                ctx.fillText('💖 WAGMI 💖', c.x + 10, c.y - 20);
+                ctx.textAlign = 'center';
+                ctx.fillText('💖 WAGMI 💖', c.x + 52, c.y - 18);
             }
         }
 
