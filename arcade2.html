@@ -134,7 +134,7 @@
         </div>
     </div>
 
-    <!-- GAME OVER BOTTOM PANEL (Leaves center screen clear for Laughing Otter + Red Candle!) -->
+    <!-- GAME OVER BOTTOM PANEL -->
     <div id="gameOverPanel" class="is-hidden relative z-40 w-full max-w-sm px-4 pb-4 pointer-events-auto mt-auto">
         <div class="dex-panel rounded-2xl p-4 text-center flex flex-col items-center gap-3 border-rose-500/80 shadow-2xl">
             <p id="gameOverText" class="text-xs sm:text-sm text-slate-200 font-bold"></p>
@@ -162,9 +162,9 @@
 
 <script>
 // ============================================================================
-// 1. PIXEL ART SPRITES (CHAD & LAUGHING CAPTAIN OTTER - NO EXTERNAL IMAGES NEEDED)
+// 1. EXACT PIXEL ART PALETTES & GRIDS
 // ============================================================================
-const PALETTE = {
+const CHAD_PALETTE = {
     'K': '#090a0f',
     'W': '#ffffff',
     'G': '#b8d8d8',
@@ -174,13 +174,7 @@ const PALETTE = {
     'S': '#eac096',
     'T': '#c49668',
     'P': '#d9536f',
-    'O': '#e06d1a',
-    'N': '#6b4226',
-    'D': '#472a16',
-    'M': '#f5deb3',
-    'C': '#1ca3ec',
-    'Y': '#f5c71a',
-    'V': '#111633'
+    'O': '#e06d1a'
 };
 
 const CHAD_GRID = [
@@ -207,56 +201,107 @@ const CHAD_GRID = [
     "..KWWWWKKWWWWK.."
 ];
 
-// Captain Otter Portrait (Frame 1: Smirk, Frame 2: Wide Laughing Mouth)
-const OTTER_FRAME_1 = [
-    ".....KKKKKKK....",
-    "...KKWWWWWWWKK..",
-    "..KWWWWWYWWWWWK.",
-    "..KWWWWYYYWWWWK.",
-    "..KVVVVYYYVVVVK.",
-    "..KYYYYYYYYYYYK.",
-    ".KKNNNNKKKKKKKKK",
-    ".KNNNNNCCKNNCCK.",
-    "..KNNNNNNMMNNNK.",
-    "..KNNNMMMMMMMMK.",
-    "..KNNMMKKMMKKMK.",
-    "...KNNMMMMMMMMK.",
-    "...KNNMMKKKKMMK.",
-    "..KNNNNNMMMMMMNK",
-    ".KNNNNNNMMMMMMNK",
-    ".KNNNNNNMMMMMMNK"
+// Exact 32x32 Pixel Palette for Captain Otter
+const OTTER_PALETTE = {
+    'K': '#000000', // Black outline, visor rim, nose, whiskers
+    'W': '#ffffff', // Pure white hat crown, snout highlight, chest fur
+    'S': '#d3cbc2', // Light grey/taupe shading on hat & chest fur
+    'Y': '#ffd700', // Bright gold anchor & hat band
+    'G': '#b7950b', // Darker gold shading on band & anchor
+    'V': '#131640', // Dark navy blue hat band
+    'E': '#5a5a5a', // Grey hat visor
+    'B': '#5c3824', // Main brown otter fur
+    'D': '#3d2314', // Dark brown ear & shoulder fur shading
+    'C': '#34b4eb', // Bright cyan eye highlight
+    'U': '#0f4c75', // Dark blue eye pupil
+    'M': '#f5ddc4', // Cream/peach muzzle
+    'L': '#ccb094', // Muzzle shadow tan
+    'R': '#dc2626'  // Red open laughing mouth
+};
+
+// Exact 32x32 Captain Otter Grid (Frame 1: Signature Smirk)
+const OTTER_32_SMIRK = [
+    "................................",
+    "..............KKKKKKKK..........",
+    "..........KKKKWWWWYWWWKK........",
+    "........KKSSSSWWWGYYWWWWK.......",
+    ".......KSSSWWWWWWWYWWWWWK.......",
+    "......KSSSWWWWWWGVYVYWWWK.......",
+    ".....KSSSSSWWWVVGYYVVVVWK.......",
+    ".....KSSSVVVVVVVVYYVVVKK........",
+    ".....KKSSVVYGGYYYYYYYYYK........",
+    ".....KDBKVVKKKEEEEEEEEEEK.......",
+    ".....KBDKKKKKKKKKKKKKKKKKK......",
+    "......KDBKBBBBCCUUBBCCUK........",
+    ".......KDDBBBBCUUUBBCUUK........",
+    ".......KBBBBBBBBBBBWWWBK........",
+    ".......KBBBBBMMMMMMKKKMMK.......",
+    "........KBBBMMMKKMMMKMMKK.......",
+    "........KBBBMMKMMKMMMMKSK.......",
+    ".........KBBMMMKMMMMKMMKK.......",
+    ".........KBLMMMKMKKKSKKK........",
+    ".........KBBLMMMMMMMLMK.........",
+    "..........KBBLMMMMMMKK..........",
+    "..........KBBKLLLLKK............",
+    "..........KBBSSSWWK.............",
+    "..........KBBSWWWWK.............",
+    "........KKBBBSWWWWWK............",
+    ".......KBBBBBSWWWWWBK...........",
+    ".....KKBBBBBSWWWWWWBBK..........",
+    "....KDBBBBBBSWWWWWWWBBK.........",
+    "...KDDBBBBBSWWWWWWWWBBK.........",
+    "...KDDBBBBBWWWWWWWWWWBK.........",
+    "...KDDDBBBSWWWWWWWWWWBK.........",
+    "...KDDDBBBWWWWWWWWWWWBK........."
 ];
 
-const OTTER_FRAME_2 = [
-    ".....KKKKKKK....",
-    "...KKWWWWWWWKK..",
-    "..KWWWWWYWWWWWK.",
-    "..KWWWWYYYWWWWK.",
-    "..KVVVVYYYVVVVK.",
-    "..KYYYYYYYYYYYK.",
-    ".KKNNNNKKKKKKKKK",
-    ".KNNNNNCCKNNCCK.",
-    "..KNNNNNNMMNNNK.",
-    "..KNNNMMMMMMMMK.",
-    "..KNNMMKKMMKKMK.",
-    "...KNNMMKKKKMMK.",
-    "...KNNMKRRRRKMK.",
-    "...KNNMMKKKKMMK.",
-    "..KNNNNNMMMMMMNK",
-    ".KNNNNNNMMMMMMNK"
+// Exact 32x32 Captain Otter Grid (Frame 2: Open Laughing Mouth)
+const OTTER_32_LAUGH = [
+    "................................",
+    "..............KKKKKKKK..........",
+    "..........KKKKWWWWYWWWKK........",
+    "........KKSSSSWWWGYYWWWWK.......",
+    ".......KSSSWWWWWWWYWWWWWK.......",
+    "......KSSSWWWWWWGVYVYWWWK.......",
+    ".....KSSSSSWWWVVGYYVVVVWK.......",
+    ".....KSSSVVVVVVVVYYVVVKK........",
+    ".....KKSSVVYGGYYYYYYYYYK........",
+    ".....KDBKVVKKKEEEEEEEEEEK.......",
+    ".....KBDKKKKKKKKKKKKKKKKKK......",
+    "......KDBKBBBBCCUUBBCCUK........",
+    ".......KDDBBBBCUUUBBCUUK........",
+    ".......KBBBBBBBBBBBWWWBK........",
+    ".......KBBBBBMMMMMMKKKMMK.......",
+    "........KBBBMMMKKMMMKMMKK.......",
+    "........KBBBMMKMMKMMMMKSK.......",
+    ".........KBBMMMKMMMMKMMKK.......",
+    ".........KBLMMKKKKKKKSKK........",
+    ".........KBBLMKRRRRKLMK.........",
+    "..........KBBLKKKKKKMMK.........",
+    "..........KBBKLLLLKK............",
+    "..........KBBSSSWWK.............",
+    "..........KBBSWWWWK.............",
+    "........KKBBBSWWWWWK............",
+    ".......KBBBBBSWWWWWBK...........",
+    ".....KKBBBBBSWWWWWWBBK..........",
+    "....KDBBBBBBSWWWWWWWBBK.........",
+    "...KDDBBBBBSWWWWWWWWBBK.........",
+    "...KDDBBBBBWWWWWWWWWWBK.........",
+    "...KDDDBBBSWWWWWWWWWWBK.........",
+    "...KDDDBBBWWWWWWWWWWWBK........."
 ];
 
-function buildSprite(grid, scale) {
+function buildSprite(grid, palette, scale) {
     const c = document.createElement('canvas');
-    c.width = 16 * scale;
+    c.width = grid[0].length * scale;
     c.height = grid.length * scale;
     const ctx = c.getContext('2d');
     for (let r = 0; r < grid.length; r++) {
         const row = grid[r];
         for (let col = 0; col < row.length; col++) {
             const ch = row[col];
-            if (PALETTE[ch]) {
-                ctx.fillStyle = PALETTE[ch];
+            if (palette[ch]) {
+                ctx.fillStyle = palette[ch];
                 ctx.fillRect(col * scale, r * scale, scale, scale);
             }
         }
@@ -306,9 +351,10 @@ class DontFumbleTheBagGame {
         this.ctx = this.canvas.getContext('2d');
         this.sfx = new SoundFX();
 
-        this.chadSprite = buildSprite(CHAD_GRID, 3.5);
-        this.otterLaugh1 = buildSprite(OTTER_FRAME_1, 8);
-        this.otterLaugh2 = buildSprite(OTTER_FRAME_2, 8);
+        this.chadSprite = buildSprite(CHAD_GRID, CHAD_PALETTE, 3.5);
+        // Scale 5 -> 160x160 crisp 32x32 pixel-art Captain Otter
+        this.otterLaugh1 = buildSprite(OTTER_32_SMIRK, OTTER_PALETTE, 5);
+        this.otterLaugh2 = buildSprite(OTTER_32_LAUGH, OTTER_PALETTE, 5);
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -620,7 +666,7 @@ class DontFumbleTheBagGame {
             ctx.restore();
         });
 
-        // 5. GAME OVER: GIANT RED CANDLE CRASH + LAUGHING CAPTAIN OTTER + "THE DEV RUGGED" SIGN
+        // 5. GAME OVER: GIANT RED CANDLE CRASH + EXACT 32x32 LAUGHING CAPTAIN OTTER + SIGN
         if (this.gameState === 'GAMEOVER') {
             ctx.save();
             ctx.fillStyle = 'rgba(127, 29, 29, 0.55)';
@@ -638,9 +684,9 @@ class DontFumbleTheBagGame {
             ctx.fillRect(candleX, 75, candleW, this.candleHeight);
             ctx.strokeRect(candleX, 75, candleW, this.candleHeight);
 
-            // Bouncing Laughing Captain Otter (Transparent Background!)
-            const bounce = Math.abs(Math.sin(this.rugAnim * 10)) * 16;
-            const otterY = this.height * 0.36 - bounce;
+            // Bouncing Laughing 32x32 Captain Otter (Transparent Background!)
+            const bounce = Math.abs(Math.sin(this.rugAnim * 10)) * 14;
+            const otterY = this.height * 0.35 - bounce;
             const otterSpr = Math.floor(this.rugAnim * 7) % 2 === 0 ? this.otterLaugh1 : this.otterLaugh2;
             ctx.drawImage(otterSpr, this.width / 2 - otterSpr.width / 2, otterY);
 
@@ -648,14 +694,14 @@ class DontFumbleTheBagGame {
             ctx.fillStyle = '#fde047';
             ctx.font = '900 15px Orbitron';
             ctx.textAlign = 'center';
-            ctx.fillText('HAHAHA!', this.width / 2 - 88, otterY + 25);
-            ctx.fillText('RUGGED!', this.width / 2 + 88, otterY + 45);
+            ctx.fillText('HAHAHA!', this.width / 2 - 95, otterY + 35);
+            ctx.fillText('RUGGED!', this.width / 2 + 95, otterY + 55);
 
-            // Sign Held by Otter: "THE DEV RUGGED!"
+            // Sign Above Otter: "THE DEV RUGGED!"
             const signW = Math.min(310, this.width - 30);
             const signH = 58;
             const signX = this.width / 2 - signW / 2;
-            const signY = otterY - 68;
+            const signY = otterY - 65;
 
             ctx.fillStyle = '#090d16';
             ctx.strokeStyle = '#facc15';
@@ -688,7 +734,6 @@ class DontFumbleTheBagGame {
     }
 }
 
-// Initialize immediately so buttons respond right away
 const game = new DontFumbleTheBagGame();
 
 window.startTradingGame = function(e) {
