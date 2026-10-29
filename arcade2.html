@@ -1,1023 +1,539 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#090b12">
-  <title>DON'T FUMBLE THE BAG | Rugged Arcade</title>
-
-  <style>
-    :root {
-      --bg: #090b12;
-      --panel: #131827;
-      --gold: #f8c747;
-      --green: #4ade80;
-      --red: #fb5252;
-      --text: #f8fafc;
-      --muted: #9ca3af;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(ellipse at top, #20253b 0%, #090b12 65%);
-      color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    button {
-      font: inherit;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      font-size: 12px;
-      letter-spacing: 3px;
-      color: var(--gold);
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    .game-title {
-      font-size: clamp(21px, 5vw, 38px);
-      line-height: 1.1;
-      font-weight: 1000;
-      letter-spacing: -1px;
-      margin: 5px 0;
-    }
-
-    .game-title span {
-      color: var(--gold);
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    .pill {
-      border: 1px solid #343b50;
-      border-radius: 999px;
-      padding: 8px 12px;
-      color: var(--gold);
-      background: #151a29;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .game-shell {
-      position: relative;
-      overflow: hidden;
-      border: 1px solid #30384c;
-      border-radius: 16px;
-      background: #0c1120;
-      box-shadow: 0 20px 70px #0009;
-    }
-
-    .hud {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      padding: 12px;
-      background: #111727;
-      border-bottom: 1px solid #30384c;
-    }
-
-    .hud-card {
-      min-width: 0;
-      padding: 9px 10px;
-      border: 1px solid #2b3449;
-      border-radius: 10px;
-      background: #171e30;
-    }
-
-    .hud-label {
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .hud-value {
-      margin-top: 4px;
-      font-size: clamp(17px, 4vw, 25px);
-      font-weight: 950;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .gold {
-      color: var(--gold);
-    }
-
-    .green {
-      color: var(--green);
-    }
-
-    .canvas-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      min-height: 260px;
-      max-height: 560px;
-      background: #0c1120;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .modal {
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: #070a12d9;
-      backdrop-filter: blur(5px);
-    }
-
-    .modal.hidden {
-      display: none;
-    }
-
-    .modal-card {
-      width: 100%;
-      max-width: 410px;
-      text-align: center;
-      padding: 24px 20px;
-      background: linear-gradient(160deg, #1b2337, #101522);
-      border: 1px solid #454c60;
-      border-radius: 18px;
-      box-shadow: 0 15px 50px #0008;
-    }
-
-    .otter {
-      width: 110px;
-      height: 110px;
-      object-fit: contain;
-      margin: 0 auto 8px;
-      display: block;
-      image-rendering: pixelated;
-    }
-
-    .modal h2 {
-      margin: 5px 0 10px;
-      font-size: clamp(24px, 5vw, 34px);
-      font-weight: 1000;
-      line-height: 1.05;
-    }
-
-    .modal h2 span {
-      color: var(--gold);
-    }
-
-    .modal p {
-      margin: 0 auto 18px;
-      max-width: 310px;
-      color: #c4cad7;
-      line-height: 1.6;
-      font-size: 14px;
-    }
-
-    .primary-btn {
-      width: 100%;
-      border: 0;
-      border-radius: 10px;
-      padding: 15px 18px;
-      color: #15110a;
-      background: linear-gradient(135deg, #ffe58a, #f4b923);
-      font-weight: 1000;
-      letter-spacing: 1px;
-      box-shadow: 0 5px 0 #a56e10;
-      transition: transform 0.12s, filter 0.12s;
-    }
-
-    .primary-btn:hover {
-      filter: brightness(1.08);
-    }
-
-    .primary-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 2px 0 #a56e10;
-    }
-
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 12px;
-      background: #111727;
-      border-top: 1px solid #30384c;
-    }
-
-    .control-btn {
-      padding: 14px;
-      color: #fff;
-      background: #20283c;
-      border: 1px solid #3c465e;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 900;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .control-btn:active {
-      background: #343f5a;
-      transform: scale(0.98);
-    }
-
-    .instructions {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 4px 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .instructions strong {
-      color: #dfe5f1;
-    }
-
-    .footer {
-      margin-top: 18px;
-      text-align: center;
-      color: #687186;
-      font-size: 11px;
-      letter-spacing: 2px;
-    }
-
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      .canvas-wrap {
-        aspect-ratio: 3 / 4;
-        min-height: 350px;
-      }
-
-      .hud {
-        padding: 8px;
-        gap: 6px;
-      }
-
-      .hud-card {
-        padding: 8px;
-      }
-
-      .modal-card {
-        padding: 18px 14px;
-      }
-
-      .otter {
-        width: 85px;
-        height: 85px;
-      }
-
-      .instructions {
-        font-size: 11px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        transition-duration: 0.01ms !important;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DON'T FUMBLE THE BAG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            background: #030712;
+            font-family: 'Rajdhani', sans-serif;
+            touch-action: none;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        #app-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 1;
+            image-rendering: pixelated;
+        }
+        .dex-panel {
+            background: rgba(3, 7, 18, 0.92);
+            border: 1px solid rgba(16, 185, 129, 0.6);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .dex-btn {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(59, 130, 246, 0.4));
+            border: 2px solid rgba(52, 211, 153, 1);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .dex-btn:active {
+            transform: scale(0.95);
+            background: rgba(16, 185, 129, 0.8);
+        }
+        .dex-exit-btn {
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.35), rgba(159, 18, 57, 0.45));
+            border: 1px solid rgba(244, 63, 94, 0.9);
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+            text-decoration: none;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
 </head>
+<body class="text-white antialiased">
 
-<body>
-  <main class="app">
-    <header class="topbar">
-      <div>
-        <div class="brand">Rugged Arcade presents</div>
-        <h1 class="game-title">DON'T FUMBLE <span>THE BAG</span></h1>
-        <div class="subtitle">Grab the bags. Dodge the rugs. Protect your gains.</div>
-      </div>
-      <div class="pill">◆ APECHAIN ARCADE</div>
+<div id="app-wrapper">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- TOP PORTRAIT DEX HUD BAR -->
+    <header class="relative z-10 w-full px-3 pt-3 pointer-events-none flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-2 dex-panel rounded-xl px-3 py-2 pointer-events-auto">
+            <div class="flex items-center gap-2.5">
+                <a href="main.html" class="dex-exit-btn rounded-lg px-2.5 py-1.5 font-orbitron text-[10px] font-black text-rose-200 tracking-wider flex items-center justify-center shrink-0">
+                    EXIT
+                </a>
+                <div>
+                    <div class="text-[9px] text-emerald-400 font-orbitron font-bold">BAG VALUE</div>
+                    <div id="scoreDisplay" class="font-orbitron text-xs sm:text-base font-black text-emerald-300">$0</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div>
+                    <div class="text-[9px] text-amber-400 font-orbitron font-bold">BANANAS 🍌</div>
+                    <div id="bananasDisplay" class="font-orbitron text-xs sm:text-base font-black text-amber-300">0</div>
+                </div>
+                <div class="border-l border-slate-700 pl-3">
+                    <div class="text-[9px] text-rose-400 font-orbitron font-bold">TIME</div>
+                    <div id="timerDisplay" class="font-orbitron text-xs sm:text-base font-black text-rose-400">30s</div>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <section class="game-shell" aria-label="Don't Fumble the Bag game">
-      <div class="hud">
-        <div class="hud-card">
-          <div class="hud-label">Your bag</div>
-          <div class="hud-value gold" id="scoreValue">0</div>
-        </div>
-        <div class="hud-card">
-          <div class="hud-label">Time left</div>
-          <div class="hud-value" id="timeValue">45</div>
-        </div>
-        <div class="hud-card">
-          <div class="hud-label">Best score</div>
-          <div class="hud-value green" id="bestValue">0</div>
-        </div>
-      </div>
+    <!-- PORTRAIT TOUCH CONTROLS -->
+    <footer class="relative z-10 w-full px-4 pb-4 flex items-center justify-between pointer-events-none">
+        <button id="btnLeft" class="dex-btn w-24 h-20 rounded-2xl flex items-center justify-center font-orbitron text-3xl font-black text-white pointer-events-auto">
+            &#9664;
+        </button>
+        <button id="btnRight" class="dex-btn w-24 h-20 rounded-2xl flex items-center justify-center font-orbitron text-3xl font-black text-white pointer-events-auto">
+            &#9654;
+        </button>
+    </footer>
+</div>
 
-      <div class="canvas-wrap" id="canvasWrap">
-        <canvas id="gameCanvas" aria-label="Game play area"></canvas>
+<script>
+const CHAD_PALETTE = {
+    'K': '#090a0f', 'W': '#ffffff', 'G': '#b8d8d8', 'B': '#1d38b8',
+    'J': '#1e293b', 'R': '#e61919', 'S': '#eac096', 'T': '#c49668',
+    'P': '#d9536f', 'O': '#e06d1a'
+};
 
-        <div class="modal" id="modalScreen">
-          <div class="modal-card">
-            <img
-              class="otter"
-              id="otterImage"
-              src="https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png"
-              alt="Rugged Orphans otter"
-              onerror="this.style.display='none'"
-            >
+const CHAD_GRID = [
+    "......KKKKKK....",
+    "....KKBBBBWWKK..",
+    "...KBWBBWBWRRRK.",
+    "..KBBWBWBWBRWWRK",
+    "KKKBBBBBBBBRRRRK",
+    "KWWKSSSSSSSSSSK.",
+    "KRRKKKKKKKKKKKK.",
+    ".KKKSSKKGGKKGGKK",
+    "..KTSSKKGGKKGGKK",
+    "..KTSSKKKKKKSSK.",
+    "...KSSSSSSPPSSK.",
+    "..KKRKKKKKKKKRKK",
+    ".KRRRRKSSSSKRRRR",
+    ".KBBBBKORWROKWRW",
+    ".KBBBBKORRROKRRR",
+    ".KBBBBKOWWWOKWWW",
+    "..KKKKKKKKKKKK..",
+    "..KJJJJKKJJJJK..",
+    "..KJJJJKKJJJJK..",
+    "..KRRRRKKRRRRK..",
+    "..KWWWWKKWWWWK.."
+];
 
-            <h2 id="modalTitle">DON'T FUMBLE<br><span>THE BAG</span></h2>
-
-            <p id="modalText">
-              Collect the green bags and dodge the red rugs.
-              You have 45 seconds to stack your gains.
-            </p>
-
-            <button class="primary-btn" id="btnAction" type="button">
-              START TRADING
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button class="control-btn" id="leftBtn" type="button"
-          aria-label="Move left">◀ LEFT</button>
-        <button class="control-btn" id="rightBtn" type="button"
-          aria-label="Move right">RIGHT ▶</button>
-      </div>
-    </section>
-
-    <div class="instructions">
-      <span><strong>PC:</strong> ← → or A / D</span>
-      <span><strong>Mobile:</strong> Use the buttons</span>
-      <span><strong>MISSION:</strong> Don't get rugged!</span>
-    </div>
-
-    <footer class="footer">RUGGED ORPHANS · RUGGED ARCADE</footer>
-  </main>
-
-  <script>
-    (() => {
-      "use strict";
-
-      const canvas = document.getElementById("gameCanvas");
-      const ctx = canvas.getContext("2d");
-
-      const scoreValue = document.getElementById("scoreValue");
-      const timeValue = document.getElementById("timeValue");
-      const bestValue = document.getElementById("bestValue");
-      const modalScreen = document.getElementById("modalScreen");
-      const modalTitle = document.getElementById("modalTitle");
-      const modalText = document.getElementById("modalText");
-      const btnAction = document.getElementById("btnAction");
-
-      const otterImg = new Image();
-      otterImg.src =
-        "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png";
-
-      const GAME_DURATION = 45;
-
-      let gameState = "READY";
-      let score = 0;
-      let bestScore = loadBestScore();
-      let timeLeft = GAME_DURATION;
-      let lastFrame = 0;
-      let spawnTimer = 0;
-      let elapsed = 0;
-      let items = [];
-      let particles = [];
-      let animationId = null;
-
-      const keys = {
-        left: false,
-        right: false
-      };
-
-      const player = {
-        x: 0,
-        y: 0,
-        width: 58,
-        height: 66,
-        speed: 330,
-        invulnerable: 0
-      };
-
-      function loadBestScore() {
-        try {
-          return Number(localStorage.getItem("ruggedArcadeBest") || 0);
-        } catch {
-          return 0;
-        }
-      }
-
-      function saveBestScore(value) {
-        try {
-          localStorage.setItem("ruggedArcadeBest", String(value));
-        } catch {
-          // The game still works if storage is unavailable.
-        }
-      }
-
-      function resizeCanvas() {
-        const rect = canvas.getBoundingClientRect();
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-        canvas.width = Math.max(1, Math.round(rect.width * dpr));
-        canvas.height = Math.max(1, Math.round(rect.height * dpr));
-
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        player.width = Math.min(62, rect.width * 0.17);
-        player.height = player.width * 1.08;
-        player.y = rect.height - player.height - 22;
-        player.x = Math.max(0, (rect.width - player.width) / 2);
-
-        draw();
-      }
-
-      function width() {
-        return canvas.getBoundingClientRect().width;
-      }
-
-      function height() {
-        return canvas.getBoundingClientRect().height;
-      }
-
-      function random(min, max) {
-        return Math.random() * (max - min) + min;
-      }
-
-      function startNewGame() {
-        score = 0;
-        timeLeft = GAME_DURATION;
-        elapsed = 0;
-        spawnTimer = 0;
-        items = [];
-        particles = [];
-        keys.left = false;
-        keys.right = false;
-        player.invulnerable = 0;
-        player.x = (width() - player.width) / 2;
-        player.y = height() - player.height - 22;
-        gameState = "PLAYING";
-
-        updateHUD();
-        modalScreen.classList.add("hidden");
-
-        lastFrame = performance.now();
-
-        if (animationId !== null) {
-          cancelAnimationFrame(animationId);
-        }
-
-        animationId = requestAnimationFrame(gameLoop);
-      }
-
-      function endGame() {
-        if (gameState !== "PLAYING") return;
-
-        gameState = "GAMEOVER";
-        keys.left = false;
-        keys.right = false;
-
-        if (score > bestScore) {
-          bestScore = score;
-          saveBestScore(bestScore);
-        }
-
-        updateHUD();
-
-        modalTitle.innerHTML =
-          score >= 100
-            ? 'BAG SECURED <span>◆</span>'
-            : 'MARKET <span>CLOSED</span>';
-
-        modalText.textContent =
-          `You collected ${score} points. ` +
-          (score >= 100
-            ? "Nice trading! Ready for another round?"
-            : "Keep moving, collect green bags, and avoid the rugs.");
-
-        btnAction.textContent = "PLAY AGAIN";
-        modalScreen.classList.remove("hidden");
-      }
-
-      function updateHUD() {
-        scoreValue.textContent = score;
-        timeValue.textContent = Math.max(0, Math.ceil(timeLeft));
-        bestValue.textContent = bestScore;
-      }
-
-      function spawnItem() {
-        const isBag = Math.random() < 0.67;
-        const size = isBag ? random(24, 33) : random(29, 39);
-
-        items.push({
-          type: isBag ? "bag" : "rug",
-          x: random(8, Math.max(9, width() - size - 8)),
-          y: -size - 5,
-          size,
-          speed: random(145, 225) + elapsed * 2.1,
-          rotation: random(-0.15, 0.15),
-          rotationSpeed: random(-1.3, 1.3)
-        });
-      }
-
-      function addParticles(x, y, color, count = 9) {
-        for (let i = 0; i < count; i++) {
-          particles.push({
-            x,
-            y,
-            vx: random(-115, 115),
-            vy: random(-150, 25),
-            life: random(0.35, 0.8),
-            maxLife: 0.8,
-            size: random(3, 7),
-            color
-          });
-        }
-      }
-
-      function intersects(a, b) {
-        return (
-          a.x < b.x + b.size &&
-          a.x + a.width > b.x &&
-          a.y < b.y + b.size &&
-          a.y + a.height > b.y
-        );
-      }
-
-      function update(dt) {
-        if (gameState !== "PLAYING") return;
-
-        elapsed += dt;
-        timeLeft -= dt;
-
-        if (timeLeft <= 0) {
-          timeLeft = 0;
-          updateHUD();
-          endGame();
-          return;
-        }
-
-        if (player.invulnerable > 0) {
-          player.invulnerable -= dt;
-        }
-
-        if (keys.left) player.x -= player.speed * dt;
-        if (keys.right) player.x += player.speed * dt;
-
-        player.x = Math.max(
-          0,
-          Math.min(width() - player.width, player.x)
-        );
-
-        spawnTimer -= dt;
-
-        const spawnInterval = Math.max(0.32, 0.72 - elapsed * 0.006);
-
-        if (spawnTimer <= 0) {
-          spawnItem();
-          spawnTimer = spawnInterval;
-        }
-
-        for (let i = items.length - 1; i >= 0; i--) {
-          const item = items[i];
-          item.y += item.speed * dt;
-          item.rotation += item.rotationSpeed * dt;
-
-          if (intersects(player, item)) {
-            if (item.type === "bag") {
-              score += 10;
-              addParticles(
-                item.x + item.size / 2,
-                item.y + item.size / 2,
-                "#4ade80"
-              );
-            } else if (player.invulnerable <= 0) {
-              score = Math.max(0, score - 15);
-              player.invulnerable = 0.85;
-              addParticles(
-                item.x + item.size / 2,
-                item.y + item.size / 2,
-                "#fb5252",
-                14
-              );
+function createChadSprite(scale = 3.5) {
+    const c = document.createElement('canvas');
+    c.width = 16 * scale;
+    c.height = CHAD_GRID.length * scale;
+    const ctx = c.getContext('2d');
+    for (let r = 0; r < CHAD_GRID.length; r++) {
+        const row = CHAD_GRID[r];
+        for (let col = 0; col < row.length; col++) {
+            const ch = row[col];
+            if (CHAD_PALETTE[ch]) {
+                ctx.fillStyle = CHAD_PALETTE[ch];
+                ctx.fillRect(col * scale, r * scale, scale, scale);
             }
-
-            items.splice(i, 1);
-            continue;
-          }
-
-          if (item.y > height() + item.size) {
-            items.splice(i, 1);
-          }
         }
+    }
+    return c;
+}
 
-        for (let i = particles.length - 1; i >= 0; i--) {
-          const p = particles[i];
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
-          p.vy += 220 * dt;
-          p.life -= dt;
-
-          if (p.life <= 0) {
-            particles.splice(i, 1);
-          }
+class SoundFX {
+    constructor() { this.ctx = null; }
+    init() {
+        if (!this.ctx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) this.ctx = new AC();
         }
-
-        updateHUD();
-      }
-
-      function roundedRect(x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, r);
-      }
-
-      function drawBackground() {
-        const w = width();
-        const h = height();
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, h);
-        gradient.addColorStop(0, "#101a30");
-        gradient.addColorStop(1, "#090d18");
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, w, h);
-
-        // Subtle grid.
-        ctx.strokeStyle = "rgba(115, 140, 190, 0.09)";
-        ctx.lineWidth = 1;
-
-        const grid = 36;
-        const offset = (elapsed * 25) % grid;
-
-        for (let x = 0; x < w; x += grid) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, h);
-          ctx.stroke();
-        }
-
-        for (let y = -grid + offset; y < h; y += grid) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(w, y);
-          ctx.stroke();
-        }
-
-        // Ground line.
-        ctx.fillStyle = "rgba(248, 199, 71, 0.06)";
-        ctx.fillRect(0, h - 10, w, 10);
-      }
-
-      function drawBag(item) {
-        const s = item.size;
-
-        ctx.save();
-        ctx.translate(item.x + s / 2, item.y + s / 2);
-        ctx.rotate(item.rotation);
-
-        // Bag body.
-        ctx.fillStyle = "#1fbd72";
-        roundedRect(-s * 0.42, -s * 0.22, s * 0.84, s * 0.72, 5);
-        ctx.fill();
-
-        ctx.strokeStyle = "#83ffb4";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Bag tie.
-        ctx.fillStyle = "#8effba";
-        ctx.fillRect(-s * 0.18, -s * 0.34, s * 0.36, s * 0.14);
-
-        // Dollar symbol.
-        ctx.fillStyle = "#073b25";
-        ctx.font = `900 ${s * 0.53}px system-ui`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("$", 0, s * 0.1);
-
-        ctx.restore();
-      }
-
-      function drawRug(item) {
-        const s = item.size;
-
-        ctx.save();
-        ctx.translate(item.x + s / 2, item.y + s / 2);
-        ctx.rotate(item.rotation);
-
-        ctx.fillStyle = "#d93d4e";
-        roundedRect(-s / 2, -s / 2, s, s, 4);
-        ctx.fill();
-
-        ctx.strokeStyle = "#ff8a91";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Rug pattern.
-        ctx.strokeStyle = "#ffb1b6";
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(-s * 0.34, -s * 0.34, s * 0.68, s * 0.68);
-
-        ctx.fillStyle = "#fff1f2";
-        ctx.font = `900 ${s * 0.56}px system-ui`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("!", 0, 0);
-
-        ctx.restore();
-      }
-
-      function drawPlayer() {
-        const x = player.x;
-        const y = player.y;
-        const w = player.width;
-        const h = player.height;
-
-        ctx.save();
-
-        if (
-          player.invulnerable > 0 &&
-          Math.floor(performance.now() / 90) % 2 === 0
-        ) {
-          ctx.globalAlpha = 0.35;
-        }
-
-        // Shadow.
-        ctx.fillStyle = "#0006";
-        ctx.beginPath();
-        ctx.ellipse(
-          x + w / 2,
-          y + h - 2,
-          w * 0.42,
-          7,
-          0,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
-
-        if (otterImg.complete && otterImg.naturalWidth > 0) {
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(otterImg, x, y, w, h);
-        } else {
-          // Built-in otter fallback.
-          ctx.fillStyle = "#a87543";
-          ctx.beginPath();
-          ctx.ellipse(
-            x + w / 2,
-            y + h * 0.6,
-            w * 0.4,
-            h * 0.36,
-            0,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-
-          ctx.fillStyle = "#d7a16b";
-          ctx.beginPath();
-          ctx.arc(x + w / 2, y + h * 0.27, w * 0.31, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = "#a87543";
-          ctx.beginPath();
-          ctx.arc(x + w * 0.27, y + h * 0.1, w * 0.13, 0, Math.PI * 2);
-          ctx.arc(x + w * 0.73, y + h * 0.1, w * 0.13, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = "#161616";
-          ctx.beginPath();
-          ctx.arc(x + w * 0.4, y + h * 0.26, 2.2, 0, Math.PI * 2);
-          ctx.arc(x + w * 0.6, y + h * 0.26, 2.2, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = "#282018";
-          ctx.beginPath();
-          ctx.ellipse(
-            x + w / 2,
-            y + h * 0.36,
-            w * 0.12,
-            h * 0.075,
-            0,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-
-          ctx.fillStyle = "#f8c747";
-          ctx.font = `900 ${Math.max(10, w * 0.19)}px system-ui`;
-          ctx.textAlign = "center";
-          ctx.fillText("R", x + w / 2, y + h * 0.72);
-        }
-
-        ctx.restore();
-      }
-
-      function drawParticles() {
-        for (const p of particles) {
-          ctx.save();
-          ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-          ctx.restore();
-        }
-      }
-
-      function draw() {
-        if (!ctx) return;
-
-        drawBackground();
-
-        for (const item of items) {
-          if (item.type === "bag") {
-            drawBag(item);
-          } else {
-            drawRug(item);
-          }
-        }
-
-        drawParticles();
-        drawPlayer();
-
-        if (gameState === "READY") {
-          ctx.fillStyle = "#ffffff12";
-          ctx.fillRect(0, 0, width(), height());
-        }
-      }
-
-      function gameLoop(now) {
-        if (gameState !== "PLAYING") {
-          animationId = null;
-          return;
-        }
-
-        const dt = Math.min((now - lastFrame) / 1000, 0.04);
-        lastFrame = now;
-
-        update(dt);
-        draw();
-
-        if (gameState === "PLAYING") {
-          animationId = requestAnimationFrame(gameLoop);
-        } else {
-          animationId = null;
-        }
-      }
-
-      function setDirection(direction, pressed) {
-        if (direction === "left") keys.left = pressed;
-        if (direction === "right") keys.right = pressed;
-      }
-
-      // Keyboard controls.
-      window.addEventListener("keydown", (event) => {
-        const key = event.key.toLowerCase();
-
-        if (
-          key === "arrowleft" ||
-          key === "arrowright" ||
-          key === " "
-        ) {
-          event.preventDefault();
-        }
-
-        if (key === "arrowleft" || key === "a") {
-          setDirection("left", true);
-        }
-
-        if (key === "arrowright" || key === "d") {
-          setDirection("right", true);
-        }
-
-        if (
-          (key === "enter" || key === " ") &&
-          gameState !== "PLAYING"
-        ) {
-          startNewGame();
-        }
-      });
-
-      window.addEventListener("keyup", (event) => {
-        const key = event.key.toLowerCase();
-
-        if (key === "arrowleft" || key === "a") {
-          setDirection("left", false);
-        }
-
-        if (key === "arrowright" || key === "d") {
-          setDirection("right", false);
-        }
-      });
-
-      // Mobile controls: support touch and mouse without double-starting.
-      function bindHoldButton(buttonId, direction) {
-        const button = document.getElementById(buttonId);
-
-        button.addEventListener("pointerdown", (event) => {
-          event.preventDefault();
-          setDirection(direction, true);
-          try {
-            button.setPointerCapture(event.pointerId);
-          } catch {
-            // Pointer capture is optional.
-          }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    }
+    tone(freq, endFreq, dur, type = 'sine', vol = 0.12) {
+        if (!this.ctx) return;
+        try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + dur);
+            g.gain.setValueAtTime(vol, now);
+            g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + dur);
+        } catch (e) {}
+    }
+    catchBanana() { this.tone(520, 880, 0.1, 'sine', 0.15); }
+    rugCrash() {
+        [150, 90, 45].forEach((f, i) => {
+            setTimeout(() => this.tone(f, f * 0.5, 0.3, 'sawtooth', 0.25), i * 150);
         });
+    }
+}
 
-        const release = (event) => {
-          event.preventDefault();
-          setDirection(direction, false);
+class DontFumbleTheBagGame {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.sfx = new SoundFX();
+
+        this.chadSprite = createChadSprite(3.5);
+
+        this.otterImg = new Image();
+        this.otterImg.crossOrigin = 'anonymous';
+        this.otterImg.onload = () => {
+            this.otterSprite = this.removeBackground(this.otterImg);
+        };
+        this.otterImg.src = 'https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png';[span_0](start_span)[span_0](end_span)
+        this.otterSprite = null;
+
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+
+        this.keys = { left: false, right: false };
+        this.bananas = [];
+        this.particles = [];
+        this.chartPoints = [];
+
+        this.gameState = 'PLAYING';
+        this.score = 0;
+        this.bananasCaught = 0;
+        this.timeLeft = 30.0;
+        this.spawnTimer = 0;
+        this.chartTimer = 0;
+        this.rugAnim = 0;
+
+        this.chad = {
+            x: this.width / 2 - 28,
+            y: 0,
+            w: 56,
+            h: 74,
+            vx: 0,
+            speed: 460
         };
 
-        button.addEventListener("pointerup", release);
-        button.addEventListener("pointercancel", release);
-        button.addEventListener("lostpointercapture", () => {
-          setDirection(direction, false);
-        });
-      }
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        this.bindControls();
 
-      bindHoldButton("leftBtn", "left");
-      bindHoldButton("rightBtn", "right");
-
-      // This is the single start/restart handler.
-      btnAction.addEventListener("click", () => {
-        startNewGame();
-      });
-
-      window.addEventListener("blur", () => {
-        keys.left = false;
-        keys.right = false;
-      });
-
-      window.addEventListener("resize", resizeCanvas);
-
-      // Initialize the canvas and UI once the DOM exists.
-      function initializeGame() {
-        try {
-          bestValue.textContent = bestScore;
-          resizeCanvas();
-          updateHUD();
-          draw();
-        } catch (error) {
-          console.error("Game initialization failed:", error);
-          modalText.textContent =
-            "The game could not load. Please refresh and try again.";
+        let val = this.height * 0.5;
+        for (let x = 0; x <= this.width + 40; x += 25) {
+            val += (Math.random() - 0.48) * 30;
+            val = Math.max(this.height * 0.25, Math.min(this.height * 0.75, val));
+            this.chartPoints.push({ x, y: val });
         }
-      }
 
-      if (document.readyState === "loading") {
-        document.addEventListener(
-          "DOMContentLoaded",
-          initializeGame,
-          { once: true }
-        );
-      } else {
-        initializeGame();
-      }
-    })();
-  </script>
+        this.lastTime = performance.now();
+        requestAnimationFrame((t) => this.loop(t));
+    }
+
+    removeBackground(img) {
+        const c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, c.width, c.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            if (r > 150 && g > 190 && b > 210) {
+                data[i+3] = 0;
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        return c;
+    }
+
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.chad.y = this.height * 0.76 - this.chad.h;
+    }
+
+    bindControls() {
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowLeft', 'KeyA'].includes(e.code)) this.keys.left = true;
+            if (['ArrowRight', 'KeyD'].includes(e.code)) this.keys.right = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if (['ArrowLeft', 'KeyA'].includes(e.code)) this.keys.left = false;
+            if (['ArrowRight', 'KeyD'].includes(e.code)) this.keys.right = false;
+        });
+
+        const bindTouch = (id, action) => {
+            const btn = document.getElementById(id);
+            const start = (e) => {
+                e.preventDefault();
+                this.sfx.init();
+                if (action === 'left') this.keys.left = true;
+                if (action === 'right') this.keys.right = true;
+                btn.classList.add('touch-active');
+            };
+            const end = (e) => {
+                e.preventDefault();
+                if (action === 'left') this.keys.left = false;
+                if (action === 'right') this.keys.right = false;
+                btn.classList.remove('touch-active');
+            };
+            btn.addEventListener('touchstart', start, { passive: false });
+            btn.addEventListener('touchend', end, { passive: false });
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+        };
+
+        bindTouch('btnLeft', 'left');
+        bindTouch('btnRight', 'right');
+    }
+
+    updateHUD() {
+        document.getElementById('scoreDisplay').textContent = '$' + this.score.toLocaleString();
+        document.getElementById('bananasDisplay').textContent = this.bananasCaught;
+        document.getElementById('timerDisplay').textContent = Math.ceil(this.timeLeft) + 's';
+    }
+
+    spawnBanana() {
+        const x = 30 + Math.random() * (this.width - 60);
+        this.bananas.push({
+            x,
+            y: -30,
+            vy: 240 + Math.random() * 120 + this.bananasCaught * 3,
+            size: 26,
+            rot: Math.random() * Math.PI
+        });
+    }
+
+    spawnParticles(x, y, color) {
+        for (let i = 0; i < 7; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const spd = 30 + Math.random() * 80;
+            this.particles.push({
+                x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 25,
+                color, alpha: 1, size: 2.5 + Math.random() * 2.5
+            });
+        }
+    }
+
+    update(dt) {
+        this.chartTimer += dt;
+        if (this.chartTimer > 0.08) {
+            this.chartTimer = 0;
+            this.chartPoints.forEach(pt => pt.x -= 3);
+            if (this.chartPoints[0].x < -30) {
+                this.chartPoints.shift();
+                const last = this.chartPoints[this.chartPoints.length - 1];
+                let nextY = last.y + (Math.random() - 0.47) * 40;
+                nextY = Math.max(this.height * 0.25, Math.min(this.height * 0.75, nextY));
+                this.chartPoints.push({ x: last.x + 25, y: nextY });
+            }
+        }
+
+        if (this.gameState === 'PLAYING') {
+            this.timeLeft -= dt;
+            if (this.timeLeft <= 0) {
+                this.timeLeft = 0;
+                this.gameState = 'GAMEOVER';
+                this.sfx.rugCrash();
+            }
+            this.updateHUD();
+
+            let move = 0;
+            if (this.keys.left) move = -1;
+            if (this.keys.right) move = 1;
+            this.chad.x += move * this.chad.speed * dt;
+            this.chad.x = Math.max(10, Math.min(this.width - this.chad.w - 10, this.chad.x));
+
+            this.spawnTimer += dt;
+            if (this.spawnTimer > Math.max(0.4, 1.3 - this.bananasCaught * 0.03)) {
+                this.spawnTimer = 0;
+                this.spawnBanana();
+            }
+
+            const bagBox = {
+                x: this.chad.x + 22,
+                y: this.chad.y + 40,
+                w: 32,
+                h: 30
+            };
+
+            for (let i = this.bananas.length - 1; i >= 0; i--) {
+                const b = this.bananas[i];
+                b.y += b.vy * dt;
+                b.rot += dt * 2;
+
+                if (b.x + b.size/2 > bagBox.x && b.x - b.size/2 < bagBox.x + bagBox.w &&
+                    b.y + b.size/2 > bagBox.y && b.y - b.size/2 < bagBox.y + bagBox.h) {
+                    this.bananasCaught++;
+                    this.score += 300;
+                    this.sfx.catchBanana();
+                    this.spawnParticles(b.x, b.y, '#f5c71a');
+                    this.bananas.splice(i, 1);
+                    this.updateHUD();
+                    continue;
+                }
+
+                if (b.y > this.height * 0.79) {
+                    this.spawnParticles(b.x, this.height * 0.76, '#ef4444');
+                    this.bananas.splice(i, 1);
+                }
+            }
+        } else if (this.gameState === 'GAMEOVER') {
+            this.rugAnim += dt * 3;
+        }
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const pt = this.particles[i];
+            pt.x += pt.vx * dt;
+            pt.vy += 400 * dt;
+            pt.y += pt.vy * dt;
+            pt.alpha -= 1.5 * dt;
+            if (pt.alpha <= 0) this.particles.splice(i, 1);
+        }
+    }
+
+    draw() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.width, this.height);
+
+        ctx.fillStyle = '#030712';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < this.width; x += 60) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.height); ctx.stroke();
+        }
+        for (let y = 0; y < this.height; y += 60) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(this.width, y); ctx.stroke();
+        }
+
+        ctx.save();
+        ctx.strokeStyle = this.gameState === 'GAMEOVER' ? '#ef4444' : '#10b981';
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = ctx.strokeStyle;
+        ctx.beginPath();
+        for (let i = 0; i < this.chartPoints.length; i++) {
+            const pt = this.chartPoints[i];
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        const floorY = this.height * 0.76;
+        ctx.strokeStyle = this.gameState === 'GAMEOVER' ? '#ef4444' : '#34d399';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, floorY);
+        ctx.lineTo(this.width, floorY);
+        ctx.stroke();
+
+        this.bananas.forEach(b => {
+            ctx.save();
+            ctx.translate(b.x, b.y);
+            ctx.rotate(b.rot);
+            ctx.font = '24px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🍌', 0, 0);
+            ctx.restore();
+        });
+
+        ctx.drawImage(this.chadSprite, this.chad.x, this.chad.y);
+        ctx.save();
+        ctx.translate(this.chad.x + 22, this.chad.y + 40);
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2;
+        ctx.fillRect(0, 0, 32, 30);
+        ctx.strokeRect(0, 0, 32, 30);
+        ctx.fillStyle = '#fef08a';
+        ctx.font = '900 14px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText('$', 16, 20);
+        ctx.restore();
+
+        if (this.gameState === 'GAMEOVER') {
+            ctx.save();
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.fillRect(0, 0, this.width, this.height);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(this.width * 0.3, 0, this.width * 0.4, this.height);
+
+            const otterY = this.height * 0.45 + Math.sin(this.rugAnim * 8) * 15;
+            if (this.otterSprite) {
+                ctx.drawImage(this.otterSprite, this.width / 2 - 70, otterY - 50, 140, 140);
+            }
+
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 4;
+            ctx.fillRect(this.width / 2 - 145, otterY - 120, 290, 55);
+            ctx.strokeRect(this.width / 2 - 145, otterY - 120, 290, 55);
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = '900 18px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('THE DEV RUGGED!', this.width / 2, otterY - 84);
+            ctx.restore();
+        }
+
+        this.particles.forEach(pt => {
+            ctx.globalAlpha = Math.max(0, pt.alpha);
+            ctx.fillStyle = pt.color;
+            ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    loop(now) {
+        const dt = Math.min(0.05, (now - this.lastTime) / 1000);
+        this.lastTime = now;
+        this.update(dt);
+        this.draw();
+        requestAnimationFrame((t) => this.loop(t));
+    }
+}
+
+window.onload = () => {
+    new DontFumbleTheBagGame();
+};
+</script>
 </body>
 </html>
