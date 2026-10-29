@@ -107,7 +107,7 @@
         </div>
     </header>
 
-    <!-- START / GAME OVER MODAL WITH INLINE HANDLERS -->
+    <!-- START / GAME OVER MODAL -->
     <div id="modalScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 pointer-events-auto">
         <div class="dex-panel rounded-2xl p-6 max-w-sm w-full text-center flex flex-col items-center gap-4 border-emerald-500/60 pointer-events-auto">
             <div id="modalBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-orbitron">
@@ -252,7 +252,7 @@ class DontFumbleTheBagGame {
         this.particles = [];
         this.chartPoints = [];
 
-        this.gameState = 'MENU';
+        this.gameState = 'PLAYING'; // Start immediately in active play loop
         this.score = 0;
         this.bananasCaught = 0;
         this.timeLeft = 30.0;
