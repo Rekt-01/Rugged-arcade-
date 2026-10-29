@@ -1,100 +1,735 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop — Rugged Arcade</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      background: #0f0f12;
-      color: #e8e8e8;
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+  <title>Rugged Orphans | Rugged Arcade</title>
+  <meta name="theme-color" content="#0b0b10">
+  <meta name="description" content="Discover Rugged Orphans, the collectible pixel-art universe from Rugged Arcade on ApeChain.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0b10;
+      --panel: #12121a;
+      --gold: #ffbf36;
+      --gold-bright: #ffe08a;
+      --orange: #ff812b;
+      --text: #f7f5f0;
+      --muted: #9292a3;
+      --border: rgba(255, 255, 255, 0.09);
     }
 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          ellipse at 50% 35%,
+          rgba(105, 57, 15, 0.15),
+          transparent 48%
+        ),
+        var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    /* HEADER */
+
     .top-bar {
+      min-height: 76px;
+      padding: 0 6%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 24px;
-      border-bottom: 1px solid #222;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 11, 16, 0.88);
+      backdrop-filter: blur(16px);
+      position: relative;
+      z-index: 5;
     }
 
-    .chain {
-      font-size: 13px;
-      font-weight: 600;
-      color: #aaa;
-      letter-spacing: 0.5px;
-    }
-
-    .connect {
-      background: #fff;
-      color: #000;
-      border: none;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .connect:hover {
-      background: #eee;
-    }
-
-    .center {
-      flex: 1;
+    .brand {
       display: flex;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .center h1 {
-      font-size: 28px;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-      color: #fff;
-    }
-
-    .center p {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #666;
-    }
-
-    .back {
-      display: block;
-      text-align: center;
-      padding: 20px;
-      font-size: 13px;
-      color: #666;
+      gap: 12px;
       text-decoration: none;
     }
 
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 191, 54, 0.4);
+      border-radius: 11px;
+      background: linear-gradient(145deg, #39260e, #17120c);
+      color: var(--gold);
+      font-size: 21px;
+      box-shadow: 0 0 24px rgba(255, 174, 40, 0.08);
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+    }
+
+    .brand-sub {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .chain {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #c7c7d2;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .chain-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffbf36;
+      box-shadow: 0 0 12px rgba(255, 191, 54, 0.7);
+    }
+
+    .connect {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 19px;
+      border: 1px solid #ffe09a;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #ffe39b, #ffb92e);
+      color: #201506;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .connect:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(255, 177, 35, 0.22);
+    }
+
+    .connect:focus-visible,
+    .back:focus-visible {
+      outline: 2px solid var(--gold-bright);
+      outline-offset: 4px;
+    }
+
+    /* MAIN CONTENT */
+
+    main {
+      flex: 1;
+      width: 100%;
+    }
+
+    .shop {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 68px 28px 78px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 0.88fr;
+      align-items: center;
+      gap: 56px;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 191, 54, 0.2);
+      border-radius: 100px;
+      background: rgba(255, 191, 54, 0.055);
+      color: var(--gold-bright);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .eyebrow span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold);
+    }
+
+    h1 {
+      margin-top: 25px;
+      max-width: 620px;
+      font-size: clamp(42px, 5.6vw, 72px);
+      font-weight: 900;
+      letter-spacing: -4px;
+      line-height: 0.99;
+    }
+
+    h1 .highlight {
+      display: block;
+      padding-bottom: 7px;
+      background: linear-gradient(
+        100deg,
+        #fff2c9 0%,
+        #ffc94e 44%,
+        #ff862b 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .description {
+      max-width: 460px;
+      margin-top: 23px;
+      color: #a4a4b3;
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .feature {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.025);
+      color: #d1d0db;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .feature span {
+      margin-right: 5px;
+      color: var(--gold);
+    }
+
+    /* PACK DISPLAY */
+
+    .pack-stage {
+      min-width: 0;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8px;
+      isolation: isolate;
+    }
+
+    .pack-stage::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 78%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(255, 153, 35, 0.15);
+      filter: blur(65px);
+    }
+
+    .pack-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* COMING SOON BANNER */
+
+    .coming-soon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 24px;
+      border: 1px solid rgba(255, 191, 54, 0.65);
+      border-radius: 8px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 191, 54, 0.18),
+        rgba(255, 129, 43, 0.10)
+      );
+      color: #ffcf62;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-align: center;
+      box-shadow:
+        0 0 25px rgba(255, 174, 40, 0.12),
+        inset 0 0 15px rgba(255, 191, 54, 0.04);
+      text-shadow: 0 0 12px rgba(255, 191, 54, 0.3);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      flex-shrink: 0;
+      background: #ffbf36;
+      box-shadow: 0 0 10px #ffbf36;
+      transform: rotate(45deg);
+    }
+
+    /* PACK ARTWORK FRAME */
+
+    .pack-frame {
+      position: relative;
+      width: min(100%, 390px);
+      padding: 13px;
+      border: 1px solid rgba(255, 207, 106, 0.25);
+      border-radius: 20px;
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.09),
+        rgba(255, 255, 255, 0.015) 45%,
+        rgba(255, 173, 35, 0.07)
+      );
+      box-shadow:
+        0 35px 90px rgba(0, 0, 0, 0.48),
+        0 0 50px rgba(255, 161, 30, 0.07);
+      transform: rotate(1deg);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .pack-frame:hover {
+      transform: rotate(0deg) translateY(-5px);
+      box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.55),
+        0 0 55px rgba(255, 161, 30, 0.14);
+    }
+
+    .pack-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 570px;
+      object-fit: contain;
+      border-radius: 11px;
+    }
+
+    .pack-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 13px;
+      padding: 3px 4px 2px;
+    }
+
+    .pack-caption strong {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .pack-caption small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .edition {
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 191, 54, 0.22);
+      border-radius: 6px;
+      color: var(--gold-bright);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    /* BOTTOM SECTION */
+
+    .divider {
+      height: 1px;
+      margin: 68px 0 27px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 191, 54, 0.23),
+        var(--border),
+        transparent
+      );
+    }
+
+    .bottom-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .note-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .note-text {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 13px 17px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.035);
+      color: #ededf4;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
     .back:hover {
-      color: #aaa;
+      border-color: rgba(255, 191, 54, 0.5);
+      background: rgba(255, 191, 54, 0.07);
+    }
+
+    /* FOOTER */
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 6%;
+      border-top: 1px solid var(--border);
+      color: #747484;
+      font-size: 10px;
+    }
+
+    footer strong {
+      color: #aaaab8;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 760px) {
+      .top-bar {
+        min-height: 68px;
+        padding: 0 18px;
+      }
+
+      .brand-icon {
+        width: 35px;
+        height: 35px;
+      }
+
+      .brand-name {
+        font-size: 12px;
+      }
+
+      .brand-sub {
+        font-size: 8px;
+      }
+
+      .nav-right {
+        gap: 12px;
+      }
+
+      .chain {
+        font-size: 9px;
+        gap: 6px;
+      }
+
+      .connect {
+        padding: 10px 12px;
+        font-size: 11px;
+      }
+
+      .shop {
+        padding: 44px 20px 50px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .hero-copy {
+        text-align: center;
+      }
+
+      h1 {
+        margin-top: 20px;
+        font-size: clamp(42px, 10vw, 62px);
+        letter-spacing: -2.5px;
+      }
+
+      .description {
+        margin: 18px auto 0;
+        font-size: 14px;
+      }
+
+      .features {
+        justify-content: center;
+      }
+
+      .pack-frame {
+        width: min(100%, 350px);
+      }
+
+      .coming-soon {
+        max-width: 100%;
+        padding: 11px 17px;
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+
+      .divider {
+        margin: 44px 0 24px;
+      }
+
+      .bottom-note {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .back {
+        width: 100%;
+      }
+
+      footer {
+        padding: 20px;
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .chain {
+        display: none;
+      }
+
+      .top-bar {
+        padding: 0 14px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="top-bar">
-    <div class="chain">APECHAIN</div>
-    <button class="connect" onclick="alert('Wallet connection coming soon')">Connect Wallet</button>
-  </div>
 
-  <div class="center">
-    <div>
-      <h1>Coming Soon</h1>
-      <p>Rugged Arcade Shop</p>
+  <!-- HEADER -->
+  <header class="top-bar">
+    <a href="main.html" class="brand" aria-label="Rugged Arcade home">
+      <div class="brand-icon" aria-hidden="true">♛</div>
+
+      <div>
+        <div class="brand-name">RUGGED ARCADE</div>
+        <span class="brand-sub">THE RUGGED UNIVERSE</span>
+      </div>
+    </a>
+
+    <div class="nav-right">
+      <div class="chain">
+        <span class="chain-dot"></span>
+        APECHAIN
+      </div>
+
+      <button
+        class="connect"
+        type="button"
+        onclick="alert('Wallet connection coming soon')"
+      >
+        <span aria-hidden="true">◈</span>
+        Connect Wallet
+      </button>
     </div>
-  </div>
+  </header>
 
-  <a href="main.html" class="back">← Back to Arcade</a>
+  <!-- SHOP CONTENT -->
+  <main>
+    <section class="shop">
+
+      <div class="hero">
+
+        <!-- INTRODUCTION -->
+        <div class="hero-copy">
+
+          <div class="eyebrow">
+            <span></span>
+            THE COLLECTION STARTS HERE
+          </div>
+
+          <h1>
+            WELCOME TO
+            <span class="highlight">RUGGED ORPHANS.</span>
+          </h1>
+
+          <p class="description">
+            A little chaos. A lot of character. Meet the Rugged Orphans
+            and step into the world of Rugged Arcade. Your next favourite
+            collectible starts here.
+          </p>
+
+          <div class="features">
+            <div class="feature">
+              <span>✦</span> Pixel-art universe
+            </div>
+
+            <div class="feature">
+              <span>✦</span> Collectible packs
+            </div>
+
+            <div class="feature">
+              <span>✦</span> Built for ApeChain
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PACK IMAGE AND COMING SOON BANNER -->
+        <div class="pack-stage">
+
+          <div class="pack-wrapper">
+
+            <div class="coming-soon">
+              <span class="status-dot"></span>
+              COMING SOON
+              <span class="status-dot"></span>
+            </div>
+
+            <div class="pack-frame">
+
+              <!-- Pack.png must be beside this HTML file -->
+              <img
+                class="pack-image"
+                src="./Pack.png"
+                alt="Rugged Orphans shiny holographic otter captain collectible pack"
+                fetchpriority="high"
+                onerror="this.onerror=null; this.alt='Pack artwork could not be loaded. Check that Pack.png is in the same folder as this HTML file.'; this.style.minHeight='280px'; this.style.background='#191923';"
+              >
+
+              <div class="pack-caption">
+                <div>
+                  <strong>RUGGED ORPHANS</strong>
+                  <small>The original pack artwork</small>
+                </div>
+
+                <div class="edition">GENESIS</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM MESSAGE -->
+      <div class="divider"></div>
+
+      <div class="bottom-note">
+
+        <div>
+          <div class="note-title">
+            THE ARCADE IS JUST GETTING STARTED.
+          </div>
+
+          <p class="note-text">
+            Explore the collection and stay tuned for future shop features.
+            Wallet connectivity and purchases are not yet enabled.
+          </p>
+        </div>
+
+        <a class="back" href="main.html">
+          <span aria-hidden="true">←</span>
+          Back to Arcade
+        </a>
+
+      </div>
+
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <strong>RUGGED ARCADE</strong>
+    <span>POWERED BY APECHAIN</span>
+    <span>© 2026 RUGGED ORPHANS</span>
+  </footer>
+
 </body>
 </html>
