@@ -49,7 +49,7 @@
             image-rendering: pixelated;
         }
         .dex-panel {
-            background: rgba(3, 7, 18, 0.92);
+            background: rgba(3, 7, 18, 0.95);
             border: 1px solid rgba(16, 185, 129, 0.6);
             box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
             backdrop-filter: blur(10px);
@@ -106,6 +106,29 @@
             </div>
         </div>
     </header>
+
+    <!-- START / GAME OVER MODAL -->
+    <div id="modalScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 pointer-events-auto">
+        <div class="dex-panel rounded-2xl p-6 max-w-sm w-full text-center flex flex-col items-center gap-4 border-emerald-500/60 pointer-events-auto">
+            <div id="modalBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-orbitron">
+                30-SECOND RUSH
+            </div>
+            <h1 id="modalTitle" class="font-orbitron text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-300 to-amber-300">
+                DON'T FUMBLE THE BAG
+            </h1>
+            <p id="modalText" class="text-xs text-slate-300 leading-relaxed">
+                Catch as many falling bananas 🍌 as you can before the 30-second timer runs out. Watch out for the rug pull!
+            </p>
+            <div class="w-full flex flex-col gap-2.5 pointer-events-auto">
+                <button id="btnAction" type="button" class="dex-btn w-full py-3.5 rounded-xl font-orbitron text-sm font-black text-emerald-200 tracking-wider">
+                    START TRADING
+                </button>
+                <a href="main.html" class="dex-exit-btn w-full py-2.5 rounded-xl font-orbitron text-xs font-bold text-rose-200 block text-center">
+                    EXIT TO MAIN MENU
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- PORTRAIT TOUCH CONTROLS -->
     <footer class="relative z-10 w-full px-4 pb-4 flex items-center justify-between pointer-events-none">
@@ -227,7 +250,7 @@ class DontFumbleTheBagGame {
         this.particles = [];
         this.chartPoints = [];
 
-        this.gameState = 'PLAYING';
+        this.gameState = 'MENU';
         this.score = 0;
         this.bananasCaught = 0;
         this.timeLeft = 30.0;
@@ -241,7 +264,7 @@ class DontFumbleTheBagGame {
             w: 56,
             h: 74,
             vx: 0,
-            speed: 460
+            speed: 480
         };
 
         this.resize();
@@ -269,7 +292,7 @@ class DontFumbleTheBagGame {
         const data = imgData.data;
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i], g = data[i+1], b = data[i+2];
-            if (r > 150 && g > 190 && b > 210) {
+            if (r > 160 && g > 200 && b > 220) {
                 data[i+3] = 0;
             }
         }
@@ -297,6 +320,7 @@ class DontFumbleTheBagGame {
 
         const bindTouch = (id, action) => {
             const btn = document.getElementById(id);
+            if (!btn) return;
             const start = (e) => {
                 e.preventDefault();
                 this.sfx.init();
@@ -318,6 +342,37 @@ class DontFumbleTheBagGame {
 
         bindTouch('btnLeft', 'left');
         bindTouch('btnRight', 'right');
+
+        // Robust start button listener
+        const startBtn = document.getElementById('btnAction');
+        const triggerGameStart = (e) => {
+            if (e) e.preventDefault();
+            this.sfx.init();
+            const modal = document.getElementById('modalScreen');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+            }
+            this.startNewGame();
+        };
+
+        if (startBtn) {
+            startBtn.addEventListener('click', triggerGameStart);
+            startBtn.addEventListener('touchend', triggerGameStart);
+            startBtn.addEventListener('pointerdown', triggerGameStart);
+        }
+    }
+
+    startNewGame() {
+        this.score = 0;
+        this.bananasCaught = 0;
+        this.timeLeft = 30.0;
+        this.bananas = [];
+        this.particles = [];
+        this.rugAnim = 0;
+        this.chad.x = this.width / 2 - 28;
+        this.gameState = 'PLAYING';
+        this.updateHUD();
     }
 
     updateHUD() {
@@ -368,6 +423,16 @@ class DontFumbleTheBagGame {
                 this.timeLeft = 0;
                 this.gameState = 'GAMEOVER';
                 this.sfx.rugCrash();
+                const modal = document.getElementById('modalScreen');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    modal.classList.remove('hidden');
+                }
+                document.getElementById('modalBadge').className = "px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-orbitron";
+                document.getElementById('modalBadge').textContent = "TOTAL RUG PULL";
+                document.getElementById('modalTitle').textContent = "THE DEV RUGGED!";
+                document.getElementById('modalText').textContent = `Time's up! You secured ${this.bananasCaught} bananas ($${this.score.toLocaleString()}) before Captain Otter pulled the liquidity.`;
+                document.getElementById('btnAction').textContent = "PLAY AGAIN";
             }
             this.updateHUD();
 
