@@ -107,8 +107,8 @@
         </div>
     </header>
 
-    <!-- START / GAME OVER MODAL -->
-    <div id="modalScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 pointer-events-auto" style="pointer-events: auto;">
+    <!-- START / GAME OVER MODAL WITH INLINE HANDLERS -->
+    <div id="modalScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 pointer-events-auto">
         <div class="dex-panel rounded-2xl p-6 max-w-sm w-full text-center flex flex-col items-center gap-4 border-emerald-500/60 pointer-events-auto">
             <div id="modalBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-orbitron">
                 30-SECOND RUSH
@@ -120,7 +120,7 @@
                 Catch as many falling bananas 🍌 as you can before the 30-second timer runs out. Watch out for the rug pull!
             </p>
             <div class="w-full flex flex-col gap-2.5 pointer-events-auto">
-                <button id="btnAction" type="button" class="dex-btn w-full py-3.5 rounded-xl font-orbitron text-sm font-black text-emerald-200 tracking-wider">
+                <button id="btnAction" type="button" onclick="window.triggerGameStart()" ontouchstart="window.triggerGameStart()" class="dex-btn w-full py-3.5 rounded-xl font-orbitron text-sm font-black text-emerald-200 tracking-wider">
                     START TRADING
                 </button>
                 <a href="main.html" class="dex-exit-btn w-full py-2.5 rounded-xl font-orbitron text-xs font-bold text-rose-200 block text-center">
@@ -224,6 +224,8 @@ class SoundFX {
     }
 }
 
+let gameInstance = null;
+
 class DontFumbleTheBagGame {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -232,14 +234,13 @@ class DontFumbleTheBagGame {
 
         this.chadSprite = createChadSprite(3.5);
 
-        // Load Captain Otter image[span_0](start_span)[span_0](end_span)
-        this.otterSprite = null;
         this.otterImg = new Image();
         this.otterImg.crossOrigin = 'anonymous';
         this.otterImg.onload = () => {
             this.otterSprite = this.removeBackground(this.otterImg);
         };
-        this.otterImg.src = 'https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png';[span_1](start_span)[span_1](end_span)
+        this.otterImg.src = 'https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png';[span_0](start_span)[span_0](end_span)
+        this.otterSprite = null;
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -293,7 +294,6 @@ class DontFumbleTheBagGame {
         const data = imgData.data;
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i], g = data[i+1], b = data[i+2];
-            // Clear light blue background pixels
             if (r > 150 && g > 190 && b > 210) {
                 data[i+3] = 0;
             }
@@ -343,21 +343,6 @@ class DontFumbleTheBagGame {
 
         bindTouch('btnLeft', 'left');
         bindTouch('btnRight', 'right');
-
-        // Robust start handler
-        const startBtn = document.getElementById('btnAction');
-        const triggerGameStart = (e) => {
-            if (e) e.preventDefault();
-            this.sfx.init();
-            const modal = document.getElementById('modalScreen');
-            modal.style.display = 'none';
-            modal.classList.add('hidden');
-            this.startNewGame();
-        };
-
-        startBtn.addEventListener('click', triggerGameStart);
-        startBtn.addEventListener('touchend', triggerGameStart);
-        startBtn.addEventListener('pointerdown', triggerGameStart);
     }
 
     startNewGame() {
@@ -548,33 +533,29 @@ class DontFumbleTheBagGame {
         ctx.fillText('$', 16, 20);
         ctx.restore();
 
-        // GAME OVER SCREEN: BIG RED CANDLE + CAPTAIN OTTER LAUGHING WITH SIGN
         if (this.gameState === 'GAMEOVER') {
             ctx.save();
             ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
             ctx.fillRect(0, 0, this.width, this.height);
 
-            // Giant Red Candle
             ctx.fillStyle = '#ef4444';
             ctx.fillRect(this.width * 0.3, 0, this.width * 0.4, this.height);
 
-            // Captain Otter popping up laughing
             const otterY = this.height * 0.45 + Math.sin(this.rugAnim * 8) * 15;
             if (this.otterSprite) {
-                ctx.drawImage(this.otterSprite, this.width / 2 - 80, otterY - 60, 160, 160);
+                ctx.drawImage(this.otterSprite, this.width / 2 - 70, otterY - 50, 140, 140);
             }
 
-            // "THE DEV RUGGED" Sign
             ctx.fillStyle = '#0f172a';
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 4;
-            ctx.fillRect(this.width / 2 - 150, otterY - 130, 300, 60);
-            ctx.strokeRect(this.width / 2 - 150, otterY - 130, 300, 60);
+            ctx.fillRect(this.width / 2 - 145, otterY - 120, 290, 55);
+            ctx.strokeRect(this.width / 2 - 145, otterY - 120, 290, 55);
 
             ctx.fillStyle = '#f8fafc';
-            ctx.font = '900 20px Orbitron';
+            ctx.font = '900 18px Orbitron';
             ctx.textAlign = 'center';
-            ctx.fillText('THE DEV RUGGED!', this.width / 2, otterY - 92);
+            ctx.fillText('THE DEV RUGGED!', this.width / 2, otterY - 84);
             ctx.restore();
         }
 
@@ -595,7 +576,19 @@ class DontFumbleTheBagGame {
     }
 }
 
-window.onload = () => new DontFumbleTheBagGame();
+window.triggerGameStart = function() {
+    if (gameInstance) {
+        gameInstance.sfx.init();
+        const modal = document.getElementById('modalScreen');
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        gameInstance.startNewGame();
+    }
+};
+
+window.onload = () => {
+    gameInstance = new DontFumbleTheBagGame();
+};
 </script>
 </body>
 </html>
