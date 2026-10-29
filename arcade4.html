@@ -50,7 +50,7 @@
   #exitBtn:hover { background: #ff0000; }
 
   #finishBtn {
-    position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%);
+    position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
     font-size: clamp(28px, 8vw, 56px); padding: 15px 30px;
     background: linear-gradient(#aa0000, #440000); color: #ffcc00;
     border: 5px solid #ffcc00; cursor: pointer; display: none; z-index: 100;
@@ -59,18 +59,19 @@
   }
   @keyframes pulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.08); } }
 
+  /* Transparent overlay controls pinned at bottom edges to keep gameplay clear */
   #controls {
-    position: absolute; bottom: 15px; left: 0; right: 0;
-    display: flex; justify-content: space-between; padding: 0 20px; z-index: 20; pointer-events: none;
+    position: absolute; bottom: 8px; left: 15px; right: 15px;
+    display: flex; justify-content: space-between; z-index: 20; pointer-events: none;
   }
-  .btn-group { display: flex; gap: 12px; pointer-events: auto; }
+  .btn-group { display: flex; gap: 10px; pointer-events: auto; }
   .ctrl-btn {
-    width: 70px; height: 70px; background: rgba(50,0,0,0.85); border: 3px solid #fff;
-    color: #fff; font-size: 24px; font-weight: bold; border-radius: 14px;
-    touch-action: none; user-select: none; box-shadow: 0 4px 0 #000;
+    width: 60px; height: 60px; background: rgba(30, 0, 0, 0.65); border: 2px solid rgba(255,255,255,0.8);
+    color: #fff; font-size: 22px; font-weight: bold; border-radius: 12px;
+    touch-action: none; user-select: none; box-shadow: 0 3px 6px rgba(0,0,0,0.5);
   }
-  .ctrl-btn:active { background: rgba(200,0,0,0.95); transform: translateY(2px); box-shadow: 0 2px 0 #000; }
-  #instructions { margin: 10px 0; font-size: 13px; text-align: center; opacity: 0.85; max-width: 95%; }
+  .ctrl-btn:active { background: rgba(200,0,0,0.85); transform: translateY(2px); }
+  #instructions { margin: 8px 0; font-size: 12px; text-align: center; opacity: 0.8; max-width: 95%; }
 </style>
 </head>
 <body>
@@ -88,7 +89,7 @@
     </div>
   </div>
 
-  <canvas id="gameCanvas" width="900" height="500"></canvas>
+  <canvas id="gameCanvas" width="900" height="460"></canvas>
   <button id="finishBtn">FINISH HIM!</button>
 
   <div id="controls">
@@ -104,7 +105,7 @@
 </div>
 
 <div id="instructions">
-  Desktop: ← → Move &nbsp;|&nbsp; Z: Punch &nbsp;|&nbsp; X: Kick &nbsp;|&nbsp; Mobile: On-screen buttons
+  Desktop: ← → Move &nbsp;|&nbsp; Z: Punch &nbsp;|&nbsp; X: Kick &nbsp;|&nbsp; Mobile: Clean bottom-edge buttons
 </div>
 
 <script>
@@ -138,15 +139,15 @@ chadImg.onerror = checkLoad;
 otterImg.onerror = checkLoad;
 
 // Game State
-let chad = { x: 180, y: 240, vx: 0, health: 100, maxHealth: 100, width: 130, height: 130, state: "idle", facing: 1 };
-let otter = { x: 600, y: 245, vx: 0, health: 100, maxHealth: 100, width: 130, height: 130, state: "idle", facing: -1, aiTimer: 0 };
+let chad = { x: 180, y: 220, vx: 0, health: 100, maxHealth: 100, width: 110, height: 110, state: "idle", facing: 1 };
+let otter = { x: 600, y: 225, vx: 0, health: 100, maxHealth: 100, width: 110, height: 110, state: "idle", facing: -1, aiTimer: 0 };
 let finishing = false;
 let finished = false;
 let bloodParticles = [];
 
 // Controls mapping
 let keys = {};
-let tLeft = false, tRight = false, tPunch = false, tKick = false;
+let tLeft = false, tRight = false;
 
 window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
@@ -174,10 +175,10 @@ finishBtn.onclick = finishBtn.ontouchstart = () => {
   if (!finishing && otter.health <= 0) {
     finishing = true;
     finishBtn.style.display = "none";
-    otter.width = 100;
-    otter.height = 70; // knocked down
-    otter.y += 40;
-    spawnBlood(otter.x + 50, otter.y + 30, 60);
+    otter.width = 90;
+    otter.height = 60; // knocked down
+    otter.y += 50;
+    spawnBlood(otter.x + 45, otter.y + 25, 60);
   }
 };
 
@@ -185,15 +186,14 @@ function triggerAttack(fighter, type) {
   if (fighter.state !== "idle" || finishing || finished) return;
   fighter.state = type;
   
-  // Check hit against opponent
   setTimeout(() => {
     if (finishing || finished) return;
     const target = (fighter === chad) ? otter : chad;
     const dist = Math.abs(fighter.x - target.x);
-    if (dist < 120) {
+    if (dist < 110) {
       target.health = Math.max(0, target.health - (type === "punch" ? 12 : 18));
       updateBars();
-      spawnBlood(target.x + 60, target.y + 60, 15);
+      spawnBlood(target.x + 50, target.y + 50, 15);
       
       if (target === otter && otter.health <= 0) {
         finishBtn.style.display = "block";
@@ -228,20 +228,16 @@ function updateAI() {
   
   otter.aiTimer++;
   const dist = chad.x - otter.x;
-  
-  // Face Chad
   otter.facing = dist > 0 ? 1 : -1;
 
-  if (Math.abs(dist) > 110) {
+  if (Math.abs(dist) > 100) {
     otter.x += otter.facing * 2.2;
   } else if (otter.aiTimer % 75 === 0) {
-    // Otter attacks back
     triggerAttack(otter, Math.random() > 0.5 ? "punch" : "kick");
   }
 }
 
 function update() {
-  // Player Movement
   let moveDir = 0;
   if (tLeft || keys['arrowleft'] || keys['a']) moveDir = -1;
   if (tRight || keys['arrowright'] || keys['d']) moveDir = 1;
@@ -251,18 +247,16 @@ function update() {
     chad.facing = moveDir;
   }
 
-  // Keep fighters within bounds
-  chad.x = Math.max(50, Math.min(canvas.width - 180, chad.x));
-  otter.x = Math.max(50, Math.min(canvas.width - 180, otter.x));
+  chad.x = Math.max(40, Math.min(canvas.width - 150, chad.x));
+  otter.x = Math.max(40, Math.min(canvas.width - 150, otter.x));
 
   updateAI();
 
-  // Update blood particles
   for (let i = bloodParticles.length - 1; i >= 0; i--) {
     let p = bloodParticles[i];
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.8; // gravity
+    p.vy += 0.8;
     p.life--;
     if (p.life <= 0) bloodParticles.splice(i, 1);
   }
@@ -271,14 +265,13 @@ function update() {
 function drawShadow(x, y, w) {
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.beginPath();
-  ctx.ellipse(x + w/2, y + 130, w * 0.38, 12, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + w/2, y + 115, w * 0.38, 10, 0, 0, Math.PI * 2);
   ctx.fill();
 }
 
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw Arena Background
   if (arenaImg.complete && arenaImg.naturalWidth !== 0) {
     ctx.drawImage(arenaImg, 0, 0, canvas.width, canvas.height);
   } else {
@@ -286,7 +279,6 @@ function render() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Draw Shadows
   drawShadow(chad.x, chad.y, chad.width);
   drawShadow(otter.x, otter.y, otter.width);
 
