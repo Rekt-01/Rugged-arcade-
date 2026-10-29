@@ -21,57 +21,54 @@
   #gameWrap {
     position: relative;
     width: 100%;
-    max-width: 960px;
+    max-width: 900px;
   }
   #gameCanvas {
     width: 100%;
     height: auto;
     display: block;
     border: 4px solid #8B0000;
-    box-shadow: 0 0 40px #ff0000;
+    box-shadow: 0 0 30px #ff0000;
     background: #111;
   }
   #ui {
-    position: absolute; top: 12px; left: 0; right: 0;
-    display: flex; justify-content: space-between; padding: 0 20px;
+    position: absolute; top: 10px; left: 0; right: 0;
+    display: flex; justify-content: space-between; padding: 0 15px;
     pointer-events: none; z-index: 10;
   }
-  .health-container { width: 42%; }
-  .name { font-size: clamp(14px, 3.5vw, 22px); text-shadow: 2px 2px #000; margin-bottom: 4px; letter-spacing: 1px; color: #ffcc00; }
-  .health-bar { height: 22px; background: #222; border: 3px solid #fff; position: relative; border-radius: 3px; overflow: hidden; }
+  .health-container { width: 40%; }
+  .name { font-size: clamp(12px, 3vw, 18px); text-shadow: 2px 2px #000; margin-bottom: 2px; color: #ffcc00; }
+  .health-bar { height: 18px; background: #222; border: 2px solid #fff; border-radius: 3px; overflow: hidden; }
   .health-fill { height: 100%; background: linear-gradient(90deg, #aa0000, #ff5500); width: 100%; transition: width 0.1s; }
   
   #exitBtn {
-    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-    background: rgba(139, 0, 0, 0.85); border: 2px solid #fff; color: #fff;
-    padding: 6px 14px; font-size: 14px; font-weight: bold; cursor: pointer;
-    border-radius: 6px; z-index: 25; text-decoration: none; box-shadow: 0 2px 5px #000;
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: rgba(139, 0, 0, 0.9); border: 2px solid #fff; color: #fff;
+    padding: 4px 12px; font-size: 12px; font-weight: bold; cursor: pointer;
+    border-radius: 5px; z-index: 25; text-decoration: none;
   }
   #exitBtn:hover { background: #ff0000; }
 
   #finishBtn {
     position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
-    font-size: clamp(28px, 8vw, 56px); padding: 15px 30px;
+    font-size: clamp(24px, 7vw, 48px); padding: 12px 24px;
     background: linear-gradient(#aa0000, #440000); color: #ffcc00;
-    border: 5px solid #ffcc00; cursor: pointer; display: none; z-index: 100;
-    text-shadow: 3px 3px #000; animation: pulse 0.4s infinite alternate;
-    letter-spacing: 2px; border-radius: 8px;
+    border: 4px solid #ffcc00; cursor: pointer; display: none; z-index: 100;
+    text-shadow: 3px 3px #000; animation: pulse 0.4s infinite alternate; border-radius: 8px;
   }
-  @keyframes pulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.08); } }
+  @keyframes pulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.06); } }
 
-  /* Transparent overlay controls pinned at bottom edges to keep gameplay clear */
   #controls {
-    position: absolute; bottom: 8px; left: 15px; right: 15px;
+    position: absolute; bottom: 8px; left: 10px; right: 10px;
     display: flex; justify-content: space-between; z-index: 20; pointer-events: none;
   }
-  .btn-group { display: flex; gap: 10px; pointer-events: auto; }
+  .btn-group { display: flex; gap: 8px; pointer-events: auto; }
   .ctrl-btn {
-    width: 60px; height: 60px; background: rgba(30, 0, 0, 0.65); border: 2px solid rgba(255,255,255,0.8);
-    color: #fff; font-size: 22px; font-weight: bold; border-radius: 12px;
-    touch-action: none; user-select: none; box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+    width: 55px; height: 55px; background: rgba(30, 0, 0, 0.75); border: 2px solid rgba(255,255,255,0.9);
+    color: #fff; font-size: 20px; font-weight: bold; border-radius: 10px;
+    touch-action: none; user-select: none;
   }
-  .ctrl-btn:active { background: rgba(200,0,0,0.85); transform: translateY(2px); }
-  #instructions { margin: 8px 0; font-size: 12px; text-align: center; opacity: 0.8; max-width: 95%; }
+  .ctrl-btn:active { background: rgba(200,0,0,0.9); transform: translateY(2px); }
 </style>
 </head>
 <body>
@@ -89,7 +86,7 @@
     </div>
   </div>
 
-  <canvas id="gameCanvas" width="900" height="460"></canvas>
+  <canvas id="gameCanvas" width="900" height="450"></canvas>
   <button id="finishBtn">FINISH HIM!</button>
 
   <div id="controls">
@@ -104,48 +101,40 @@
   </div>
 </div>
 
-<div id="instructions">
-  Desktop: ← → Move &nbsp;|&nbsp; Z: Punch &nbsp;|&nbsp; X: Kick &nbsp;|&nbsp; Mobile: Clean bottom-edge buttons
-</div>
-
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const finishBtn = document.getElementById("finishBtn");
 
-// Assets from your project reference
+// Load images using direct references from your uploaded project files
 const arenaImg = new Image();
-arenaImg.crossOrigin = "anonymous";
 arenaImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/arena.png";
 
 const chadImg = new Image();
-chadImg.crossOrigin = "anonymous";
-chadImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_2.png"; // Chad
+chadImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_2.png"; //[span_0](start_span)[span_0](end_span)
 
 const otterImg = new Image();
-otterImg.crossOrigin = "anonymous";
-otterImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png"; // Captain Otter
+otterImg.src = "https://raw.githubusercontent.com/Rekt-01/Rugged-arcade-/main/image_3.png"; //[span_1](start_span)[span_1](end_span)
 
-let assetsLoaded = 0;
-function checkLoad() {
-  assetsLoaded++;
-  if (assetsLoaded >= 3) gameLoop();
+// Fallback safety drawers if external images block
+let imagesReady = 0;
+function assetLoaded() {
+  imagesReady++;
+  if (imagesReady >= 3) gameLoop();
 }
-arenaImg.onload = checkLoad;
-chadImg.onload = checkLoad;
-otterImg.onload = checkLoad;
-arenaImg.onerror = checkLoad;
-chadImg.onerror = checkLoad;
-otterImg.onerror = checkLoad;
+arenaImg.onload = assetLoaded;
+chadImg.onload = assetLoaded;
+otterImg.onload = assetLoaded;
+arenaImg.onerror = assetLoaded;
+chadImg.onerror = assetLoaded;
+otterImg.onerror = assetLoaded;
 
-// Game State
-let chad = { x: 180, y: 220, vx: 0, health: 100, maxHealth: 100, width: 110, height: 110, state: "idle", facing: 1 };
-let otter = { x: 600, y: 225, vx: 0, health: 100, maxHealth: 100, width: 110, height: 110, state: "idle", facing: -1, aiTimer: 0 };
+// Game State & Fighter Positions
+let chad = { x: 150, y: 220, health: 100, maxHealth: 100, width: 120, height: 120, state: "idle", facing: 1 };
+let otter = { x: 630, y: 220, health: 100, maxHealth: 100, width: 120, height: 120, state: "idle", facing: -1, aiTimer: 0 };
 let finishing = false;
-let finished = false;
 let bloodParticles = [];
 
-// Controls mapping
 let keys = {};
 let tLeft = false, tRight = false;
 
@@ -158,7 +147,6 @@ function setupTouch(id, downCb, upCb) {
   btn.addEventListener("touchend", e => { e.preventDefault(); upCb(); });
   btn.addEventListener("mousedown", e => { e.preventDefault(); downCb(); });
   btn.addEventListener("mouseup", e => { e.preventDefault(); upCb(); });
-  btn.addEventListener("mouseleave", e => { e.preventDefault(); upCb(); });
 }
 
 setupTouch("btnLeft", () => tLeft = true, () => tLeft = false);
@@ -175,35 +163,29 @@ finishBtn.onclick = finishBtn.ontouchstart = () => {
   if (!finishing && otter.health <= 0) {
     finishing = true;
     finishBtn.style.display = "none";
-    otter.width = 90;
-    otter.height = 60; // knocked down
     otter.y += 50;
-    spawnBlood(otter.x + 45, otter.y + 25, 60);
+    spawnBlood(otter.x + 60, otter.y + 40, 50);
   }
 };
 
 function triggerAttack(fighter, type) {
-  if (fighter.state !== "idle" || finishing || finished) return;
+  if (fighter.state !== "idle" || finishing) return;
   fighter.state = type;
   
   setTimeout(() => {
-    if (finishing || finished) return;
+    if (finishing) return;
     const target = (fighter === chad) ? otter : chad;
-    const dist = Math.abs(fighter.x - target.x);
-    if (dist < 110) {
+    if (Math.abs(fighter.x - target.x) < 120) {
       target.health = Math.max(0, target.health - (type === "punch" ? 12 : 18));
       updateBars();
-      spawnBlood(target.x + 50, target.y + 50, 15);
-      
+      spawnBlood(target.x + 60, target.y + 60, 12);
       if (target === otter && otter.health <= 0) {
         finishBtn.style.display = "block";
       }
     }
-  }, 120);
+  }, 100);
 
-  setTimeout(() => {
-    if (!finishing) fighter.state = "idle";
-  }, 300);
+  setTimeout(() => { if (!finishing) fighter.state = "idle"; }, 250);
 }
 
 function updateBars() {
@@ -215,24 +197,23 @@ function spawnBlood(x, y, count) {
   for (let i = 0; i < count; i++) {
     bloodParticles.push({
       x, y,
-      vx: (Math.random() - 0.5) * 16,
-      vy: (Math.random() - 1) * 12,
-      life: 50 + Math.random() * 40,
-      size: 4 + Math.random() * 5
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 1) * 10,
+      life: 40 + Math.random() * 30,
+      size: 4 + Math.random() * 4
     });
   }
 }
 
 function updateAI() {
-  if (finishing || finished || otter.health <= 0) return;
-  
+  if (finishing || otter.health <= 0) return;
   otter.aiTimer++;
   const dist = chad.x - otter.x;
   otter.facing = dist > 0 ? 1 : -1;
 
-  if (Math.abs(dist) > 100) {
-    otter.x += otter.facing * 2.2;
-  } else if (otter.aiTimer % 75 === 0) {
+  if (Math.abs(dist) > 110) {
+    otter.x += otter.facing * 2.5;
+  } else if (otter.aiTimer % 70 === 0) {
     triggerAttack(otter, Math.random() > 0.5 ? "punch" : "kick");
   }
 }
@@ -247,8 +228,8 @@ function update() {
     chad.facing = moveDir;
   }
 
-  chad.x = Math.max(40, Math.min(canvas.width - 150, chad.x));
-  otter.x = Math.max(40, Math.min(canvas.width - 150, otter.x));
+  chad.x = Math.max(30, Math.min(canvas.width - 150, chad.x));
+  otter.x = Math.max(30, Math.min(canvas.width - 150, otter.x));
 
   updateAI();
 
@@ -256,31 +237,22 @@ function update() {
     let p = bloodParticles[i];
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.8;
+    p.vy += 0.7;
     p.life--;
     if (p.life <= 0) bloodParticles.splice(i, 1);
   }
 }
 
-function drawShadow(x, y, w) {
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.beginPath();
-  ctx.ellipse(x + w/2, y + 115, w * 0.38, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-}
-
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Background
   if (arenaImg.complete && arenaImg.naturalWidth !== 0) {
     ctx.drawImage(arenaImg, 0, 0, canvas.width, canvas.height);
   } else {
-    ctx.fillStyle = "#1b0000";
+    ctx.fillStyle = "#111";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
-
-  drawShadow(chad.x, chad.y, chad.width);
-  drawShadow(otter.x, otter.y, otter.width);
 
   // Draw Chad
   ctx.save();
@@ -304,7 +276,7 @@ function render() {
   }
   ctx.restore();
 
-  // Draw Blood Particles
+  // Blood
   ctx.fillStyle = "#cc0000";
   for (let p of bloodParticles) {
     ctx.fillRect(p.x, p.y, p.size, p.size);
@@ -318,6 +290,8 @@ function gameLoop() {
 }
 
 updateBars();
+// Fallback kickstart in case image load events stall on mobile
+setTimeout(gameLoop, 500);
 </script>
 </body>
 </html>
