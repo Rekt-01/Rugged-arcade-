@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RUGGED INVADERS: OVERDRIVE - 10 LEVELS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -17,7 +17,8 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
+            height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             background-color: #060805;
             font-family: 'Rajdhani', sans-serif;
@@ -30,6 +31,9 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -73,8 +77,24 @@
         .rugged-btn:active {
             transform: translateY(1px) scale(0.97);
         }
+        .rugged-exit-btn {
+            position: relative;
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.28), rgba(159, 18, 57, 0.35));
+            border: 1px solid rgba(244, 63, 94, 0.75);
+            box-shadow: 0 0 14px rgba(244, 63, 94, 0.35), inset 0 0 10px rgba(244, 63, 94, 0.2);
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+        }
+        .rugged-exit-btn:hover {
+            border-color: #fb7185;
+            box-shadow: 0 0 24px rgba(244, 63, 94, 0.65);
+            transform: translateY(-1px) scale(1.02);
+        }
+        .rugged-exit-btn:active {
+            transform: translateY(1px) scale(0.97);
+        }
         .rugged-panel {
-            background: rgba(10, 15, 10, 0.88);
+            background: rgba(10, 15, 10, 0.9);
             border: 1px solid rgba(34, 197, 94, 0.4);
             box-shadow: 0 0 35px rgba(34, 197, 94, 0.15), inset 0 0 20px rgba(234, 179, 8, 0.08);
             backdrop-filter: blur(12px);
@@ -87,10 +107,21 @@
         }
         @keyframes pulseGlow {
             0%, 100% { opacity: 0.85; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.04); }
+            50% { opacity: 1; transform: scale(1.03); }
         }
         .animate-pulse-glow {
             animation: pulseGlow 2.2s infinite ease-in-out;
+        }
+        /* Custom subtle scrollbar for smaller mobile viewports */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 15, 10, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.5);
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -102,15 +133,22 @@
     <div class="crt-overlay"></div>
 
     <!-- TOP HUD BAR -->
-    <header id="hud-top" class="relative z-10 w-full max-w-5xl px-3 pt-2 sm:px-6 sm:pt-3 pointer-events-none flex flex-col gap-1.5">
-        <div class="flex items-center justify-between gap-2 rugged-panel rounded-xl px-3 py-2 sm:px-5 sm:py-2.5 pointer-events-auto">
-            <!-- Score & High Score -->
-            <div class="flex items-center gap-3 sm:gap-6">
+    <header id="hud-top" class="relative z-10 w-full max-w-5xl px-2.5 pt-2 sm:px-6 sm:pt-3 pointer-events-none flex flex-col gap-1">
+        <div class="flex items-center justify-between gap-1.5 sm:gap-2 rugged-panel rounded-xl px-2.5 py-1.5 sm:px-5 sm:py-2.5 pointer-events-auto">
+            <!-- EXIT BUTTON + Score & High Score -->
+            <div class="flex items-center gap-2 sm:gap-5">
+                <a href="main.html" class="rugged-exit-btn rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 font-orbitron text-[10px] sm:text-xs font-black text-rose-200 tracking-wider flex items-center gap-1 shrink-0" title="Return to Main Menu">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span>EXIT</span>
+                </a>
+
                 <div>
-                    <div class="text-[10px] sm:text-xs uppercase tracking-widest text-emerald-400/80 font-semibold">SCORE</div>
-                    <div id="scoreDisplay" class="font-orbitron text-base sm:text-2xl font-black text-emerald-300 text-glow-green tracking-wider">000000</div>
+                    <div class="text-[9px] sm:text-xs uppercase tracking-widest text-emerald-400/80 font-semibold">SCORE</div>
+                    <div id="scoreDisplay" class="font-orbitron text-sm sm:text-2xl font-black text-emerald-300 text-glow-green tracking-wider">000000</div>
                 </div>
-                <div class="hidden xs:block sm:block border-l border-emerald-500/30 pl-3 sm:pl-6">
+                <div class="hidden md:block border-l border-emerald-500/30 pl-4 sm:pl-5">
                     <div class="text-[10px] sm:text-xs uppercase tracking-widest text-amber-400/80 font-semibold">HIGH SCORE</div>
                     <div id="highScoreDisplay" class="font-orbitron text-sm sm:text-xl font-bold text-amber-300">000000</div>
                 </div>
@@ -118,28 +156,28 @@
 
             <!-- Sector & Combo -->
             <div class="flex flex-col items-center">
-                <div class="flex items-center gap-1.5">
-                    <span class="text-[10px] sm:text-xs uppercase tracking-widest text-slate-400">SECTOR</span>
-                    <span id="levelDisplay" class="font-orbitron text-sm sm:text-lg font-black text-amber-400 text-glow-amber">01/10</span>
+                <div class="flex items-center gap-1">
+                    <span class="text-[9px] sm:text-xs uppercase tracking-widest text-slate-400">SECTOR</span>
+                    <span id="levelDisplay" class="font-orbitron text-xs sm:text-lg font-black text-amber-400 text-glow-amber">01/10</span>
                 </div>
                 <!-- Combo Pill -->
-                <div id="comboContainer" class="flex items-center gap-1.5 bg-zinc-900/90 border border-amber-500/50 rounded-full px-2.5 py-0.5 transition-opacity duration-200 opacity-50">
-                    <span id="comboText" class="font-orbitron text-[11px] sm:text-xs font-extrabold text-amber-300">1.0x</span>
-                    <div class="w-10 sm:w-14 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="comboContainer" class="flex items-center gap-1.5 bg-zinc-900/90 border border-amber-500/50 rounded-full px-2 py-0.5 transition-opacity duration-200 opacity-50">
+                    <span id="comboText" class="font-orbitron text-[10px] sm:text-xs font-extrabold text-amber-300">1.0x</span>
+                    <div class="w-8 sm:w-14 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                         <div id="comboBar" class="h-full bg-gradient-to-r from-emerald-400 to-amber-500 w-0 transition-all duration-75"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Lives & Utility Buttons -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <div class="flex flex-col items-end mr-1">
-                    <span class="text-[10px] uppercase tracking-widest text-emerald-300/80 font-semibold hidden sm:inline">HULL</span>
-                    <div id="livesContainer" class="flex items-center gap-1"></div>
+            <div class="flex items-center gap-1.5 sm:gap-2.5">
+                <div class="flex flex-col items-end mr-0.5 sm:mr-1">
+                    <span class="text-[9px] uppercase tracking-widest text-emerald-300/80 font-semibold hidden sm:inline">HULL</span>
+                    <div id="livesContainer" class="flex items-center gap-0.5 sm:gap-1"></div>
                 </div>
 
                 <!-- Sound Toggle -->
-                <button id="btnAudio" class="rugged-btn rounded-lg p-2 text-emerald-300 hover:text-white" title="Toggle Audio (M)">
+                <button id="btnAudio" class="rugged-btn rounded-lg p-1.5 sm:p-2 text-emerald-300 hover:text-white" title="Toggle Audio (M)">
                     <svg id="iconAudioOn" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                     </svg>
@@ -149,7 +187,7 @@
                 </button>
 
                 <!-- Pause Button -->
-                <button id="btnPause" class="rugged-btn rounded-lg p-2 text-emerald-300 hover:text-white" title="Pause Game (P)">
+                <button id="btnPause" class="rugged-btn rounded-lg p-1.5 sm:p-2 text-emerald-300 hover:text-white" title="Pause Game (P)">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -160,134 +198,170 @@
         <!-- Boss Health Bar & Active Power-ups Sub-bar -->
         <div class="flex flex-col gap-1 w-full">
             <div id="bossHud" class="hidden rugged-panel rounded-lg px-3 py-1.5 border-amber-500/60">
-                <div class="flex justify-between items-center text-xs font-orbitron font-bold text-amber-400 mb-1">
+                <div class="flex justify-between items-center text-[11px] sm:text-xs font-orbitron font-bold text-amber-400 mb-1">
                     <span id="bossNameDisplay" class="tracking-widest flex items-center gap-1.5">
                         <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                         AEGIS DREADNOUGHT
                     </span>
                     <span id="bossPercentDisplay">100%</span>
                 </div>
-                <div class="w-full h-2.5 bg-zinc-950/90 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
+                <div class="w-full h-2 sm:h-2.5 bg-zinc-950/90 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
                     <div id="bossHealthBar" class="h-full bg-gradient-to-r from-amber-600 via-yellow-500 to-emerald-400 rounded-full transition-all duration-100" style="width: 100%"></div>
                 </div>
             </div>
-            <div id="powerupHud" class="flex flex-wrap items-center gap-1.5 min-h-[24px]"></div>
+            <div id="powerupHud" class="flex flex-wrap items-center gap-1.5 min-h-[20px]"></div>
         </div>
     </header>
 
     <!-- CENTER OVERLAYS (START / PAUSE / GAME OVER / VICTORY) -->
-    <main class="relative z-20 flex-1 flex items-center justify-center w-full px-4 pointer-events-none">
+    <main class="relative z-20 flex-1 flex items-center justify-center w-full px-3 py-1 pointer-events-none overflow-hidden">
         <!-- START / TITLE MODAL -->
-        <div id="startModal" class="rugged-panel rounded-2xl p-6 sm:p-8 max-w-md w-full text-center pointer-events-auto flex flex-col items-center gap-5 border-emerald-500/50">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 text-xs font-orbitron tracking-widest">
+        <div id="startModal" class="rugged-panel rounded-2xl p-4 sm:p-7 max-w-md w-full max-h-full overflow-y-auto text-center pointer-events-auto flex flex-col items-center gap-3 sm:gap-4 border-emerald-500/50">
+            <div class="inline-flex items-center gap-2 px-3 py-0.5 sm:py-1 rounded-full bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 text-[10px] sm:text-xs font-orbitron tracking-widest">
                 10-LEVEL CAMPAIGN EDITION
             </div>
 
             <div>
-                <h1 class="font-orbitron text-3xl sm:text-5xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-amber-200 to-amber-500 text-glow-green">
+                <h1 class="font-orbitron text-2xl sm:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 via-amber-200 to-amber-500 text-glow-green">
                     RUGGED INVADERS
                 </h1>
-                <p class="font-orbitron text-sm sm:text-base font-bold text-amber-400 tracking-[0.28em] mt-1 text-glow-amber">
+                <p class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-[0.28em] mt-0.5 text-glow-amber">
                     OVERDRIVE
                 </p>
             </div>
 
             <!-- Power-up Legend -->
-            <div class="w-full grid grid-cols-2 gap-2 text-left bg-zinc-950/70 p-3.5 rounded-xl border border-zinc-800 text-xs sm:text-sm">
+            <div class="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-left bg-zinc-950/70 p-2.5 sm:p-3.5 rounded-xl border border-zinc-800 text-[11px] sm:text-xs">
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_8px_#22c55e]"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#22c55e] shrink-0"></span>
                     <span class="text-zinc-200 font-medium">Spread Plasma</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] shrink-0"></span>
                     <span class="text-zinc-200 font-medium">Rapid Vulcan</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-lime-400 shadow-[0_0_8px_#84cc16]"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-lime-400 shadow-[0_0_8px_#84cc16] shrink-0"></span>
                     <span class="text-zinc-200 font-medium">Hyper Railgun</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_8px_#06b6d4]"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#06b6d4] shrink-0"></span>
                     <span class="text-zinc-200 font-medium">Aegis Shield</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_8px_#c084fc] shrink-0"></span>
+                    <span class="text-zinc-200 font-medium">Wingman Drones</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-400 shadow-[0_0_8px_#fb7185] shrink-0"></span>
+                    <span class="text-zinc-200 font-medium">Homing Swarm</span>
                 </div>
             </div>
 
             <!-- Controls Info -->
-            <div class="text-xs sm:text-sm text-zinc-300 space-y-1 leading-relaxed">
+            <div class="text-[11px] sm:text-xs text-zinc-300 space-y-0.5 leading-snug">
                 <p><strong class="text-emerald-300">MOBILE:</strong> Touch &amp; Drag anywhere to pilot</p>
                 <p><strong class="text-emerald-300">DESKTOP:</strong> Arrow Keys / WASD + Spacebar</p>
-                <p class="text-[11px] text-zinc-400">Bosses await at Sectors 3, 6, 9 &amp; 10</p>
+                <p class="text-[10px] sm:text-[11px] text-zinc-400">Bosses await at Sectors 3, 6, 9 &amp; 10</p>
             </div>
 
-            <button id="btnStartGame" class="rugged-btn w-full py-3.5 rounded-xl font-orbitron text-base sm:text-lg font-black tracking-widest text-emerald-200 uppercase animate-pulse-glow">
-                LAUNCH ARMORED FIGHTER
-            </button>
+            <div class="w-full flex flex-col gap-2">
+                <button id="btnStartGame" class="rugged-btn w-full py-3 sm:py-3.5 rounded-xl font-orbitron text-sm sm:text-base font-black tracking-widest text-emerald-200 uppercase animate-pulse-glow">
+                    LAUNCH ARMORED FIGHTER
+                </button>
+                <a href="main.html" class="rugged-exit-btn w-full py-2 sm:py-2.5 rounded-xl font-orbitron text-xs font-bold tracking-widest text-rose-200 uppercase block text-center">
+                    EXIT TO MAIN MENU
+                </a>
+            </div>
         </div>
 
         <!-- PAUSE MODAL -->
-        <div id="pauseModal" class="hidden rugged-panel rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center pointer-events-auto flex flex-col items-center gap-4">
-            <h2 class="font-orbitron text-2xl sm:text-3xl font-black text-emerald-300 text-glow-green tracking-widest">TACTICAL PAUSE</h2>
-            <p class="text-sm text-zinc-300">Combat simulation suspended. Resume command?</p>
-            <div class="flex flex-col w-full gap-3 mt-2">
-                <button id="btnResumeGame" class="rugged-btn w-full py-3 rounded-xl font-orbitron font-bold text-emerald-300 tracking-wider">
+        <div id="pauseModal" class="hidden rugged-panel rounded-2xl p-5 sm:p-8 max-w-sm w-full text-center pointer-events-auto flex flex-col items-center gap-3.5">
+            <h2 class="font-orbitron text-xl sm:text-3xl font-black text-emerald-300 text-glow-green tracking-widest">TACTICAL PAUSE</h2>
+            <p class="text-xs sm:text-sm text-zinc-300">Combat simulation suspended. Resume command?</p>
+            <div class="flex flex-col w-full gap-2.5 mt-1">
+                <button id="btnResumeGame" class="rugged-btn w-full py-3 rounded-xl font-orbitron text-sm font-bold text-emerald-300 tracking-wider">
                     RESUME MISSION
                 </button>
-                <button id="btnRestartFromPause" class="w-full py-2.5 rounded-xl border border-rose-500/50 bg-rose-950/30 hover:bg-rose-900/50 font-orbitron text-sm font-bold text-rose-300 tracking-wider transition">
+                <button id="btnRestartFromPause" class="w-full py-2.5 rounded-xl border border-amber-500/50 bg-amber-950/30 hover:bg-amber-900/50 font-orbitron text-xs font-bold text-amber-300 tracking-wider transition">
                     RESTART SECTOR 01
                 </button>
+                <a href="main.html" class="rugged-exit-btn w-full py-2.5 rounded-xl font-orbitron text-xs font-bold text-rose-200 tracking-wider block text-center">
+                    EXIT TO MAIN MENU
+                </a>
             </div>
         </div>
 
         <!-- GAME OVER MODAL -->
-        <div id="gameOverModal" class="hidden rugged-panel rounded-2xl p-6 sm:p-8 max-w-md w-full text-center pointer-events-auto flex flex-col items-center gap-4 border-rose-500/60">
-            <div class="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-orbitron tracking-widest">
+        <div id="gameOverModal" class="hidden rugged-panel rounded-2xl p-5 sm:p-8 max-w-md w-full text-center pointer-events-auto flex flex-col items-center gap-3.5 border-rose-500/60">
+            <div class="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/40 text-rose-300 text-[10px] sm:text-xs font-orbitron tracking-widest">
                 CRITICAL HULL FAILURE
             </div>
-            <h2 class="font-orbitron text-3xl sm:text-4xl font-black text-rose-500 text-glow-amber tracking-wider">
+            <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-rose-500 text-glow-amber tracking-wider">
                 MISSION TERMINATED
             </h2>
 
-            <div class="w-full grid grid-cols-2 gap-3 bg-zinc-950/85 p-4 rounded-xl border border-zinc-800">
+            <div class="w-full grid grid-cols-2 gap-2.5 bg-zinc-950/85 p-3.5 rounded-xl border border-zinc-800">
                 <div>
-                    <div class="text-xs text-zinc-400 uppercase">FINAL SCORE</div>
-                    <div id="finalScoreDisplay" class="font-orbitron text-xl sm:text-2xl font-black text-emerald-400 mt-0.5">0</div>
+                    <div class="text-[10px] sm:text-xs text-zinc-400 uppercase">FINAL SCORE</div>
+                    <div id="finalScoreDisplay" class="font-orbitron text-lg sm:text-2xl font-black text-emerald-400 mt-0.5">0</div>
                 </div>
                 <div>
-                    <div class="text-xs text-zinc-400 uppercase">SECTOR REACHED</div>
-                    <div id="finalSectorDisplay" class="font-orbitron text-xl sm:text-2xl font-black text-amber-400 mt-0.5">1/10</div>
+                    <div class="text-[10px] sm:text-xs text-zinc-400 uppercase">SECTOR REACHED</div>
+                    <div id="finalSectorDisplay" class="font-orbitron text-lg sm:text-2xl font-black text-amber-400 mt-0.5">1/10</div>
                 </div>
                 <div>
-                    <div class="text-xs text-zinc-400 uppercase">MAX COMBO</div>
-                    <div id="finalComboDisplay" class="font-orbitron text-lg font-bold text-lime-400 mt-0.5">1.0x</div>
+                    <div class="text-[10px] sm:text-xs text-zinc-400 uppercase">MAX COMBO</div>
+                    <div id="finalComboDisplay" class="font-orbitron text-base sm:text-lg font-bold text-lime-400 mt-0.5">1.0x</div>
                 </div>
                 <div>
-                    <div class="text-xs text-zinc-400 uppercase">ALL-TIME BEST</div>
-                    <div id="finalBestDisplay" class="font-orbitron text-lg font-bold text-cyan-400 mt-0.5">0</div>
+                    <div class="text-[10px] sm:text-xs text-zinc-400 uppercase">ALL-TIME BEST</div>
+                    <div id="finalBestDisplay" class="font-orbitron text-base sm:text-lg font-bold text-cyan-400 mt-0.5">0</div>
                 </div>
             </div>
 
-            <button id="btnPlayAgain" class="rugged-btn w-full py-3.5 rounded-xl font-orbitron text-base sm:text-lg font-black tracking-widest text-emerald-200 uppercase mt-1">
-                REDEPLOY ARMORED UNIT
-            </button>
+            <div class="w-full flex flex-col gap-2">
+                <button id="btnPlayAgain" class="rugged-btn w-full py-3 sm:py-3.5 rounded-xl font-orbitron text-sm sm:text-base font-black tracking-widest text-emerald-200 uppercase">
+                    REDEPLOY ARMORED UNIT
+                </button>
+                <a href="main.html" class="rugged-exit-btn w-full py-2.5 rounded-xl font-orbitron text-xs font-bold tracking-widest text-rose-200 uppercase block text-center">
+                    EXIT TO MAIN MENU
+                </a>
+            </div>
         </div>
 
         <!-- VICTORY MODAL -->
-        <div id="victoryModal" class="hidden rugged-panel rounded-2xl p-6 sm:p-8 max-w-md w-full text-center pointer-events-auto flex flex-col items-center gap-4 border-amber-500/60">
-            <div class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-orbitron tracking-widest">
+        <div id="victoryModal" class="hidden rugged-panel rounded-2xl p-5 sm:p-8 max-w-md w-full text-center pointer-events-auto flex flex-col items-center gap-3.5 border-amber-500/60">
+            <div class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[10px] sm:text-xs font-orbitron tracking-widest">
                 CAMPAIGN CONQUERED
             </div>
-            <h2 class="font-orbitron text-3xl sm:text-4xl font-black text-amber-400 text-glow-amber tracking-wider">
+            <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-amber-400 text-glow-amber tracking-wider">
                 VICTORY ACHIEVED!
             </h2>
-            <p class="text-sm text-zinc-300">All 10 hostile sectors and elite commanders have been eradicated.</p>
-            <button id="btnVictoryPlayAgain" class="rugged-btn w-full py-3.5 rounded-xl font-orbitron text-base sm:text-lg font-black tracking-widest text-emerald-200 uppercase mt-2">
-                PLAY AGAIN (ENDLESS)
-            </button>
+            <p class="text-xs sm:text-sm text-zinc-300">All 10 hostile sectors and elite dreadnoughts have been eradicated.</p>
+            <div class="w-full grid grid-cols-2 gap-2.5 bg-zinc-950/85 p-3 rounded-xl border border-zinc-800">
+                <div>
+                    <div class="text-[10px] text-zinc-400 uppercase">VICTORY SCORE</div>
+                    <div id="victoryScoreDisplay" class="font-orbitron text-lg font-black text-emerald-400">0</div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-zinc-400 uppercase">PEAK COMBO</div>
+                    <div id="victoryComboDisplay" class="font-orbitron text-lg font-black text-amber-400">1.0x</div>
+                </div>
+            </div>
+            <div class="w-full flex flex-col gap-2">
+                <button id="btnVictoryPlayAgain" class="rugged-btn w-full py-3 sm:py-3.5 rounded-xl font-orbitron text-sm sm:text-base font-black tracking-widest text-emerald-200 uppercase">
+                    PLAY AGAIN (OVERDRIVE)
+                </button>
+                <a href="main.html" class="rugged-exit-btn w-full py-2.5 rounded-xl font-orbitron text-xs font-bold tracking-widest text-rose-200 uppercase block text-center">
+                    EXIT TO MAIN MENU
+                </a>
+            </div>
         </div>
     </main>
 
     <!-- BOTTOM MOBILE & TACTICAL CONTROL BAR -->
-    <footer class="relative z-10 w-full max-w-5xl px-3 pb-2.5 sm:px-6 sm:pb-4 pointer-events-none flex items-center justify-between gap-2">
+    <footer class="relative z-10 w-full max-w-5xl px-2.5 pb-2 sm:px-6 sm:pb-4 pointer-events-none flex items-center justify-between gap-2">
         <button id="btnAutoFire" class="rugged-btn pointer-events-auto rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 text-xs sm:text-sm font-orbitron font-bold text-emerald-300">
             <span id="autoFireDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#22c55e]"></span>
             <span>AUTO-FIRE: <span id="autoFireStatus">ON</span></span>
@@ -299,12 +373,12 @@
             <span>SHIFT / BUTTON FOR EMP NOVA</span>
         </div>
 
-        <button id="btnNovaBomb" class="rugged-btn pointer-events-auto rounded-xl px-3.5 py-2 sm:px-5 sm:py-2.5 flex items-center gap-2 text-xs sm:text-sm font-orbitron font-bold text-amber-300 border-amber-400/60">
+        <button id="btnNovaBomb" class="rugged-btn pointer-events-auto rounded-xl px-3 py-2 sm:px-5 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-orbitron font-bold text-amber-300 border-amber-400/60">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
             </svg>
             <span>EMP NOVA</span>
-            <span id="novaCountBadge" class="px-1.5 py-0.5 text-[11px] rounded bg-amber-500/20 border border-amber-400/50 text-amber-200">2</span>
+            <span id="novaCountBadge" class="px-1.5 py-0.5 text-[10px] sm:text-[11px] rounded bg-amber-500/20 border border-amber-400/50 text-amber-200">2</span>
         </button>
     </footer>
 </div>
@@ -313,7 +387,8 @@
 /**
  * ============================================================================
  * RUGGED INVADERS: OVERDRIVE (10-LEVEL CAMPAIGN EDITION)
- * Single-File Heavy Military Sci-Fi Arcade Game with Procedural Synth & Engine
+ * Full Custom Vector Graphics Engine, Web Audio Synthesizer, Wingman Drones,
+ * Homing Swarm Missiles, Destructible Bunkers, Graze System & 4 Boss Fortresses
  * ============================================================================
  */
 
@@ -323,6 +398,7 @@ class SoundEngine {
         this.muted = false;
         this.lastShootTime = 0;
         this.beatStep = 0;
+        this.beatTimer = 0.25;
     }
 
     init() {
@@ -370,6 +446,16 @@ class SoundEngine {
                 gain.connect(this.ctx.destination);
                 osc.start(now);
                 osc.stop(now + 0.1);
+            } else if (type === 'homing') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.exponentialRampToValueAtTime(310, now + 0.11);
+                gain.gain.setValueAtTime(0.11, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.11);
             } else {
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(580, now);
@@ -402,12 +488,30 @@ class SoundEngine {
         } catch (e) {}
     }
 
+    playGraze() {
+        if (this.muted || !this.ctx) return;
+        try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(980, now);
+            osc.frequency.exponentialRampToValueAtTime(1480, now + 0.05);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        } catch (e) {}
+    }
+
     playExplosion(scale = 1) {
         if (this.muted || !this.ctx) return;
         try {
             const now = this.ctx.currentTime;
             const duration = Math.min(0.6, 0.2 * scale);
-            const bufferSize = this.ctx.sampleRate * duration;
+            const bufferSize = Math.floor(this.ctx.sampleRate * duration);
             const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
             const data = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
@@ -439,18 +543,18 @@ class SoundEngine {
         if (this.muted || !this.ctx) return;
         try {
             const now = this.ctx.currentTime;
-            const notes = [330, 440, 550, 660];
+            const notes = [330, 440, 550, 660, 880];
             notes.forEach((freq, idx) => {
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now + idx * 0.05);
-                gain.gain.setValueAtTime(0.12, now + idx * 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.12);
+                osc.frequency.setValueAtTime(freq, now + idx * 0.045);
+                gain.gain.setValueAtTime(0.12, now + idx * 0.045);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.045 + 0.12);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
-                osc.start(now + idx * 0.05);
-                osc.stop(now + idx * 0.05 + 0.12);
+                osc.start(now + idx * 0.045);
+                osc.stop(now + idx * 0.045 + 0.12);
             });
         } catch (e) {}
     }
@@ -498,7 +602,7 @@ class SoundEngine {
         if (this.muted || !this.ctx) return;
         try {
             const now = this.ctx.currentTime;
-            const notes = [45, 45, 55, 40];
+            const notes = [45, 45, 55, 40, 48, 45, 60, 38];
             const freq = notes[this.beatStep % notes.length];
             this.beatStep++;
 
@@ -530,7 +634,7 @@ class RuggedInvadersGame {
         this.combo = 1.0;
         this.maxCombo = 1.0;
         this.comboTimer = 0;
-        this.maxComboTime = 3.6;
+        this.maxComboTime = 3.8;
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -554,6 +658,7 @@ class RuggedInvadersGame {
         this.clouds = [];
         this.player = null;
         this.bullets = [];
+        this.missiles = [];
         this.enemyBullets = [];
         this.enemies = [];
         this.boss = null;
@@ -587,7 +692,7 @@ class RuggedInvadersGame {
             this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
             if (this.player) {
-                this.player.y = this.height - (this.width < 640 ? 92 : 85);
+                this.player.y = this.height - (this.width < 640 ? 94 : 86);
                 this.player.x = Math.max(30, Math.min(this.width - 30, this.player.x));
             }
             this.repositionBunkers();
@@ -598,14 +703,14 @@ class RuggedInvadersGame {
 
     initBackground() {
         this.stars = [];
-        const starCount = Math.floor((this.width * this.height) / 7000);
+        const starCount = Math.floor((this.width * this.height) / 6500);
         const colors = ['#ffffff', '#22c55e', '#f59e0b', '#84cc16', '#06b6d4'];
-        for (let i = 0; i < Math.max(70, starCount); i++) {
+        for (let i = 0; i < Math.max(75, starCount); i++) {
             const layer = Math.random() < 0.5 ? 1 : (Math.random() < 0.8 ? 2 : 3);
             this.stars.push({
                 x: Math.random() * this.width,
                 y: Math.random() * this.height,
-                size: layer === 3 ? 2.1 : (layer === 2 ? 1.4 : 0.9),
+                size: layer === 3 ? 2.2 : (layer === 2 ? 1.5 : 0.9),
                 speed: layer * 22 + Math.random() * 14,
                 color: colors[Math.floor(Math.random() * colors.length)],
                 alpha: 0.35 + Math.random() * 0.65,
@@ -773,6 +878,7 @@ class RuggedInvadersGame {
         this.comboTimer = 0;
 
         this.bullets = [];
+        this.missiles = [];
         this.enemyBullets = [];
         this.enemies = [];
         this.boss = null;
@@ -783,7 +889,7 @@ class RuggedInvadersGame {
 
         this.player = {
             x: this.width / 2,
-            y: this.height - (this.width < 640 ? 92 : 85),
+            y: this.height - (this.width < 640 ? 94 : 86),
             width: 42,
             height: 34,
             speed: 440,
@@ -791,9 +897,17 @@ class RuggedInvadersGame {
             shield: true,
             invulnTimer: 0,
             shootCooldown: 0,
+            missileCooldown: 0,
+            dronePhase: 0,
             tilt: 0,
             novaBombs: 2,
-            powerUps: { spread: 0, rapid: 0, railgun: 0 }
+            powerUps: {
+                spread: 0,
+                rapid: 0,
+                railgun: 0,
+                drones: 0,
+                homing: 0
+            }
         };
 
         this.createBunkers();
@@ -809,7 +923,7 @@ class RuggedInvadersGame {
     createBunkers() {
         this.bunkers = [];
         const count = this.width < 600 ? 3 : 4;
-        const bunkerY = this.height - (this.width < 640 ? 158 : 152);
+        const bunkerY = this.height - (this.width < 640 ? 156 : 150);
         const spacing = this.width / (count + 1);
 
         for (let i = 1; i <= count; i++) {
@@ -827,7 +941,7 @@ class RuggedInvadersGame {
     repositionBunkers() {
         if (!this.bunkers.length) return;
         const count = this.bunkers.length;
-        const bunkerY = this.height - (this.width < 640 ? 158 : 152);
+        const bunkerY = this.height - (this.width < 640 ? 156 : 150);
         const spacing = this.width / (count + 1);
         this.bunkers.forEach((b, idx) => {
             b.x = spacing * (idx + 1);
@@ -852,37 +966,39 @@ class RuggedInvadersGame {
         if (isBossLevel) {
             this.audio.playBossWarning();
             let bossName = 'AEGIS DREADNOUGHT';
-            let maxHp = 300;
+            let maxHp = 320;
             let tier = 1;
 
             if (lvl === 6) {
                 bossName = 'XENO HIVE MATRIX';
-                maxHp = 550;
+                maxHp = 580;
                 tier = 2;
             } else if (lvl === 9) {
                 bossName = 'TITANIUM OVERLORD';
-                maxHp = 800;
+                maxHp = 860;
                 tier = 3;
             } else if (lvl === 10) {
                 bossName = 'OMEGA COMMAND CORE';
-                maxHp = 1200;
+                maxHp = 1350;
                 tier = 4;
             }
 
             this.boss = {
                 name: bossName,
                 x: this.width / 2,
-                y: -90,
-                targetY: 135,
-                width: Math.min(210, this.width * 0.48),
-                height: 85,
+                y: -95,
+                targetY: 138,
+                width: Math.min(220, this.width * 0.5),
+                height: 88,
                 hp: maxHp,
                 maxHp: maxHp,
-                vx: 120 + tier * 22,
+                vx: 120 + tier * 24,
                 phase: 1,
                 attackTimer: 1.4,
+                minionTimer: 5.5,
                 patternIndex: 0,
                 hitFlash: 0,
+                coreAngle: 0,
                 tier: tier
             };
 
@@ -900,16 +1016,18 @@ class RuggedInvadersGame {
         const cols = isMobile ? 7 : 10;
         const rows = Math.min(6, 4 + Math.floor(lvl / 2));
         const spacingX = isMobile ? Math.min(44, (this.width - 50) / cols) : 56;
-        const spacingY = isMobile ? 38 : 44;
+        const spacingY = isMobile ? 36 : 44;
         const startX = (this.width - (cols - 1) * spacingX) / 2;
-        const startY = 88;
+        const startY = 86;
 
         const archetype = lvl % 4;
         const types = [
             { id: 'scout', color: '#22c55e', hp: 1, score: 100 },
             { id: 'wasp', color: '#f59e0b', hp: 1 + Math.floor(lvl / 3), score: 160 },
             { id: 'tank', color: '#84cc16', hp: 2 + Math.floor(lvl / 2), score: 260 },
-            { id: 'wraith', color: '#06b6d4', hp: 2 + Math.floor(lvl / 2), score: 320 }
+            { id: 'wraith', color: '#06b6d4', hp: 2 + Math.floor(lvl / 2), score: 320 },
+            { id: 'sniper', color: '#c084fc', hp: 2 + Math.floor(lvl / 3), score: 380 },
+            { id: 'berzerker', color: '#fb7185', hp: 3 + Math.floor(lvl / 2), score: 450 }
         ];
 
         for (let r = 0; r < rows; r++) {
@@ -917,7 +1035,12 @@ class RuggedInvadersGame {
                 if (archetype === 2 && ((r === 0 && c % 2 === 1) || (r === rows - 1 && (c === 0 || c === cols - 1)))) continue;
                 if (archetype === 0 && Math.abs(c - (cols - 1) / 2) + Math.abs(r - (rows - 1) / 2) > (cols / 2 + 1)) continue;
 
-                let tIndex = r === 0 ? 3 : (r === 1 ? 2 : (r < rows - 1 ? 1 : 0));
+                let tIndex = 0;
+                if (r === 0) tIndex = lvl >= 7 ? 5 : (lvl >= 4 ? 4 : 3);
+                else if (r === 1) tIndex = lvl >= 5 ? 3 : 2;
+                else if (r < rows - 1) tIndex = 1;
+                else tIndex = 0;
+
                 const template = types[tIndex];
                 const yOffset = archetype === 2 ? Math.abs(c - (cols - 1) / 2) * 10 : 0;
 
@@ -944,10 +1067,21 @@ class RuggedInvadersGame {
 
         this.formationSpeed = (isMobile ? 32 : 45) + lvl * 5;
         this.formationDir = 1;
-        this.diveTimer = Math.max(1.2, 3.2 - lvl * 0.2);
+        this.diveTimer = Math.max(1.1, 3.2 - lvl * 0.2);
 
-        const titles = ['STEEL VANGUARD', 'ARMORED PHALANX', 'HEAVY SWARM', 'IRON ARMADA', 'STRIKE WING', 'VANGUARD SQUADRON', 'ASSAULT FLEET', 'DREADNOUGHT ESCORT'];
-        this.showBanner(`SECTOR 0${lvl}/10`, titles[(lvl - 1) % titles.length]);
+        const titles = [
+            'STEEL VANGUARD',
+            'ARMORED PHALANX',
+            'AEGIS BLOCKADE',
+            'IRON ARMADA',
+            'STRIKE WING',
+            'HIVE MATRIX SECTOR',
+            'VANGUARD SQUADRON',
+            'ASSAULT FLEET',
+            'TITANIUM CITADEL',
+            'OMEGA CORE'
+        ];
+        this.showBanner(`SECTOR ${String(lvl).padStart(2, '0')}/10`, titles[(lvl - 1) % titles.length]);
     }
 
     showBanner(title, subtitle) {
@@ -987,13 +1121,13 @@ class RuggedInvadersGame {
 
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const e = this.enemies[i];
-            e.hp -= 3;
+            e.hp -= 4;
             e.hitFlash = 0.2;
             if (e.hp <= 0) this.destroyEnemy(e, i);
         }
 
         if (this.boss) {
-            this.boss.hp -= 45;
+            this.boss.hp -= 55;
             this.boss.hitFlash = 0.25;
             this.updateBossUI();
             if (this.boss.hp <= 0) this.destroyBoss();
@@ -1028,19 +1162,21 @@ class RuggedInvadersGame {
         const hasRapid = p.powerUps.rapid > 0;
         const hasSpread = p.powerUps.spread > 0;
         const hasRailgun = p.powerUps.railgun > 0;
+        const hasDrones = p.powerUps.drones > 0;
+        const hasHoming = p.powerUps.homing > 0;
 
-        const baseCooldown = hasRapid ? 0.085 : 0.17;
+        const baseCooldown = hasRapid ? 0.085 : 0.165;
         p.shootCooldown = baseCooldown;
 
         if (hasRailgun) {
             this.audio.playShoot('railgun');
             this.bullets.push({
                 x: p.x, y: p.y - 22,
-                vx: 0, vy: -920,
-                width: 8, height: 38,
+                vx: 0, vy: -940,
+                width: 8, height: 40,
                 color: '#84cc16',
-                damage: 2.8,
-                pierce: 3
+                damage: 3.0,
+                pierce: 4
             });
         } else if (hasSpread) {
             this.audio.playShoot('spread');
@@ -1050,10 +1186,10 @@ class RuggedInvadersGame {
                     x: p.x + Math.sin(ang) * 12,
                     y: p.y - 16,
                     vx: Math.sin(ang) * 580,
-                    vy: -Math.cos(ang) * 660,
+                    vy: -Math.cos(ang) * 680,
                     width: 4, height: 15,
                     color: '#22c55e',
-                    damage: 1.1,
+                    damage: 1.15,
                     pierce: 1
                 });
             });
@@ -1062,10 +1198,10 @@ class RuggedInvadersGame {
             [-11, 11].forEach(offset => {
                 this.bullets.push({
                     x: p.x + offset, y: p.y - 14,
-                    vx: 0, vy: -760,
+                    vx: 0, vy: -780,
                     width: 4, height: 16,
                     color: '#f59e0b',
-                    damage: 1,
+                    damage: 1.1,
                     pierce: 1
                 });
             });
@@ -1073,13 +1209,49 @@ class RuggedInvadersGame {
             this.audio.playShoot('normal');
             this.bullets.push({
                 x: p.x, y: p.y - 18,
-                vx: 0, vy: -700,
+                vx: 0, vy: -720,
                 width: 4, height: 16,
                 color: '#22c55e',
                 damage: 1,
                 pierce: 1
             });
         }
+
+        // Wingman Drones Twin Plasma Fire
+        if (hasDrones) {
+            const leftDroneX = p.x - 38 + Math.cos(p.dronePhase) * 5;
+            const rightDroneX = p.x + 38 - Math.cos(p.dronePhase) * 5;
+            const droneY = p.y - 4 + Math.sin(p.dronePhase * 2) * 4;
+            [leftDroneX, rightDroneX].forEach(dx => {
+                this.bullets.push({
+                    x: dx, y: droneY - 10,
+                    vx: 0, vy: -740,
+                    width: 3.5, height: 14,
+                    color: '#c084fc',
+                    damage: 0.9,
+                    pierce: 1
+                });
+            });
+        }
+
+        // Homing Swarm Micro-Missiles
+        if (hasHoming && p.missileCooldown <= 0) {
+            p.missileCooldown = 0.42;
+            this.audio.playShoot('homing');
+            [-18, 18].forEach(side => {
+                this.missiles.push({
+                    x: p.x + side,
+                    y: p.y - 8,
+                    vx: side * 6,
+                    vy: -260,
+                    speed: 520,
+                    damage: 1.8,
+                    color: '#fb7185',
+                    trailTimer: 0
+                });
+            });
+        }
+
         this.spawnParticles(p.x, p.y - 18, '#22c55e', 3, 70);
     }
 
@@ -1104,7 +1276,7 @@ class RuggedInvadersGame {
         });
         this.addFloatingText(enemy.x, enemy.y, `+${points}`, enemy.color, 13);
 
-        if (Math.random() < 0.16) {
+        if (Math.random() < 0.18) {
             this.spawnPowerUp(enemy.x, enemy.y);
         }
     }
@@ -1122,7 +1294,7 @@ class RuggedInvadersGame {
         this.flashColor = '#f59e0b';
         this.flashAlpha = 0.65;
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
             const ox = bx + (Math.random() - 0.5) * this.boss.width;
             const oy = by + (Math.random() - 0.5) * this.boss.height;
             this.spawnParticles(ox, oy, '#f59e0b', 30, 260);
@@ -1138,8 +1310,8 @@ class RuggedInvadersGame {
 
         this.addFloatingText(bx, by, `COMMANDER DESTROYED +${bonus}`, '#f59e0b', 20);
 
-        this.spawnPowerUp(bx - 30, by);
-        this.spawnPowerUp(bx + 30, by);
+        this.spawnPowerUp(bx - 35, by);
+        this.spawnPowerUp(bx + 35, by);
 
         this.boss = null;
         document.getElementById('bossHud').classList.add('hidden');
@@ -1147,10 +1319,17 @@ class RuggedInvadersGame {
 
         // Check if level 10 victory reached
         if (this.level >= this.maxSectors) {
+            if (this.score > this.highScore) {
+                this.highScore = this.score;
+                localStorage.setItem('ruggedInvadersHighScore10', String(this.highScore));
+                this.updateHighScoreUI();
+            }
             setTimeout(() => {
                 this.state = 'VICTORY';
+                document.getElementById('victoryScoreDisplay').textContent = this.score.toLocaleString();
+                document.getElementById('victoryComboDisplay').textContent = `${this.maxCombo.toFixed(1)}x`;
                 document.getElementById('victoryModal').classList.remove('hidden');
-            }, 600);
+            }, 650);
         }
     }
 
@@ -1159,6 +1338,8 @@ class RuggedInvadersGame {
             { type: 'spread', label: 'SPREAD', color: '#22c55e' },
             { type: 'rapid', label: 'RAPID', color: '#f59e0b' },
             { type: 'railgun', label: 'RAILGUN', color: '#84cc16' },
+            { type: 'drones', label: 'DRONES', color: '#c084fc' },
+            { type: 'homing', label: 'HOMING', color: '#fb7185' },
             { type: 'shield', label: 'SHIELD', color: '#06b6d4' },
             { type: 'nova', label: '+1 NOVA', color: '#eab308' }
         ];
@@ -1184,7 +1365,7 @@ class RuggedInvadersGame {
             this.updateNovaUI();
             this.addFloatingText(p.x, p.y - 30, '+1 EMP NOVA!', '#eab308', 16);
         } else {
-            p.powerUps[pUp.type] = 10.0;
+            p.powerUps[pUp.type] = 11.0;
             this.addFloatingText(p.x, p.y - 30, `${pUp.label} ACTIVE!`, pUp.color, 16);
         }
         this.score += 250;
@@ -1255,7 +1436,8 @@ class RuggedInvadersGame {
     }
 
     updateHighScoreUI() {
-        document.getElementById('highScoreDisplay').textContent = String(this.highScore).padStart(6, '0');
+        const el = document.getElementById('highScoreDisplay');
+        if (el) el.textContent = String(this.highScore).padStart(6, '0');
     }
 
     renderLivesUI(lives) {
@@ -1293,17 +1475,19 @@ class RuggedInvadersGame {
         }
         const items = [];
         if (this.player.shield) {
-            items.push(`<span class="px-2.5 py-0.5 rounded-full text-[11px] font-orbitron font-bold bg-cyan-950/90 border border-cyan-400/60 text-cyan-300">SHIELD ACTIVE</span>`);
+            items.push(`<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-orbitron font-bold bg-cyan-950/90 border border-cyan-400/60 text-cyan-300">SHIELD ACTIVE</span>`);
         }
         const meta = {
             spread: { name: 'SPREAD', cls: 'bg-emerald-950/90 border-emerald-400/60 text-emerald-300' },
             rapid: { name: 'RAPID', cls: 'bg-amber-950/90 border-amber-400/60 text-amber-300' },
-            railgun: { name: 'RAILGUN', cls: 'bg-lime-950/90 border-lime-400/60 text-lime-300' }
+            railgun: { name: 'RAILGUN', cls: 'bg-lime-950/90 border-lime-400/60 text-lime-300' },
+            drones: { name: 'DRONES', cls: 'bg-purple-950/90 border-purple-400/60 text-purple-300' },
+            homing: { name: 'HOMING', cls: 'bg-rose-950/90 border-rose-400/60 text-rose-300' }
         };
-        for (const key of ['spread', 'rapid', 'railgun']) {
+        for (const key of ['spread', 'rapid', 'railgun', 'drones', 'homing']) {
             const t = this.player.powerUps[key];
             if (t > 0) {
-                items.push(`<span class="px-2.5 py-0.5 rounded-full text-[11px] font-orbitron font-bold border ${meta[key].cls}">${meta[key].name} ${t.toFixed(1)}s</span>`);
+                items.push(`<span class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-orbitron font-bold border ${meta[key].cls}">${meta[key].name} ${t.toFixed(1)}s</span>`);
             }
         }
         container.innerHTML = items.join('');
@@ -1348,8 +1532,10 @@ class RuggedInvadersGame {
         if (p) {
             if (p.invulnTimer > 0) p.invulnTimer -= dt;
             if (p.shootCooldown > 0) p.shootCooldown -= dt;
+            if (p.missileCooldown > 0) p.missileCooldown -= dt;
+            p.dronePhase += dt * 4;
 
-            for (const key of ['spread', 'rapid', 'railgun']) {
+            for (const key of ['spread', 'rapid', 'railgun', 'drones', 'homing']) {
                 if (p.powerUps[key] > 0) p.powerUps[key] = Math.max(0, p.powerUps[key] - dt);
             }
             this.updatePowerupHud();
@@ -1374,12 +1560,12 @@ class RuggedInvadersGame {
 
         this.audio.beatTimer -= dt;
         if (this.audio.beatTimer <= 0) {
-            const enemyRatio = this.boss ? 0.4 : Math.max(0.2, Math.min(1, this.enemies.length / 35));
+            const enemyRatio = this.boss ? 0.35 : Math.max(0.2, Math.min(1, this.enemies.length / 35));
             this.audio.beatTimer = 0.18 + enemyRatio * 0.28;
             this.audio.playBassPulse();
         }
 
-        // Bullets
+        // Standard Bullets
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const b = this.bullets[i];
             b.x += b.vx * dt;
@@ -1419,6 +1605,72 @@ class RuggedInvadersGame {
                         this.bullets.splice(i, 1);
                         break;
                     }
+                }
+            }
+        }
+
+        // Homing Missiles Update
+        for (let i = this.missiles.length - 1; i >= 0; i--) {
+            const m = this.missiles[i];
+            let target = this.boss;
+            if (!target && this.enemies.length > 0) {
+                let minDist = Infinity;
+                for (const e of this.enemies) {
+                    const d = Math.hypot(e.x - m.x, e.y - m.y);
+                    if (d < minDist) {
+                        minDist = d;
+                        target = e;
+                    }
+                }
+            }
+
+            if (target) {
+                const desiredAngle = Math.atan2(target.y - m.y, target.x - m.x);
+                const currentAngle = Math.atan2(m.vy, m.vx);
+                let diff = desiredAngle - currentAngle;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                const newAngle = currentAngle + diff * Math.min(1, dt * 8.5);
+                m.vx = Math.cos(newAngle) * m.speed;
+                m.vy = Math.sin(newAngle) * m.speed;
+            }
+
+            m.x += m.vx * dt;
+            m.y += m.vy * dt;
+            m.trailTimer -= dt;
+            if (m.trailTimer <= 0) {
+                m.trailTimer = 0.03;
+                this.particles.push({
+                    x: m.x, y: m.y, vx: 0, vy: 0,
+                    size: 2.2, color: '#fb7185', alpha: 0.8, decay: 3.0
+                });
+            }
+
+            if (m.y < -40 || m.y > this.height + 40 || m.x < -40 || m.x > this.width + 40) {
+                this.missiles.splice(i, 1);
+                continue;
+            }
+
+            if (this.boss && Math.abs(m.x - this.boss.x) < this.boss.width / 2 && Math.abs(m.y - this.boss.y) < this.boss.height / 2) {
+                this.boss.hp -= m.damage;
+                this.boss.hitFlash = 0.1;
+                this.spawnParticles(m.x, m.y, '#fb7185', 8, 120);
+                this.updateBossUI();
+                this.missiles.splice(i, 1);
+                if (this.boss.hp <= 0) this.destroyBoss();
+                continue;
+            }
+
+            for (let j = this.enemies.length - 1; j >= 0; j--) {
+                const e = this.enemies[j];
+                if (Math.hypot(m.x - e.x, m.y - e.y) < e.width * 0.65) {
+                    e.hp -= m.damage;
+                    e.hitFlash = 0.15;
+                    this.spawnParticles(m.x, m.y, '#fb7185', 8, 120);
+                    if (e.hp <= 0) this.destroyEnemy(e, j);
+                    else this.audio.playHit();
+                    this.missiles.splice(i, 1);
+                    break;
                 }
             }
         }
@@ -1471,11 +1723,20 @@ class RuggedInvadersGame {
 
             const fireChance = (0.16 + this.level * 0.035) * dt;
             if (Math.random() < fireChance) {
-                this.enemyBullets.push({
-                    x: e.x, y: e.y + e.height / 2,
-                    vx: 0, vy: 260 + this.level * 18,
-                    radius: 4.5, color: e.color, grazed: false
-                });
+                if (e.type === 'sniper' && p) {
+                    const ang = Math.atan2(p.y - e.y, p.x - e.x);
+                    this.enemyBullets.push({
+                        x: e.x, y: e.y + e.height / 2,
+                        vx: Math.cos(ang) * 320, vy: Math.sin(ang) * 320,
+                        radius: 4.5, color: e.color, grazed: false
+                    });
+                } else {
+                    this.enemyBullets.push({
+                        x: e.x, y: e.y + e.height / 2,
+                        vx: 0, vy: 260 + this.level * 18,
+                        radius: 4.5, color: e.color, grazed: false
+                    });
+                }
             }
 
             this.bunkers.forEach(bunk => {
@@ -1507,6 +1768,7 @@ class RuggedInvadersGame {
         // Boss Logic
         if (this.boss) {
             const boss = this.boss;
+            boss.coreAngle += dt * 3.5;
             if (boss.hitFlash > 0) boss.hitFlash -= dt;
 
             if (boss.y < boss.targetY) {
@@ -1524,7 +1786,7 @@ class RuggedInvadersGame {
                 boss.attackTimer -= dt;
                 if (boss.attackTimer <= 0) {
                     boss.patternIndex = (boss.patternIndex + 1) % 3;
-                    boss.attackTimer = Math.max(0.75, 1.5 - boss.tier * 0.18);
+                    boss.attackTimer = Math.max(0.72, 1.5 - boss.tier * 0.18);
 
                     if (boss.patternIndex === 0) {
                         const count = 10 + boss.tier * 2;
@@ -1537,7 +1799,7 @@ class RuggedInvadersGame {
                             });
                         }
                     } else if (boss.patternIndex === 1 && p) {
-                        [-50, 0, 50].forEach(offset => {
+                        [-55, 0, 55].forEach(offset => {
                             const bx = boss.x + offset;
                             const by = boss.y + 24;
                             const ang = Math.atan2(p.y - by, p.x - bx);
@@ -1594,6 +1856,7 @@ class RuggedInvadersGame {
                 } else if (!b.grazed && dist < 36 + b.radius && p.invulnTimer <= 0) {
                     b.grazed = true;
                     this.score += 50;
+                    this.audio.playGraze();
                     this.updateScoreUI();
                     this.spawnParticles(p.x, p.y, '#f59e0b', 4, 90);
                     this.addFloatingText(p.x, p.y - 22, 'GRAZE +50', '#f59e0b', 11);
@@ -1645,7 +1908,7 @@ class RuggedInvadersGame {
             if (ft.alpha <= 0) this.floatingTexts.splice(i, 1);
         }
 
-        if (this.enemies.length === 0 && !this.boss) {
+        if (this.enemies.length === 0 && !this.boss && this.state === 'PLAYING') {
             this.level++;
             this.score += 1000;
             this.updateScoreUI();
@@ -1732,6 +1995,22 @@ class RuggedInvadersGame {
             ctx.restore();
         });
 
+        this.missiles.forEach(m => {
+            ctx.save();
+            ctx.translate(m.x, m.y);
+            ctx.rotate(Math.atan2(m.vy, m.vx) + Math.PI / 2);
+            ctx.fillStyle = m.color;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = m.color;
+            ctx.beginPath();
+            ctx.moveTo(0, -7);
+            ctx.lineTo(4, 5);
+            ctx.lineTo(-4, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        });
+
         this.enemyBullets.forEach(b => {
             ctx.save();
             ctx.fillStyle = '#ffffff';
@@ -1808,16 +2087,16 @@ class RuggedInvadersGame {
             ctx.save();
             ctx.globalAlpha = alpha;
             ctx.textAlign = 'center';
-            ctx.font = `900 ${this.width < 600 ? 26 : 38}px Orbitron`;
+            ctx.font = `900 ${this.width < 600 ? 24 : 38}px Orbitron`;
             ctx.fillStyle = '#22c55e';
             ctx.shadowBlur = 18;
             ctx.shadowColor = '#22c55e';
             ctx.fillText(this.bannerText, this.width / 2, this.height * 0.42);
 
-            ctx.font = `700 ${this.width < 600 ? 14 : 18}px Orbitron`;
+            ctx.font = `700 ${this.width < 600 ? 13 : 18}px Orbitron`;
             ctx.fillStyle = '#f59e0b';
             ctx.shadowColor = '#f59e0b';
-            ctx.fillText(this.bannerSubText, this.width / 2, this.height * 0.42 + 30);
+            ctx.fillText(this.bannerSubText, this.width / 2, this.height * 0.42 + 28);
             ctx.restore();
         }
 
@@ -1914,6 +2193,30 @@ class RuggedInvadersGame {
         }
 
         ctx.restore();
+
+        // Draw Wingman Drones if active
+        if (p.powerUps.drones > 0) {
+            [-38, 38].forEach((offset, idx) => {
+                const dx = p.x + offset + (idx === 0 ? 1 : -1) * Math.cos(p.dronePhase) * 5;
+                const dy = p.y - 4 + Math.sin(p.dronePhase * 2) * 4;
+                ctx.save();
+                ctx.translate(dx, dy);
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#c084fc';
+                ctx.strokeStyle = '#c084fc';
+                ctx.fillStyle = '#1e1035';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.moveTo(0, -8);
+                ctx.lineTo(8, 6);
+                ctx.lineTo(0, 3);
+                ctx.lineTo(-8, 6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
     }
 
     drawInvader(ctx, e) {
@@ -1947,6 +2250,11 @@ class RuggedInvadersGame {
             ctx.lineTo(-w, -h + flap);
         } else if (e.type === 'tank') {
             ctx.rect(-w, -h, w * 2, h * 2);
+        } else if (e.type === 'sniper') {
+            ctx.moveTo(0, h + 3);
+            ctx.lineTo(w, -h);
+            ctx.lineTo(0, -h * 0.5);
+            ctx.lineTo(-w, -h);
         } else {
             ctx.moveTo(0, -h - 2);
             ctx.lineTo(w + 2, 0);
@@ -1995,9 +2303,17 @@ class RuggedInvadersGame {
         ctx.fill();
         ctx.stroke();
 
+        // Rotating reactor ring
+        ctx.save();
+        ctx.rotate(boss.coreAngle || 0);
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-16, -16, 32, 32);
+        ctx.restore();
+
         ctx.fillStyle = '#22c55e';
         ctx.beginPath();
-        ctx.arc(0, 0, 14 + Math.sin(performance.now() * 0.01) * 3, 0, Math.PI * 2);
+        ctx.arc(0, 0, 12 + Math.sin(performance.now() * 0.01) * 3, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();
