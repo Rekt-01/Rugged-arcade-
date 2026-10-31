@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>RUG PINBALL - ARCADE EDITION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
@@ -22,7 +20,7 @@
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
-            background: radial-gradient(circle at 50% 20%, #16091c 0%, #050508 75%);
+            background: #050508;
             font-family: 'Rajdhani', sans-serif;
             touch-action: none;
         }
@@ -39,1529 +37,547 @@
             justify-content: space-between;
             align-items: center;
             overflow: hidden;
-            padding: 6px 8px;
-        }
-        .mk-panel {
-            background: rgba(14, 10, 18, 0.92);
-            border: 2px solid rgba(220, 38, 38, 0.75);
-            box-shadow: 0 0 25px rgba(220, 38, 38, 0.25), inset 0 0 14px rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-        }
-        .mk-btn {
-            background: linear-gradient(135deg, rgba(153, 27, 27, 0.55), rgba(69, 10, 10, 0.8));
-            border: 2px solid rgba(239, 68, 68, 0.85);
-            box-shadow: 0 0 14px rgba(239, 68, 68, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2);
-            transition: transform 0.06s, background 0.12s, box-shadow 0.12s;
-            cursor: pointer;
-            pointer-events: auto;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .mk-btn:active, .touch-active {
-            transform: scale(0.93);
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.95));
-            box-shadow: 0 0 24px rgba(251, 191, 36, 0.75);
-            border-color: #fbbf24;
-        }
-        .mk-launch-btn {
-            background: linear-gradient(135deg, rgba(217, 119, 6, 0.55), rgba(120, 53, 15, 0.8));
-            border: 2px solid rgba(251, 191, 36, 0.9);
-            box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
-        }
-        .mk-launch-btn:active, .mk-launch-btn.touch-active {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(180, 83, 9, 0.95));
-            box-shadow: 0 0 28px rgba(251, 191, 36, 0.95);
-        }
-        .mk-exit-btn {
-            background: linear-gradient(135deg, rgba(225, 29, 72, 0.35), rgba(159, 18, 57, 0.5));
-            border: 1px solid rgba(244, 63, 94, 0.85);
-            box-shadow: 0 0 10px rgba(244, 63, 94, 0.35);
-            text-decoration: none;
-            pointer-events: auto;
-        }
-        #canvas-container {
-            position: relative;
-            flex: 1 1 auto;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin: 4px 0;
+            padding: 6px;
         }
         canvas {
             display: block;
-            max-height: 100%;
-            max-width: 100%;
-            width: auto;
-            height: 100%;
-            aspect-ratio: 460 / 760;
-            border-radius: 18px;
-            border: 2px solid rgba(239, 68, 68, 0.75);
-            box-shadow: 0 0 35px rgba(220, 38, 38, 0.35), inset 0 0 20px #000;
-            background: #07070c;
+            background: #090a0f;
+            border: 2px solid rgba(220, 38, 38, 0.6);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.25);
+            border-radius: 12px;
+            image-rendering: pixelated;
+        }
+        #orientation-warning {
+            position: fixed;
+            inset: 0;
+            background: #050508;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+        }
+        @media screen and (orientation: portrait) {
+            #orientation-warning {
+                display: flex;
+            }
+        }
+        .mk-panel {
+            background: rgba(15, 10, 15, 0.95);
+            border: 2px solid rgba(185, 28, 28, 0.7);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+            backdrop-filter: blur(8px);
+        }
+        .mk-btn {
+            background: linear-gradient(135deg, rgba(153, 27, 27, 0.5), rgba(69, 10, 10, 0.7));
+            border: 2px solid rgba(239, 68, 68, 0.85);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.06s;
+        }
+        .mk-btn:active, .touch-active {
+            transform: scale(0.92);
+            background: rgba(220, 38, 38, 0.9);
         }
     </style>
 </head>
 <body class="text-white antialiased">
 
+<div id="orientation-warning">
+    <div class="font-orbitron text-2xl sm:text-4xl font-black text-rose-500 mb-3 tracking-wider">ROTATE DEVICE TO LANDSCAPE</div>
+    <p class="text-slate-300 text-sm sm:text-base max-w-md">Rug Pinball requires landscape orientation to view the full arcade table.</p>
+</div>
+
 <div id="app-wrapper">
-    <!-- TOP ARCADE SCOREBOARD & CONTROLS -->
-    <header class="w-full max-w-xl z-10 shrink-0">
-        <div class="mk-panel rounded-xl px-3 py-1.5 flex items-center justify-between gap-2">
-            <!-- Score & High Score -->
-            <div class="flex items-center gap-3">
-                <div>
-                    <div class="text-[10px] font-orbitron text-slate-400 tracking-wider uppercase leading-none">SCORE</div>
-                    <div id="scoreText" class="text-base sm:text-xl font-orbitron font-black text-amber-400 tracking-wider leading-tight">0</div>
-                </div>
-                <div class="border-l border-rose-900/80 pl-2.5">
-                    <div class="text-[10px] font-orbitron text-slate-400 tracking-wider uppercase leading-none">HIGH</div>
-                    <div id="highScoreText" class="text-xs sm:text-sm font-orbitron font-bold text-rose-400 tracking-wider leading-tight">0</div>
-                </div>
-            </div>
-
-            <!-- Multiplier & Ball Count -->
-            <div class="flex items-center gap-2">
-                <div class="px-2 py-0.5 rounded bg-slate-950/90 border border-amber-500/60 text-center">
-                    <div class="text-[9px] font-orbitron text-slate-400 leading-none">MULT</div>
-                    <div id="multText" class="text-xs sm:text-sm font-orbitron font-black text-cyan-300 leading-tight">1X</div>
-                </div>
-                <div class="px-2 py-0.5 rounded bg-slate-950/90 border border-rose-500/60 text-center">
-                    <div class="text-[9px] font-orbitron text-slate-400 leading-none">BALL</div>
-                    <div id="ballText" class="text-xs sm:text-sm font-orbitron font-black text-amber-300 leading-tight">1 / 3</div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-1.5">
-                <a href="main.html" class="mk-exit-btn rounded-lg px-2.5 py-1.5 font-orbitron text-[10px] font-black text-rose-200 tracking-wider">
-                    EXIT
-                </a>
-                <button id="btnReset" type="button" class="mk-btn rounded-lg px-2.5 py-1.5 font-orbitron text-[10px] font-black text-amber-200 tracking-wider">
-                    NEW
-                </button>
-            </div>
+    <!-- TOP HUD BAR -->
+    <header class="w-full max-w-2xl px-2 pt-1 flex items-center justify-between mk-panel rounded-xl py-1.5 z-10">
+        <div class="flex items-center gap-3 text-xs font-orbitron font-black text-amber-400">
+            <div>SCORE: <span id="scoreVal" class="text-white">0</span></div>
+            <div>MULT: <span id="multVal" class="text-rose-400">1x</span></div>
+            <div>BALL: <span id="ballVal" class="text-amber-200">1/3</span></div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="main.html" class="mk-btn rounded-lg px-3 py-1 font-orbitron text-[10px] font-black text-rose-200 tracking-wider">EXIT</a>
+            <button id="btnNew" type="button" class="mk-btn rounded-lg px-3 py-1 font-orbitron text-[10px] font-black text-amber-200 tracking-wider">NEW GAME</button>
         </div>
     </header>
 
-    <!-- PINBALL PLAYFIELD CANVAS -->
-    <main id="canvas-container">
-        <canvas id="pinballCanvas" width="460" height="760"></canvas>
-    </main>
+    <!-- PINBALL CANVAS AREA -->
+    <div class="relative flex-1 flex items-center justify-center w-full overflow-hidden my-1">
+        <canvas id="pinballCanvas"></canvas>
+    </div>
 
-    <!-- BOTTOM FLIPPER & PLUNGER CONTROLS -->
-    <footer class="w-full max-w-xl z-10 shrink-0">
-        <div class="flex items-center justify-between gap-2.5">
-            <button id="btnLeftFlipper" type="button" class="mk-btn flex-1 h-14 sm:h-16 rounded-2xl flex flex-col items-center justify-center font-orbitron">
-                <span class="text-sm sm:text-base font-black text-white tracking-wider">LEFT FLIPPER</span>
-                <span class="text-[10px] text-rose-300 opacity-80 hidden sm:inline">[A / ◄]</span>
-            </button>
-
-            <button id="btnLaunch" type="button" class="mk-btn mk-launch-btn w-28 sm:w-36 h-14 sm:h-16 rounded-2xl flex flex-col items-center justify-center font-orbitron">
-                <span id="launchBtnLabel" class="text-xs sm:text-sm font-black text-amber-200 tracking-wider">HOLD LAUNCH</span>
-                <span class="text-[9px] text-amber-300/90">[SPACE / ▼]</span>
-            </button>
-
-            <button id="btnRightFlipper" type="button" class="mk-btn flex-1 h-14 sm:h-16 rounded-2xl flex flex-col items-center justify-center font-orbitron">
-                <span class="text-sm sm:text-base font-black text-white tracking-wider">RIGHT FLIPPER</span>
-                <span class="text-[10px] text-rose-300 opacity-80 hidden sm:inline">[D / ►]</span>
-            </button>
-        </div>
+    <!-- BOTTOM ARCADE FLIPPER CONTROLS -->
+    <footer class="w-full max-w-2xl px-2 pb-1 flex items-center justify-between gap-4 z-10">
+        <button id="btnLeft" type="button" class="mk-btn flex-1 py-3 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-white text-sm">
+            <span>LEFT FLIPPER</span>
+            <span class="text-[10px] text-amber-400 font-normal">[ A / LEFT ]</span>
+        </button>
+        <button id="btnLaunch" type="button" class="mk-btn w-32 py-3 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-amber-300 text-xs border-amber-500">
+            <span>PLUNGER</span>
+            <span class="text-[9px] text-slate-300 font-normal">[ HOLD SPACE ]</span>
+        </button>
+        <button id="btnRight" type="button" class="mk-btn flex-1 py-3 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-white text-sm">
+            <span>RIGHT FLIPPER</span>
+            <span class="text-[10px] text-amber-400 font-normal">[ D / RIGHT ]</span>
+        </button>
     </footer>
 </div>
 
 <script>
-/**
- * PIXEL ART PALETTE & CHARACTER GRIDS
- * Faithfully modeled on the 3 uploaded pixel art portraits:
- * 1. Captain Otter (White captain hat with gold anchor, brown fur, cyan eyes, cream muzzle)
- * 2. Chad (Backwards American flag cap, dark sunglasses, red/blue/white hoodie)
- * 3. Princess Hailey (Ponytail with yellow tie, red/blue 3D glasses, cigarette + smoke, royal ermine robe)
- */
-const PALETTE = {
-    'K': '#090a0f', // Black outline
-    'W': '#ffffff', // Pure White
-    'G': '#b8d8d8', // Glass reflection / Light grey
-    'D': '#27363b', // Dark sunglasses lens
-    'B': '#1d38b8', // Flag Blue / Royal Blue
-    'C': '#1ca3ec', // Bright Cyan / Otter Eyes
-    'U': '#0f5e8a', // Deep Blue Eye pupil
-    'R': '#e61919', // Bright Red
-    'M': '#991b1b', // Deep Royal Crimson
-    'S': '#eac096', // Skin tone (Chad / Hailey)
-    'T': '#c49668', // Skin shadow
-    'P': '#d9536f', // Pink/Red lips
-    'O': '#e06d1a', // Orange drawstring / cigarette filter
-    'N': '#6b4226', // Brown fur / Ponytail hair
-    'H': '#472a16', // Dark brown fur shadow
-    'F': '#f5deb3', // Cream otter muzzle
-    'Y': '#f5c71a', // Gold anchor / Yellow tie / Crown gold
-    'V': '#111633', // Dark Navy hat band
-    'A': '#9ca3af', // Smoke / Ermine grey spots
-    'L': '#cbd5e1'  // Light grey visor / fur shadow
-};
-
-// 1. CAPTAIN OTTER (16x20 Portrait)
-const OTTER_PORTRAIT_GRID = [
-    ".....KKKKKKK....",
-    "...KKWWWWWWWKK..",
-    "..KWWWWWYWWWWWK.",
-    "..KWWWWYYYWWWWK.",
-    "..KVVVVYYYVVVVK.",
-    "..KYYYYYYYYYYYK.",
-    "..KLLLLLLLLLLLK.",
-    ".KKNNNNKKKKKKKKK",
-    ".KHNNNNCCKNNCCK.",
-    "..KNNNNNNFFNNNK.",
-    "..KHNNFFFFFFFFK.",
-    "..KNNFFKKFFKKFK.",
-    "...KNNFFFFFFFFK.",
-    "...KNNFFKKKKFFK.",
-    "...KHNNFFFFFFK..",
-    "..KHNNNFFFFFFNK.",
-    ".KHNNNNFFFFFFNNK",
-    ".KNNNNNFFFFFFNNK",
-    ".KKKKKKFFFFFFKKK",
-    "......KKKKKKKK.."
-];
-
-// 2. CHAD (16x20 Portrait)
-const CHAD_PORTRAIT_GRID = [
-    "......KKKKKK....",
-    "....KKBBBBWWKK..",
-    "...KBWBBWBWRRRK.",
-    "..KBBWBWBWBRWWRK",
-    "KKKBBBBBBBBRRRRK",
-    "KWWKSSSSSSSSSSK.",
-    "KRRKKKKKKKKKKKK.",
-    ".KKKSSKKDGKKDGKK",
-    "..KTSSKKDDKKDDKK",
-    "..KTSSKKKKKKSSK.",
-    "...KTSSSSSSPSSK.",
-    "...KSSSSSSSSSSK.",
-    "..KKRKKKKKKKKRKK",
-    ".KRRRRKSSSSKRRRR",
-    ".KRRRRKORWROKRRR",
-    ".KBBBBKORRROKWRW",
-    ".KBBBBKOWWWOKRRR",
-    ".KBBBBKRRRRRKWWW",
-    ".KKKKKKWWWWKKKKK",
-    "......KKKKKK...."
-];
-
-// 3. PRINCESS HAILEY (18x20 Portrait with 3D Glasses & Cigarette Smoke)
-const HAILEY_PORTRAIT_GRID = [
-    ".....KKKKKKK......",
-    "...KKNNNNNNNKK....",
-    "..KNNYNNNNNNNNK...",
-    ".KNNNYNNNNNNNNNK..",
-    ".KNNNKSSSSSSSSK...",
-    ".KNNNKWWWWWWWWWK..",
-    ".KNNNKTWWBBWWRRK..",
-    ".KNNNKSSWWWWWWWK.A",
-    "..KNNKSSSSSSSSK.A.",
-    "..KNNKSSSSPPOWWR..",
-    "...KKKSSSSSSKK....",
-    "..KWWAKKKKKKAWWK..",
-    ".KWAWWKYYYYKWWAK..",
-    ".KMMMMKYKKYKMMMMK.",
-    ".KMMMMKYYYYKMMMMK.",
-    ".KMRMMKYKKYKMMRMK.",
-    ".KMRMMKYYYYKMMRMK.",
-    "..KMMMMYYYYMMMMK..",
-    "..KKKKKKKKKKKKKK..",
-    "....KKKKKKKKKK...."
-];
-
-function renderPixelGrid(grid, scale = 4) {
-    const canvas = document.createElement('canvas');
-    canvas.width = grid[0].length * scale;
-    canvas.height = grid.length * scale;
-    const ctx = canvas.getContext('2d');
-    for (let r = 0; r < grid.length; r++) {
-        const row = grid[r];
-        for (let c = 0; c < row.length; c++) {
-            const ch = row[c];
-            if (PALETTE[ch]) {
-                ctx.fillStyle = PALETTE[ch];
-                ctx.fillRect(c * scale, r * scale, scale, scale);
-            }
-        }
-    }
-    return canvas;
-}
-
-/**
- * WEB AUDIO SYNTHESIZER FOR RETRO ARCADE PINBALL SOUNDS
- */
-class PinballAudio {
-    constructor() {
-        this.ctx = null;
-    }
-
+class SoundFX {
+    constructor() { this.ctx = null; }
     init() {
         try {
             if (!this.ctx) {
                 const AC = window.AudioContext || window.webkitAudioContext;
                 if (AC) this.ctx = new AC();
             }
-            if (this.ctx && this.ctx.state === 'suspended') {
-                this.ctx.resume();
-            }
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
         } catch (e) {}
     }
-
-    playTone(startFreq, endFreq, duration, type = 'square', volume = 0.14) {
+    tone(freq, endFreq, dur, type = 'square', vol = 0.12) {
         if (!this.ctx) return;
         try {
             const now = this.ctx.currentTime;
             const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
+            const g = this.ctx.createGain();
             osc.type = type;
-            osc.frequency.setValueAtTime(startFreq, now);
-            osc.frequency.exponentialRampToValueAtTime(Math.max(25, endFreq), now + duration);
-            gain.gain.setValueAtTime(volume, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + dur);
+            g.gain.setValueAtTime(vol, now);
+            g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
             osc.start(now);
-            osc.stop(now + duration);
+            osc.stop(now + dur);
         } catch (e) {}
     }
-
-    flipper() {
-        this.playTone(190, 420, 0.055, 'triangle', 0.18);
-    }
-
-    launch() {
-        this.playTone(110, 580, 0.22, 'sawtooth', 0.18);
-    }
-
-    bumper(character) {
-        if (character === 'OTTER') {
-            this.playTone(520, 180, 0.14, 'sawtooth', 0.22);
-            setTimeout(() => this.playTone(780, 320, 0.1, 'square', 0.15), 40);
-        } else if (character === 'CHAD') {
-            this.playTone(440, 160, 0.12, 'square', 0.2);
-        } else {
-            this.playTone(660, 260, 0.12, 'triangle', 0.22);
-        }
-    }
-
-    slingshot() {
-        this.playTone(340, 120, 0.09, 'sawtooth', 0.16);
-    }
-
-    targetLit() {
-        this.playTone(587.33, 880, 0.12, 'sine', 0.18);
-    }
-
-    multiballSiren() {
-        const notes = [440, 554.37, 659.25, 880, 659.25, 880, 1046.5];
-        notes.forEach((freq, idx) => {
-            setTimeout(() => this.playTone(freq, freq * 1.05, 0.11, 'square', 0.18), idx * 85);
-        });
-    }
-
-    drain() {
-        [300, 240, 180, 110].forEach((freq, idx) => {
-            setTimeout(() => this.playTone(freq, freq * 0.75, 0.16, 'sawtooth', 0.18), idx * 110);
-        });
-    }
+    bumper() { this.tone(440, 880, 0.1, 'sawtooth', 0.15); }
+    flip() { this.tone(150, 80, 0.06, 'sine', 0.1); }
+    score() { this.tone(587, 880, 0.08, 'triangle', 0.1); }
+    drain() { this.tone(120, 40, 0.4, 'sawtooth', 0.2); }
 }
 
-/**
- * MAIN PINBALL GAME ENGINE
- */
 class RugPinballGame {
     constructor() {
         this.canvas = document.getElementById('pinballCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.W = 460;
-        this.H = 760;
+        this.sfx = new SoundFX();
 
-        this.sfx = new PinballAudio();
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
 
-        // Pre-render crisp pixel art portraits
-        this.sprites = {
-            otter: renderPixelGrid(OTTER_PORTRAIT_GRID, 3),
-            chad: renderPixelGrid(CHAD_PORTRAIT_GRID, 3),
-            hailey: renderPixelGrid(HAILEY_PORTRAIT_GRID, 3)
-        };
-
-        // Persistent High Score
-        this.highScore = 0;
-        try {
-            this.highScore = parseInt(localStorage.getItem('rug_pinball_high') || '0', 10) || 0;
-        } catch (e) {}
-
-        // Game state
+        // Game stats
         this.score = 0;
         this.multiplier = 1;
-        this.ballNumber = 1;
-        this.maxBalls = 3;
-        this.gameOver = false;
+        this.ballCount = 3;
+        this.gameState = 'READY'; // READY, PLAYING, GAMEOVER
 
-        // Plunger state
-        this.plungerPull = 0; // 0 to 1
+        // Ball physics object
+        this.ball = { x: 0, y: 0, vx: 0, vy: 0, r: 10, active: false };
+
+        // Plunger spring power
+        this.plungerPower = 0;
         this.plungerCharging = false;
 
-        // Table shake & visual effects
-        this.shake = 0;
-        this.particles = [];
-        this.floatingTexts = [];
-        this.bannerText = 'PRESS LAUNCH!';
-        this.bannerTimer = 2.0;
-        this.kickbackLit = true; // Left outlane rug-save shield
+        // Flipper states
+        this.leftFlipperAngle = 0.45;  // Resting angle (radians)
+        this.rightFlipperAngle = Math.PI - 0.45;
+        this.leftPressed = false;
+        this.rightPressed = false;
 
-        this.buildTableGeometry();
-        this.resetGame();
-        this.bindEvents();
+        // Bumpers (Captain Otter, Chad, Hailey)
+        this.bumpers = [
+            { x: 0, y: 0, r: 28, name: 'CAPTAIN OTTER', color: '#1ca3ec', score: 500, flash: 0 },
+            { x: 0, y: 0, r: 24, name: 'CHAD', color: '#ef4444', score: 350, flash: 0 },
+            { x: 0, y: 0, r: 24, name: 'HAILEY', color: '#eac096', score: 350, flash: 0 }
+        ];
+
+        this.bindControls();
+        this.resetBall();
 
         this.lastTime = performance.now();
         requestAnimationFrame((t) => this.loop(t));
     }
 
-    buildTableGeometry() {
-        this.walls = [];
+    resize() {
+        // Fit canvas neatly inside available height between HUD & Footer
+        const wrapper = document.getElementById('app-wrapper');
+        const availH = window.innerHeight - 120;
+        const availW = window.innerWidth - 16;
 
-        // Helper to add a polyline of wall segments
-        const addPolyline = (pts, color = '#ef4444', bounce = 0.55) => {
-            for (let i = 0; i < pts.length - 1; i++) {
-                this.walls.push({
-                    x1: pts[i][0], y1: pts[i][1],
-                    x2: pts[i + 1][0], y2: pts[i + 1][1],
-                    color, bounce
-                });
-            }
+        // Standard vertical pinball aspect ratio (~1:2)
+        let targetH = Math.min(availH, 700);
+        let targetW = targetH * 0.52;
+        if (targetW > availW) {
+            targetW = availW;
+            targetH = targetW / 0.52;
+        }
+
+        this.width = Math.round(targetW);
+        this.height = Math.round(targetH);
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+
+        // Position bumpers relative to table dimensions
+        if (this.bumpers) {
+            this.bumpers[0].x = this.width * 0.5;
+            this.bumpers[0].y = this.height * 0.28;
+
+            this.bumpers[1].x = this.width * 0.3;
+            this.bumpers[1].y = this.height * 0.42;
+
+            this.bumpers[2].x = this.width * 0.7;
+            this.bumpers[2].y = this.height * 0.42;
+        }
+
+        if (!this.ball.active && this.gameState === 'READY') {
+            this.resetBall();
+        }
+    }
+
+    resetBall() {
+        this.ball.x = this.width - 20;
+        this.ball.y = this.height - 100;
+        this.ball.vx = 0;
+        this.ball.vy = 0;
+        this.ball.active = false;
+        this.plungerPower = 0;
+    }
+
+    bindControls() {
+        const setLeft = (val) => { this.leftPressed = val; if (val) this.sfx.flip(); };
+        const setRight = (val) => { this.rightPressed = val; if (val) this.sfx.flip(); };
+
+        // Touch & Mouse buttons
+        const bindBtn = (id, onDown, onUp) => {
+            const el = document.getElementById(id);
+            el.addEventListener('touchstart', (e) => { if(e.cancelable) e.preventDefault(); this.sfx.init(); onDown(); el.classList.add('touch-active'); }, {passive: false});
+            el.addEventListener('touchend', (e) => { if(e.cancelable) e.preventDefault(); onUp(); el.classList.remove('touch-active'); }, {passive: false});
+            el.addEventListener('mousedown', () => { this.sfx.init(); onDown(); });
+            el.addEventListener('mouseup', () => onUp());
         };
 
-        // 1. Top Arched Dome (from Left Wall x=34, y=225 to Right Shooter Wall x=426, y=225)
-        // Center=(230, 225), Radius=196
-        const domePts = [];
-        const domeSteps = 32;
-        for (let i = 0; i <= domeSteps; i++) {
-            const angle = Math.PI + (i / domeSteps) * Math.PI; // PI (left) to 2*PI (right)
-            const x = 230 + Math.cos(angle) * 196;
-            const y = 225 + Math.sin(angle) * 190;
-            domePts.push([x, y]);
-        }
-        addPolyline(domePts, '#ef4444', 0.45);
+        bindBtn('btnLeft', () => setLeft(true), () => setLeft(false));
+        bindBtn('btnRight', () => setRight(true), () => setRight(false));
 
-        // 2. Right Outer Shooter Wall (x=426 from y=225 to y=735)
-        addPolyline([
-            [426, 225],
-            [426, 735],
-            [388, 735]
-        ], '#ef4444', 0.4);
-
-        // 3. Shooter Lane Divider Wall (x=388 from y=215 to y=735)
-        addPolyline([
-            [388, 735],
-            [388, 215]
-        ], '#f59e0b', 0.5);
-
-        // 4. Left Outer Wall & Outlane/Inlane contours
-        addPolyline([
-            [34, 225],
-            [34, 490],
-            [26, 525],
-            [26, 625],
-            [118, 692] // Left outlane bottom slope toward drain
-        ], '#ef4444', 0.5);
-
-        // 5. Playfield Right Wall (Inside of Shooter Lane Divider)
-        addPolyline([
-            [388, 215],
-            [388, 490],
-            [392, 525],
-            [392, 625],
-            [300, 692] // Right outlane bottom slope toward drain
-        ], '#ef4444', 0.5);
-
-        // 6. Left Inlane Guide Rail (feeds ball onto Left Flipper)
-        addPolyline([
-            [62, 535],
-            [62, 602],
-            [132, 658]
-        ], '#38bdf8', 0.45);
-
-        // 7. Right Inlane Guide Rail (feeds ball onto Right Flipper)
-        addPolyline([
-            [356, 535],
-            [356, 602],
-            [286, 658]
-        ], '#38bdf8', 0.45);
-
-        // 8. Upper Left & Right Deflector Rails (keep ball flowing toward bumpers)
-        addPolyline([
-            [68, 175],
-            [92, 235]
-        ], '#f59e0b', 0.6);
-
-        addPolyline([
-            [345, 175],
-            [322, 235]
-        ], '#f59e0b', 0.6);
-
-        // 9. One-Way Shooter Lane Gate (at top of shooter alley)
-        // Allows ball traveling UP-LEFT out of shooter lane, blocks ball from re-entering shooter lane
-        this.oneWayGate = {
-            x1: 388, y1: 215,
-            x2: 424, y2: 170
-        };
-
-        // 10. Triangular Slingshot Kickers (above Left & Right Flippers)
-        this.slingshots = [
-            {
-                // Left Slingshot
-                pts: [[86, 520], [86, 588], [134, 622]],
-                kickerIndex: 2, // Hypotenuse from (134,622) to (86,520) faces playfield
-                flash: 0,
-                color: '#f43f5e'
-            },
-            {
-                // Right Slingshot
-                pts: [[332, 520], [332, 588], [284, 622]],
-                kickerIndex: 2, // Hypotenuse from (284,622) to (332,520) faces playfield
-                flash: 0,
-                color: '#f43f5e'
-            }
-        ];
-
-        // 11. The 3 Main Character Pop Bumpers + 4 Rubber Post Bumpers
-        this.bumpers = [
-            {
-                id: 'OTTER',
-                name: 'CAPTAIN OTTER',
-                callout: 'ANCHOR SMASH +500',
-                x: 209,
-                y: 235,
-                r: 36,
-                pts: 500,
-                ringColor: '#facc15',
-                glowColor: '#38bdf8',
-                sprite: this.sprites.otter,
-                flash: 0
-            },
-            {
-                id: 'CHAD',
-                name: 'CHAD',
-                callout: 'CHAD PUMP +350',
-                x: 124,
-                y: 332,
-                r: 32,
-                pts: 350,
-                ringColor: '#3b82f6',
-                glowColor: '#ef4444',
-                sprite: this.sprites.chad,
-                flash: 0
-            },
-            {
-                id: 'HAILEY',
-                name: 'PRINCESS HAILEY',
-                callout: '3D SMOKE +350',
-                x: 294,
-                y: 332,
-                r: 32,
-                pts: 350,
-                ringColor: '#ec4899',
-                glowColor: '#22d3ee',
-                sprite: this.sprites.hailey,
-                flash: 0
-            },
-            // Mini rubber pin posts
-            { id: 'POST', x: 62, y: 535, r: 6, pts: 50, ringColor: '#f59e0b', glowColor: '#f59e0b', flash: 0 },
-            { id: 'POST', x: 356, y: 535, r: 6, pts: 50, ringColor: '#f59e0b', glowColor: '#f59e0b', flash: 0 },
-            { id: 'POST', x: 166, y: 418, r: 10, pts: 100, ringColor: '#a855f7', glowColor: '#e879f9', flash: 0 },
-            { id: 'POST', x: 252, y: 418, r: 10, pts: 100, ringColor: '#a855f7', glowColor: '#e879f9', flash: 0 }
-        ];
-
-        // 12. "W-A-G-M-I" Rollover Light Targets (hitting all 5 triggers MULTIBALL & Multiplier Up!)
-        this.wagmiTargets = [
-            { letter: 'W', x: 112, y: 140, r: 13, lit: false },
-            { letter: 'A', x: 158, y: 116, r: 13, lit: false },
-            { letter: 'G', x: 209, y: 108, r: 13, lit: false },
-            { letter: 'M', x: 260, y: 116, r: 13, lit: false },
-            { letter: 'I', x: 306, y: 140, r: 13, lit: false }
-        ];
-
-        // 13. Flippers (Symmetrical around playfield center x=209)
-        const deg = Math.PI / 180;
-        this.flippers = {
-            left: {
-                x: 132, y: 658,
-                length: 68,
-                radius: 8,
-                restAngle: 28 * deg,
-                activeAngle: -26 * deg,
-                angle: 28 * deg,
-                angularVel: 0,
-                pressed: false,
-                side: 1
-            },
-            right: {
-                x: 286, y: 658,
-                length: 68,
-                radius: 8,
-                restAngle: 152 * deg,
-                activeAngle: 206 * deg,
-                angle: 152 * deg,
-                angularVel: 0,
-                pressed: false,
-                side: -1
-            }
-        };
-    }
-
-    resetGame() {
-        this.score = 0;
-        this.multiplier = 1;
-        this.ballNumber = 1;
-        this.gameOver = false;
-        this.kickbackLit = true;
-        this.wagmiTargets.forEach(t => { t.lit = false; });
-        this.particles = [];
-        this.floatingTexts = [];
-        this.spawnBallInShooterLane();
-        this.showBanner('BALL 1 - LAUNCH!', 2.0);
-        this.updateHUD();
-    }
-
-    spawnBallInShooterLane() {
-        this.balls = [
-            {
-                x: 407,
-                y: 665,
-                vx: 0,
-                vy: 0,
-                r: 10.5,
-                trail: []
-            }
-        ];
-        this.plungerPull = 0;
-        this.plungerCharging = false;
-        this.updateLaunchButtonLabel();
-    }
-
-    spawnMultiball() {
-        // Add a second chrome/gold pinball into the upper dome
-        this.balls.push({
-            x: 209,
-            y: 155,
-            vx: (Math.random() - 0.5) * 220,
-            vy: -180,
-            r: 10.5,
-            trail: [],
-            isGold: true
-        });
-        this.sfx.multiballSiren();
-        this.showBanner('WAGMI MULTIBALL!!', 2.6);
-        this.shake = 0.45;
-    }
-
-    showBanner(text, duration = 1.6) {
-        this.bannerText = text;
-        this.bannerTimer = duration;
-    }
-
-    addScore(basePts, x, y, label = null, color = '#fde047') {
-        const total = basePts * this.multiplier;
-        this.score += total;
-        if (this.score > this.highScore) {
-            this.highScore = this.score;
-            try {
-                localStorage.setItem('rug_pinball_high', String(this.highScore));
-            } catch (e) {}
-        }
-        if (x !== undefined && y !== undefined) {
-            this.floatingTexts.push({
-                text: label || `+${total}`,
-                x,
-                y,
-                vy: -55,
-                alpha: 1.0,
-                color
-            });
-        }
-        this.updateHUD();
-    }
-
-    spawnParticles(x, y, color, count = 14) {
-        for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = 50 + Math.random() * 190;
-            this.particles.push({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color,
-                alpha: 1.0,
-                size: 2.5 + Math.random() * 3.5
-            });
-        }
-    }
-
-    updateHUD() {
-        document.getElementById('scoreText').textContent = this.score.toLocaleString();
-        document.getElementById('highScoreText').textContent = this.highScore.toLocaleString();
-        document.getElementById('multText').textContent = this.multiplier + 'X';
-        document.getElementById('ballText').textContent = this.gameOver
-            ? 'END'
-            : `${this.ballNumber} / ${this.maxBalls}`;
-    }
-
-     isBallInShooterLane() {
-        return this.balls.some(b => b.x > 388 && b.y > 540);
-    }
-
-    updateLaunchButtonLabel() {
-        const lbl = document.getElementById('launchBtnLabel');
-        if (!lbl) return;
-        if (this.gameOver) {
-            lbl.textContent = 'PLAY AGAIN';
-        } else if (this.isBallInShooterLane()) {
-            lbl.textContent = 'HOLD LAUNCH';
-        } else {
-            lbl.textContent = 'NUDGE TABLE';
-        }
-    }
-
-    releasePlunger() {
-        if (this.gameOver) {
-            this.resetGame();
-            return;
-        }
-        if (!this.plungerCharging) return;
-        this.plungerCharging = false;
-
-        const pull = Math.max(0.35, this.plungerPull);
-        this.plungerPull = 0;
-
-        let launched = false;
-        this.balls.forEach(b => {
-            if (b.x > 388 && b.y > 520) {
-                // Launch speed tuned to shoot up around the top dome
-                b.vy = -(780 + pull * 520 + (Math.random() * 40 - 20));
-                b.vx = -15;
-                launched = true;
-            }
-        });
-
-        if (launched) {
-            this.sfx.launch();
-            this.spawnParticles(407, 680, '#fbbf24', 16);
-        }
-    }
-
-    nudgeTable() {
-        if (this.gameOver || this.isBallInShooterLane()) return;
-        this.shake = 0.2;
-        this.sfx.slingshot();
-        this.balls.forEach(b => {
-            b.vy -= 95;
-            b.vx += (Math.random() - 0.5) * 140;
-        });
-        this.showBanner('NUDGE!', 0.6);
-    }
-
-    bindEvents() {
-        const leftBtn = document.getElementById('btnLeftFlipper');
-        const rightBtn = document.getElementById('btnRightFlipper');
         const launchBtn = document.getElementById('btnLaunch');
-        const resetBtn = document.getElementById('btnReset');
-
-        const setFlipper = (side, isDown) => {
+        const startCharge = (e) => {
+            if(e.cancelable) e.preventDefault();
             this.sfx.init();
-            const f = this.flippers[side];
-            if (isDown && !f.pressed) {
-                this.sfx.flipper();
+            if (!this.ball.active && this.gameState !== 'GAMEOVER') {
+                this.plungerCharging = true;
+            } else {
+                // Table nudge if ball is in play
+                this.ball.vx += (Math.random() - 0.5) * 6;
+                this.ball.vy -= 4;
             }
-            f.pressed = isDown;
-            const btn = side === 'left' ? leftBtn : rightBtn;
-            if (isDown) btn.classList.add('touch-active');
-            else btn.classList.remove('touch-active');
+        };
+        const releaseCharge = (e) => {
+            if(e.cancelable) e.preventDefault();
+            if (this.plungerCharging) {
+                this.plungerCharging = false;
+                this.ball.active = true;
+                this.ball.vy = -this.plungerPower;
+                this.plungerPower = 0;
+                this.gameState = 'PLAYING';
+            }
         };
 
-        // Keyboard controls
+        launchBtn.addEventListener('touchstart', startCharge, {passive: false});
+        launchBtn.addEventListener('touchend', releaseCharge, {passive: false});
+        launchBtn.addEventListener('mousedown', startCharge);
+        launchBtn.addEventListener('mouseup', releaseCharge);
+
+        document.getElementById('btnNew').addEventListener('click', () => {
+            this.sfx.init();
+            this.score = 0;
+            this.multiplier = 1;
+            this.ballCount = 3;
+            this.gameState = 'READY';
+            this.resetBall();
+            this.updateHUD();
+        });
+
+        // Keyboard Controls
         window.addEventListener('keydown', (e) => {
-            if (['ArrowLeft', 'KeyA', 'KeyZ'].includes(e.code)) {
-                setFlipper('left', true);
-            }
-            if (['ArrowRight', 'KeyD', 'KeyM', 'Slash'].includes(e.code)) {
-                setFlipper('right', true);
-            }
-            if (['Space', 'ArrowDown', 'Enter'].includes(e.code)) {
-                e.preventDefault();
-                this.sfx.init();
-                if (this.gameOver) {
-                    this.resetGame();
-                } else if (this.isBallInShooterLane()) {
+            this.sfx.init();
+            if (['KeyA', 'ArrowLeft'].includes(e.code)) setLeft(true);
+            if (['KeyD', 'ArrowRight'].includes(e.code)) setRight(true);
+            if (['Space', 'ArrowDown'].includes(e.code)) {
+                if (!this.ball.active && this.gameState !== 'GAMEOVER') {
                     this.plungerCharging = true;
-                    launchBtn.classList.add('touch-active');
-                } else if (!e.repeat) {
-                    this.nudgeTable();
                 }
             }
         });
 
         window.addEventListener('keyup', (e) => {
-            if (['ArrowLeft', 'KeyA', 'KeyZ'].includes(e.code)) {
-                setFlipper('left', false);
-            }
-            if (['ArrowRight', 'KeyD', 'KeyM', 'Slash'].includes(e.code)) {
-                setFlipper('right', false);
-            }
-            if (['Space', 'ArrowDown', 'Enter'].includes(e.code)) {
-                launchBtn.classList.remove('touch-active');
-                this.releasePlunger();
-            }
-        });
-
-        // Touch & Mouse helper for buttons
-        const bindHoldButton = (el, onDown, onUp) => {
-            const start = (e) => {
-                if (e.cancelable) e.preventDefault();
-                onDown();
-            };
-            const end = (e) => {
-                if (e.cancelable) e.preventDefault();
-                onUp();
-            };
-            el.addEventListener('touchstart', start, { passive: false });
-            el.addEventListener('touchend', end, { passive: false });
-            el.addEventListener('touchcancel', end, { passive: false });
-            el.addEventListener('mousedown', start);
-            el.addEventListener('mouseup', end);
-            el.addEventListener('mouseleave', end);
-        };
-
-        bindHoldButton(
-            leftBtn,
-            () => setFlipper('left', true),
-            () => setFlipper('left', false)
-        );
-
-        bindHoldButton(
-            rightBtn,
-            () => setFlipper('right', true),
-            () => setFlipper('right', false)
-        );
-
-        bindHoldButton(
-            launchBtn,
-            () => {
-                this.sfx.init();
-                launchBtn.classList.add('touch-active');
-                if (this.gameOver) {
-                    this.resetGame();
-                } else if (this.isBallInShooterLane()) {
-                    this.plungerCharging = true;
-                } else {
-                    this.nudgeTable();
+            if (['KeyA', 'ArrowLeft'].includes(e.code)) setLeft(false);
+            if (['KeyD', 'ArrowRight'].includes(e.code)) setRight(false);
+            if (['Space', 'ArrowDown'].includes(e.code)) {
+                if (this.plungerCharging) {
+                    this.plungerCharging = false;
+                    this.ball.active = true;
+                    this.ball.vy = -this.plungerPower;
+                    this.plungerPower = 0;
+                    this.gameState = 'PLAYING';
                 }
-            },
-            () => {
-                launchBtn.classList.remove('touch-active');
-                this.releasePlunger();
             }
-        );
-
-        resetBtn.addEventListener('click', () => {
-            this.sfx.init();
-            this.resetGame();
         });
     }
 
-    /**
-     * Circle-to-Line-Segment Collision Helper
-     */
-    collideBallWithSegment(ball, x1, y1, x2, y2, restitution = 0.5, extraImpulse = 0) {
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const lenSq = dx * dx + dy * dy;
-        if (lenSq === 0) return false;
-
-        let t = ((ball.x - x1) * dx + (ball.y - y1) * dy) / lenSq;
-        t = Math.max(0, Math.min(1, t));
-
-        const closestX = x1 + t * dx;
-        const closestY = y1 + t * dy;
-
-        const distX = ball.x - closestX;
-        const distY = ball.y - closestY;
-        const distSq = distX * distX + distY * distY;
-
-        if (distSq < ball.r * ball.r) {
-            const dist = Math.sqrt(distSq) || 0.0001;
-            const nx = distX / dist;
-            const ny = distY / dist;
-
-            // Push ball out of segment
-            const overlap = ball.r - dist;
-            ball.x += nx * overlap;
-            ball.y += ny * overlap;
-
-            // Relative normal velocity
-            const vn = ball.vx * nx + ball.vy * ny;
-            if (vn < 0) {
-                ball.vx -= (1 + restitution) * vn * nx;
-                ball.vy -= (1 + restitution) * vn * ny;
-                if (extraImpulse > 0) {
-                    ball.vx += nx * extraImpulse;
-                    ball.vy += ny * extraImpulse;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Capsule Flipper Collision with Angular Velocity Transfer
-     */
-    collideBallWithFlipper(ball, flipper) {
-        const x1 = flipper.x;
-        const y1 = flipper.y;
-        const x2 = x1 + Math.cos(flipper.angle) * flipper.length;
-        const y2 = y1 + Math.sin(flipper.angle) * flipper.length;
-
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const lenSq = dx * dx + dy * dy;
-
-        let t = ((ball.x - x1) * dx + (ball.y - y1) * dy) / lenSq;
-        t = Math.max(0, Math.min(1, t));
-
-        const closestX = x1 + t * dx;
-        const closestY = y1 + t * dy;
-
-        const distX = ball.x - closestX;
-        const distY = ball.y - closestY;
-        const distSq = distX * distX + distY * distY;
-        const minDist = ball.r + flipper.radius;
-
-        if (distSq < minDist * minDist) {
-            const dist = Math.sqrt(distSq) || 0.0001;
-            const nx = distX / dist;
-            const ny = distY / dist;
-
-            // Separate ball from flipper surface
-            const overlap = minDist - dist;
-            ball.x += nx * (overlap + 0.5);
-            ball.y += ny * (overlap + 0.5);
-
-            // Surface velocity of flipper at contact point (r = t * length)
-            const radiusAtContact = t * flipper.length;
-            // Tangent vector for rotation: (-sin(angle), cos(angle)) * angularVel * r
-            const surfVx = -Math.sin(flipper.angle) * flipper.angularVel * radiusAtContact;
-            const surfVy = Math.cos(flipper.angle) * flipper.angularVel * radiusAtContact;
-
-            const relVx = ball.vx - surfVx;
-            const relVy = ball.vy - surfVy;
-            const relVn = relVx * nx + relVy * ny;
-
-            if (relVn < 0) {
-                const bounce = 0.55;
-                ball.vx -= (1 + bounce) * relVn * nx;
-                ball.vy -= (1 + bounce) * relVn * ny;
-
-                // If flipper is actively swinging upward, impart strong arcade shot impulse!
-                if (Math.abs(flipper.angularVel) > 1.0) {
-                    const boost = 240 + t * 320;
-                    ball.vx += nx * boost + surfVx * 0.35;
-                    ball.vy += ny * boost + surfVy * 0.35;
-                }
-            }
-        }
+    updateHUD() {
+        document.getElementById('scoreVal').textContent = this.score;
+        document.getElementById('multVal').textContent = this.multiplier + 'x';
+        document.getElementById('ballVal').textContent = this.ballCount + '/3';
     }
 
     update(dt) {
-        if (this.shake > 0) this.shake = Math.max(0, this.shake - dt);
-        if (this.bannerTimer > 0) this.bannerTimer = Math.max(0, this.bannerTimer - dt);
-
-        // Plunger charge animation
         if (this.plungerCharging) {
-            this.plungerPull = Math.min(1, this.plungerPull + dt * 1.45);
+            this.plungerPower = Math.min(22, this.plungerPower + dt * 25);
         }
 
-        // Decay flashes on bumpers and slingshots
-        this.bumpers.forEach(b => {
-            if (b.flash > 0) b.flash = Math.max(0, b.flash - dt * 4);
-        });
-        this.slingshots.forEach(s => {
-            if (s.flash > 0) s.flash = Math.max(0, s.flash - dt * 5);
-        });
+        // Flipper rotation physics
+        const targetLeftAngle = this.leftPressed ? -0.45 : 0.45;
+        this.leftFlipperAngle += (targetLeftAngle - this.leftFlipperAngle) * 0.35;
 
-        // Update particles & floating texts
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
-            p.vy += 280 * dt;
-            p.alpha -= dt * 1.8;
-            if (p.alpha <= 0) this.particles.splice(i, 1);
+        const targetRightAngle = this.rightPressed ? Math.PI + 0.45 : Math.PI - 0.45;
+        this.rightFlipperAngle += (targetRightAngle - this.rightFlipperAngle) * 0.35;
+
+        if (!this.ball.active) {
+            if (!this.plungerCharging) {
+                this.ball.x = this.width - 20;
+                this.ball.y = this.height - 100;
+            }
+            return;
         }
 
-        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
-            const ft = this.floatingTexts[i];
-            ft.y += ft.vy * dt;
-            ft.alpha -= dt * 1.1;
-            if (ft.alpha <= 0) this.floatingTexts.splice(i, 1);
-        }
+        // Sub-stepped physics for precise collision detection
+        const substeps = 6;
+        const sdt = dt / substeps;
 
-        if (this.gameOver) return;
+        for (let step = 0; step < substeps; step++) {
+            // Gravity & friction
+            this.ball.vy += 350 * sdt;
+            this.ball.vx *= 0.992;
+            this.ball.vy *= 0.992;
 
-        // 8 Physics Substeps per frame for rock-solid collision detection
-        const SUBSTEPS = 8;
-        const subDt = dt / SUBSTEPS;
-        const GRAVITY = 640; // Arcade table slope gravity
+            this.ball.x += this.ball.vx * sdt;
+            this.ball.y += this.ball.vy * sdt;
 
-        for (let step = 0; step < SUBSTEPS; step++) {
-            // 1. Update Flippers
-            ['left', 'right'].forEach(key => {
-                const f = this.flippers[key];
-                const prevAngle = f.angle;
-                const target = f.pressed ? f.activeAngle : f.restAngle;
-                const speed = f.pressed ? 24 : 15;
-                const diff = target - f.angle;
+            // Wall bounds (Left, Right, Top)
+            const margin = this.ball.r + 8;
+            const rightWall = this.width - 28; // Shooter lane separator
 
-                if (Math.abs(diff) < 0.005) {
-                    f.angle = target;
-                    f.angularVel = 0;
-                } else {
-                    f.angle += diff * Math.min(1, speed * subDt);
-                    f.angularVel = (f.angle - prevAngle) / subDt;
+            if (this.ball.x < margin) {
+                this.ball.x = margin;
+                this.ball.vx *= -0.75;
+            }
+            if (this.ball.x > rightWall && this.ball.y > 60 && this.ball.y < this.height - 120) {
+                this.ball.x = rightWall;
+                this.ball.vx *= -0.75;
+            }
+            if (this.ball.x > this.width - margin) {
+                this.ball.x = this.width - margin;
+                this.ball.vx *= -0.75;
+            }
+            if (this.ball.y < margin + 20) {
+                this.ball.y = margin + 20;
+                this.ball.vy *= -0.75;
+            }
+
+            // Circular Bumpers Collision
+            this.bumpers.forEach(b => {
+                if (b.flash > 0) b.flash -= sdt * 4;
+                const dx = this.ball.x - b.x;
+                const dy = this.ball.y - b.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < b.r + this.ball.r) {
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+                    const overlap = (b.r + this.ball.r) - dist;
+                    this.ball.x += nx * overlap;
+                    this.ball.y += ny * overlap;
+
+                    const dot = this.ball.vx * nx + this.ball.vy * ny;
+                    this.ball.vx = (this.ball.vx - 2 * dot * nx) * 1.35 + (Math.random() - 0.5) * 40;
+                    this.ball.vy = (this.ball.vy - 2 * dot * ny) * 1.35 + (Math.random() - 0.5) * 40;
+
+                    b.flash = 1;
+                    this.score += b.score * this.multiplier;
+                    this.sfx.bumper();
+                    this.updateHUD();
                 }
             });
 
-            // 2. Update Balls
-            for (let bIdx = this.balls.length - 1; bIdx >= 0; bIdx--) {
-                const ball = this.balls[bIdx];
+            // Flippers Collision
+            const fLen = 54;
+            const leftPivot = { x: this.width * 0.34, y: this.height - 75 };
+            const rightPivot = { x: this.width * 0.66, y: this.height - 75 };
 
-                // Apply table gravity
-                ball.vy += GRAVITY * subDt;
+            const checkFlipper = (pivot, angle, isLeft) => {
+                const tipX = pivot.x + Math.cos(angle) * fLen;
+                const tipY = pivot.y + Math.sin(angle) * fLen;
 
-                // Slight air drag
-                ball.vx *= 0.9997;
-                ball.vy *= 0.9997;
+                // Simple segment distance check
+                const baX = tipX - pivot.x;
+                const baY = tipY - pivot.y;
+                const paX = this.ball.x - pivot.x;
+                const paY = this.ball.y - pivot.y;
 
-                // Cap maximum velocity for stability
-                const maxSpeed = 1350;
-                const spdSq = ball.vx * ball.vx + ball.vy * ball.vy;
-                if (spdSq > maxSpeed * maxSpeed) {
-                    const spd = Math.sqrt(spdSq);
-                    ball.vx = (ball.vx / spd) * maxSpeed;
-                    ball.vy = (ball.vy / spd) * maxSpeed;
+                const baLenSq = baX * baX + baY * baY;
+                let t = (paX * baX + paY * baY) / baLenSq;
+                t = Math.max(0, Math.min(1, t));
+
+                const closestX = pivot.x + t * baX;
+                const closestY = pivot.y + t * baY;
+
+                const dist = Math.hypot(this.ball.x - closestX, this.ball.y - closestY);
+                if (dist < this.ball.r + 6) {
+                    // Push ball out
+                    const nx = (this.ball.x - closestX) / (dist || 1);
+                    const ny = (this.ball.y - closestY) / (dist || 1);
+                    this.ball.x = closestX + nx * (this.ball.r + 6);
+                    this.ball.y = closestY + ny * (this.ball.r + 6);
+
+                    // Flipper velocity boost when swinging
+                    const swingSpeed = isLeft ? (this.leftPressed ? -18 : 0) : (this.rightPressed ? 18 : 0);
+                    this.ball.vx = nx * 320 + swingSpeed * 15;
+                    this.ball.vy = ny * 320 - 180;
+                    this.sfx.flip();
                 }
+            };
 
-                ball.x += ball.vx * subDt;
-                ball.y += ball.vy * subDt;
+            checkFlipper(leftPivot, this.leftFlipperAngle, true);
+            checkFlipper(rightPivot, this.rightFlipperAngle, false);
 
-                // Plunger rest platform in shooter lane (x > 388)
-                const plungerTopY = 682 + this.plungerPull * 38;
-                if (ball.x > 388 && ball.y + ball.r > plungerTopY) {
-                    ball.y = plungerTopY - ball.r;
-                    if (ball.vy > 0) ball.vy = 0;
-                    ball.vx *= 0.9;
-                }
-
-                // Left Outlane Kickback Shield ("RUG SHIELD")
-                if (this.kickbackLit && ball.x < 60 && ball.y > 605 && ball.y < 635 && ball.vy > 0) {
-                    ball.vy = -780;
-                    ball.vx = 90;
-                    this.kickbackLit = false;
-                    this.sfx.launch();
-                    this.shake = 0.25;
-                    this.addScore(1000, 50, 595, 'RUG SAVE! +1000', '#38bdf8');
-                    this.spawnParticles(45, 615, '#38bdf8', 18);
-                }
-
-                // Collide with static walls
-                for (let w = 0; w < this.walls.length; w++) {
-                    const wall = this.walls[w];
-                    this.collideBallWithSegment(ball, wall.x1, wall.y1, wall.x2, wall.y2, wall.bounce);
-                }
-
-                // One-Way Gate at top of shooter lane:
-                // Only block if ball is on the left/playfield side trying to move right into the shooter lane
-                if (ball.vx > 0 && ball.x < 395) {
-                    this.collideBallWithSegment(
-                        ball,
-                        this.oneWayGate.x1,
-                        this.oneWayGate.y1,
-                        this.oneWayGate.x2,
-                        this.oneWayGate.y2,
-                        0.5
-                    );
-                }
-
-                // Collide with Triangular Slingshots
-                this.slingshots.forEach(sling => {
-                    const pts = sling.pts;
-                    for (let i = 0; i < 3; i++) {
-                        const p1 = pts[i];
-                        const p2 = pts[(i + 1) % 3];
-                        const isKickerFace = (i === sling.kickerIndex);
-                        const hit = this.collideBallWithSegment(
-                            ball,
-                            p1[0], p1[1], p2[0], p2[1],
-                            isKickerFace ? 0.95 : 0.5,
-                            isKickerFace ? 280 : 0
-                        );
-                        if (hit && isKickerFace && sling.flash <= 0.1) {
-                            sling.flash = 1.0;
-                            this.sfx.slingshot();
-                            this.shake = 0.12;
-                            const midX = (p1[0] + p2[0]) / 2;
-                            const midY = (p1[1] + p2[1]) / 2;
-                            this.addScore(150, midX, midY, '+150', '#f43f5e');
-                            this.spawnParticles(midX, midY, '#f43f5e', 10);
-                        }
-                    });
-                });
-
-                // Collide with Character Pop Bumpers & Mini Posts
-                this.bumpers.forEach(b => {
-                    const dx = ball.x - b.x;
-                    const dy = ball.y - b.y;
-                    const distSq = dx * dx + dy * dy;
-                    const minDist = ball.r + b.r;
-                    if (distSq < minDist * minDist) {
-                        const dist = Math.sqrt(distSq) || 0.001;
-                        const nx = dx / dist;
-                        const ny = dy / dist;
-
-                        // Separate
-                        ball.x = b.x + nx * (minDist + 0.5);
-                        ball.y = b.y + ny * (minDist + 0.5);
-
-                        // High-energy bumper kick!
-                        const kickSpeed = b.id === 'POST' ? 320 : 540;
-                        ball.vx = nx * kickSpeed + (Math.random() - 0.5) * 40;
-                        ball.vy = ny * kickSpeed + (Math.random() - 0.5) * 40;
-
-                        if (b.flash <= 0.2) {
-                            b.flash = 1.0;
-                            if (b.id !== 'POST') {
-                                this.sfx.bumper(b.id);
-                                this.shake = 0.22;
-                                this.addScore(b.pts, b.x, b.y - b.r, b.callout, b.ringColor);
-                                this.spawnParticles(b.x + nx * b.r, b.y + ny * b.r, b.glowColor, 16);
-                            } else {
-                                this.sfx.slingshot();
-                                this.addScore(b.pts, b.x, b.y - 10, `+${b.pts * this.multiplier}`, '#e879f9');
-                            }
-                        }
-                    }
-                });
-
-                // Check "W-A-G-M-I" Rollover Targets
-                this.wagmiTargets.forEach(t => {
-                    const dx = ball.x - t.x;
-                    const dy = ball.y - t.y;
-                    if (dx * dx + dy * dy < (ball.r + t.r) * (ball.r + t.r)) {
-                        if (!t.lit) {
-                            t.lit = true;
-                            this.sfx.targetLit();
-                            this.addScore(250, t.x, t.y, `${t.letter}! +250`, '#38bdf8');
-                            this.spawnParticles(t.x, t.y, '#38bdf8', 10);
-
-                            // Did player complete W-A-G-M-I?
-                            if (this.wagmiTargets.every(tg => tg.lit)) {
-                                this.multiplier = Math.min(5, this.multiplier + 1);
-                                this.kickbackLit = true; // Re-arm left outlane shield
-                                this.addScore(5000, 209, 170, 'WAGMI JACKPOT +5000!', '#facc15');
-                                this.wagmiTargets.forEach(tg => { tg.lit = false; });
-                                if (this.balls.length < 2) {
-                                    this.spawnMultiball();
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Collide with Left & Right Flippers
-                this.collideBallWithFlipper(ball, this.flippers.left);
-                this.collideBallWithFlipper(ball, this.flippers.right);
-            }
-
-            // Ball-to-Ball Collisions during Multiball
-            if (this.balls.length > 1) {
-                for (let i = 0; i < this.balls.length; i++) {
-                    for (let j = i + 1; j < this.balls.length; j++) {
-                        const b1 = this.balls[i];
-                        const b2 = this.balls[j];
-                        const dx = b2.x - b1.x;
-                        const dy = b2.y - b1.y;
-                        const distSq = dx * dx + dy * dy;
-                        const minDist = b1.r + b2.r;
-                        if (distSq < minDist * minDist && distSq > 0) {
-                            const dist = Math.sqrt(distSq);
-                            const nx = dx / dist;
-                            const ny = dy / dist;
-                            const overlap = (minDist - dist) * 0.5;
-                            b1.x -= nx * overlap;
-                            b1.y -= ny * overlap;
-                            b2.x += nx * overlap;
-                            b2.y += ny * overlap;
-
-                            const kx = b1.vx - b2.vx;
-                            const ky = b1.vy - b2.vy;
-                            const p = nx * kx + ny * ky;
-                            if (p > 0) {
-                                b1.vx -= p * nx;
-                                b1.vy -= p * ny;
-                                b2.vx += p * nx;
-                                b2.vy += p * ny;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Record motion trail and check for Ball Drain (y > 750)
-        for (let i = this.balls.length - 1; i >= 0; i--) {
-            const b = this.balls[i];
-            b.trail.push({ x: b.x, y: b.y });
-            if (b.trail.length > 9) b.trail.shift();
-
-            if (b.y > this.H + 15) {
-                this.balls.splice(i, 1);
-                if (this.balls.length === 0) {
+            // Drain check (Bottom outlane)
+            if (this.ball.y > this.height - 35) {
+                if (this.ball.x < this.width - 35 || this.ball.x > this.width - 15) {
                     this.sfx.drain();
-                    if (this.ballNumber < this.maxBalls) {
-                        this.ballNumber++;
-                        this.multiplier = 1;
-                        this.kickbackLit = true;
-                        this.spawnBallInShooterLane();
-                        this.showBanner(`BALL ${this.ballNumber} READY`, 1.8);
-                        this.updateHUD();
-                    } else {
-                        this.gameOver = true;
-                        this.showBanner('GAME OVER - TAP NEW', 999);
-                        this.updateHUD();
-                        this.updateLaunchButtonLabel();
+                    this.ballCount--;
+                    if (this.ballCount <= 0) {
+                        this.gameState = 'GAMEOVER';
                     }
+                    this.resetBall();
+                    this.updateHUD();
+                    break;
                 }
             }
         }
-
-        this.updateLaunchButtonLabel();
     }
 
     draw() {
         const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.W, this.H);
+        ctx.clearRect(0, 0, this.width, this.height);
 
-        ctx.save();
-        if (this.shake > 0) {
-            ctx.translate((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
-        }
+        // Table Background
+        ctx.fillStyle = '#0f050d';
+        ctx.fillRect(0, 0, this.width, this.height);
 
-        // 1. Playfield Cyber-Grid Background
-        ctx.strokeStyle = 'rgba(220, 38, 38, 0.08)';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < this.W; x += 30) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.H);
-            ctx.stroke();
-        }
-        for (let y = 0; y < this.H; y += 30) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(this.W, y);
-            ctx.stroke();
-        }
+        // Outer Border Neon Glow
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 12;
+        ctx.strokeRect(10, 10, this.width - 20, this.height - 20);
+        ctx.shadowBlur = 0;
 
-        // 2. Center Playfield Medallion Artwork ("RUG ARENA PINBALL")
-        ctx.save();
-        ctx.translate(209, 495);
+        // Shooter Lane Divider
+        ctx.strokeStyle = '#331111';
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(0, 0, 66, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(24, 10, 28, 0.75)';
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgba(245, 158, 11, 0.35)';
+        ctx.moveTo(this.width - 28, 60);
+        ctx.lineTo(this.width - 28, this.height - 110);
         ctx.stroke();
 
-        ctx.font = '900 15px Orbitron';
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.5)';
-        ctx.textAlign = 'center';
-        ctx.fillText('RUG PINBALL', 0, -8);
-        ctx.font = '700 11px Orbitron';
-        ctx.fillStyle = 'rgba(244, 63, 94, 0.55)';
-        ctx.fillText(`MULTIPLIER ${this.multiplier}X`, 0, 12);
-        ctx.restore();
-
-        // 3. Left Outlane Kickback Shield Indicator
-        if (this.kickbackLit) {
+        // Draw Bumpers (Captain Otter, Chad, Hailey)
+        this.bumpers.forEach((b, idx) => {
             ctx.save();
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 4;
-            ctx.shadowColor = '#38bdf8';
-            ctx.shadowBlur = 12;
-            ctx.beginPath();
-            ctx.moveTo(28, 612);
-            ctx.lineTo(60, 612);
-            ctx.stroke();
-            ctx.font = '800 8px Orbitron';
-            ctx.fillStyle = '#38bdf8';
-            ctx.textAlign = 'center';
-            ctx.fillText('SHIELD', 44, 605);
-            ctx.restore();
-        }
-
-        // 4. Draw "W-A-G-M-I" Rollover Targets
-        this.wagmiTargets.forEach(t => {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
-            ctx.fillStyle = t.lit ? 'rgba(56, 189, 248, 0.35)' : 'rgba(15, 23, 42, 0.85)';
-            ctx.fill();
-            ctx.lineWidth = 2.5;
-            ctx.strokeStyle = t.lit ? '#38bdf8' : '#475569';
-            if (t.lit) {
-                ctx.shadowColor = '#38bdf8';
-                ctx.shadowBlur = 12;
-            }
-            ctx.stroke();
-
-            ctx.font = '900 12px Orbitron';
-            ctx.fillStyle = t.lit ? '#ffffff' : '#64748b';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(t.letter, t.x, t.y + 1);
-            ctx.restore();
-        });
-
-        // 5. Draw One-Way Shooter Gate
-        ctx.save();
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.65)';
-        ctx.lineWidth = 2.5;
-        ctx.setLineDash([5, 4]);
-        ctx.beginPath();
-        ctx.moveTo(this.oneWayGate.x1, this.oneWayGate.y1);
-        ctx.lineTo(this.oneWayGate.x2, this.oneWayGate.y2);
-        ctx.stroke();
-        ctx.restore();
-
-        // 6. Draw Table Walls
-        this.walls.forEach(w => {
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(w.x1, w.y1);
-            ctx.lineTo(w.x2, w.y2);
-            ctx.strokeStyle = w.color;
-            ctx.lineWidth = 4;
-            ctx.lineCap = 'round';
-            ctx.shadowColor = w.color;
-            ctx.shadowBlur = 8;
-            ctx.stroke();
-            ctx.restore();
-        });
-
-        // 7. Draw Slingshots
-        this.slingshots.forEach(s => {
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(s.pts[0][0], s.pts[0][1]);
-            ctx.lineTo(s.pts[1][0], s.pts[1][1]);
-            ctx.lineTo(s.pts[2][0], s.pts[2][1]);
-            ctx.closePath();
-            ctx.fillStyle = s.flash > 0
-                ? 'rgba(251, 191, 36, 0.65)'
-                : 'rgba(153, 27, 27, 0.35)';
-            ctx.fill();
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = s.flash > 0 ? '#fde047' : s.color;
-            ctx.shadowColor = s.flash > 0 ? '#fde047' : s.color;
-            ctx.shadowBlur = s.flash > 0 ? 18 : 8;
-            ctx.stroke();
-            ctx.restore();
-        });
-
-        // 8. Draw Character Pop Bumpers (Captain Otter, Chad, Princess Hailey) & Mini Posts
-        this.bumpers.forEach(b => {
-            ctx.save();
-            const scale = 1 + b.flash * 0.14;
             ctx.translate(b.x, b.y);
-            ctx.scale(scale, scale);
 
-            // Outer Glowing Ring
+            // Outer glow ring
             ctx.beginPath();
-            ctx.arc(0, 0, b.r, 0, Math.PI * 2);
-            ctx.fillStyle = b.flash > 0 ? '#451a03' : '#0f172a';
+            ctx.arc(0, 0, b.r + (b.flash > 0 ? 8 : 0), 0, Math.PI * 2);
+            ctx.fillStyle = b.flash > 0 ? '#ffffff' : b.color;
+            ctx.shadowColor = b.color;
+            ctx.shadowBlur = 15;
             ctx.fill();
-            ctx.lineWidth = b.id === 'POST' ? 3 : 4;
-            ctx.strokeStyle = b.flash > 0 ? '#ffffff' : b.ringColor;
-            ctx.shadowColor = b.glowColor;
-            ctx.shadowBlur = b.flash > 0 ? 25 : 12;
-            ctx.stroke();
 
-            if (b.sprite) {
-                // Clip character pixel portrait inside the circular bumper
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(0, 0, b.r - 3, 0, Math.PI * 2);
-                ctx.clip();
-
-                ctx.imageSmoothingEnabled = false;
-                const sw = b.sprite.width;
-                const sh = b.sprite.height;
-                ctx.drawImage(b.sprite, -sw / 2, -sh / 2 + 2);
-                ctx.restore();
-
-                // Character name plate below bumper
-                ctx.font = '900 8.5px Orbitron';
-                ctx.fillStyle = '#fde047';
-                ctx.textAlign = 'center';
-                ctx.shadowColor = '#000';
-                ctx.shadowBlur = 4;
-                ctx.fillText(b.name, 0, b.r + 12);
-            }
-            ctx.restore();
-        });
-
-        // 9. Draw Spring Plunger in Shooter Lane
-        const plungerY = 682 + this.plungerPull * 38;
-        ctx.save();
-        // Spring coils
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        const coilBottom = 732;
-        const coils = 7;
-        for (let i = 0; i <= coils; i++) {
-            const cy = plungerY + 8 + ((coilBottom - (plungerY + 8)) * (i / coils));
-            const cx = i % 2 === 0 ? 397 : 417;
-            if (i === 0) ctx.moveTo(407, cy);
-            else ctx.lineTo(cx, cy);
-        }
-        ctx.stroke();
-
-        // Plunger head
-        ctx.fillStyle = this.plungerCharging ? '#fbbf24' : '#ef4444';
-        ctx.shadowColor = '#fbbf24';
-        ctx.shadowBlur = this.plungerCharging ? 14 : 4;
-        ctx.fillRect(393, plungerY, 28, 9);
-        ctx.restore();
-
-        // 10. Draw Left & Right Flippers
-        ['left', 'right'].forEach(key => {
-            const f = this.flippers[key];
-            const x2 = f.x + Math.cos(f.angle) * f.length;
-            const y2 = f.y + Math.sin(f.angle) * f.length;
-
-            ctx.save();
+            // Inner core
             ctx.beginPath();
-            ctx.moveTo(f.x, f.y);
-            ctx.lineTo(x2, y2);
-            ctx.lineCap = 'round';
-            ctx.lineWidth = f.radius * 2;
-            ctx.strokeStyle = f.pressed ? '#fbbf24' : '#ef4444';
-            ctx.shadowColor = f.pressed ? '#fbbf24' : '#ef4444';
-            ctx.shadowBlur = f.pressed ? 16 : 8;
-            ctx.stroke();
-
-            // Inner white core
-            ctx.beginPath();
-            ctx.moveTo(f.x, f.y);
-            ctx.lineTo(x2, y2);
-            ctx.lineCap = 'round';
-            ctx.lineWidth = f.radius * 0.9;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-            ctx.restore();
-        });
-
-        // 11. Draw Pinballs & Motion Trails
-        this.balls.forEach(ball => {
-            // Trail
-            for (let i = 0; i < ball.trail.length; i++) {
-                const pt = ball.trail[i];
-                const ratio = (i + 1) / ball.trail.length;
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, ball.r * ratio * 0.8, 0, Math.PI * 2);
-                ctx.fillStyle = ball.isGold
-                    ? `rgba(250, 204, 21, ${ratio * 0.35})`
-                    : `rgba(56, 189, 248, ${ratio * 0.32})`;
-                ctx.fill();
-            }
-
-            // Pinball sphere
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-            const grad = ctx.createRadialGradient(
-                ball.x - 3, ball.y - 3, 2,
-                ball.x, ball.y, ball.r
-            );
-            if (ball.isGold) {
-                grad.addColorStop(0, '#fef08a');
-                grad.addColorStop(0.6, '#eab308');
-                grad.addColorStop(1, '#713f12');
-            } else {
-                grad.addColorStop(0, '#ffffff');
-                grad.addColorStop(0.55, '#cbd5e1');
-                grad.addColorStop(1, '#334155');
-            }
-            ctx.fillStyle = grad;
-            ctx.shadowColor = ball.isGold ? '#facc15' : '#38bdf8';
-            ctx.shadowBlur = 10;
+            ctx.arc(0, 0, b.r * 0.7, 0, Math.PI * 2);
+            ctx.fillStyle = '#090a0f';
             ctx.fill();
-            ctx.restore();
-        });
 
-        // 12. Draw Particles
-        this.particles.forEach(p => {
-            ctx.save();
-            ctx.globalAlpha = Math.max(0, p.alpha);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-            ctx.restore();
-        });
-
-        // 13. Draw Floating Score Callouts
-        this.floatingTexts.forEach(ft => {
-            ctx.save();
-            ctx.globalAlpha = Math.max(0, ft.alpha);
-            ctx.font = '900 12px Orbitron';
-            ctx.fillStyle = ft.color;
-            ctx.textAlign = 'center';
-            ctx.shadowColor = '#000';
-            ctx.shadowBlur = 6;
-            ctx.fillText(ft.text, ft.x, ft.y);
-            ctx.restore();
-        });
-
-        // 14. Draw Center Arcade Banner (Multiball, Ball Ready, Game Over)
-        if (this.bannerTimer > 0) {
-            ctx.save();
-            ctx.fillStyle = 'rgba(5, 5, 10, 0.84)';
-            ctx.fillRect(34, 395, 354, 54);
-            ctx.strokeStyle = '#fbbf24';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(34, 395, 354, 54);
-
-            ctx.font = '900 18px Orbitron';
-            ctx.fillStyle = '#fde047';
+            // Character Label
+            ctx.font = '900 8px Orbitron';
+            ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.shadowColor = '#ef4444';
-            ctx.shadowBlur = 12;
-            ctx.fillText(this.bannerText, 211, 422);
+            ctx.fillText(idx === 0 ? 'OTTER' : (idx === 1 ? 'CHAD' : 'HAILEY'), 0, 0);
+
             ctx.restore();
+        });
+
+        // Draw Flippers
+        const drawFlipper = (pivot, angle, isLeft) => {
+            ctx.save();
+            ctx.translate(pivot.x, pivot.y);
+            ctx.rotate(angle);
+            ctx.fillStyle = '#f5c71a';
+            ctx.shadowColor = '#f5c71a';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.roundRect(0, -8, 54, 16, 8);
+            ctx.fill();
+            ctx.restore();
+        };
+
+        drawFlipper({ x: this.width * 0.34, y: this.height - 75 }, this.leftFlipperAngle, true);
+        drawFlipper({ x: this.width * 0.66, y: this.height - 75 }, this.rightFlipperAngle, false);
+
+        // Draw Ball
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.ball.x, this.ball.y, this.ball.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.restore();
+
+        // Plunger Spring Indicator
+        if (!this.ball.active && this.gameState !== 'GAMEOVER') {
+            ctx.strokeStyle = '#f5c71a';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(this.width - 20, this.height - 110);
+            ctx.lineTo(this.width - 20, this.height - 110 + this.plungerPower * 3);
+            ctx.stroke();
         }
 
-        ctx.restore();
+        // Game Over Banner
+        if (this.gameState === 'GAMEOVER') {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
+            ctx.fillRect(0, this.height * 0.35, this.width, 90);
+            ctx.font = '900 22px Orbitron';
+            ctx.fillStyle = '#ef4444';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', this.width / 2, this.height * 0.35 + 35);
+            ctx.font = '700 12px Rajdhani';
+            ctx.fillStyle = '#fde047';
+            ctx.fillText('TAP NEW GAME TO RETRY', this.width / 2, this.height * 0.35 + 65);
+        }
     }
 
     loop(now) {
-        const dt = Math.min(0.035, (now - this.lastTime) / 1000);
+        const dt = Math.min(0.05, (now - this.lastTime) / 1000);
         this.lastTime = now;
         this.update(dt);
         this.draw();
