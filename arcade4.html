@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- Prevents MyInstants from blocking the MP3 hotlink -->
     <meta name="referrer" content="no-referrer">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -52,7 +51,6 @@
             z-index: 1;
             image-rendering: pixelated;
         }
-        /* Portrait warning sits ABOVE everything (z-index: 9999) */
         #orientation-warning {
             position: fixed;
             inset: 0;
@@ -64,27 +62,11 @@
             justify-content: center;
             text-align: center;
             padding: 24px;
-        }
-        /* Splash screen only shows in landscape (z-index: 2000) */
-        #splash-screen {
-            position: fixed;
-            inset: 0;
-            background: rgba(5, 5, 8, 0.92);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            backdrop-filter: blur(6px);
+            pointer-events: all;
         }
         @media screen and (orientation: portrait) {
             #orientation-warning {
                 display: flex;
-            }
-            #splash-screen {
-                display: none !important;
             }
         }
         .mk-panel {
@@ -125,29 +107,17 @@
 </head>
 <body class="text-white antialiased">
 
-<!-- FINISH HIM AUDIO (Multiple MyInstants sources) -->
+<!-- FINISH HIM AUDIO (Only triggered when Captain Otter hits 0% HP) -->
 <audio id="finishAudio" preload="auto">
     <source src="https://www.myinstants.com/media/sounds/finish-him.mp3" type="audio/mpeg">
     <source src="https://www.myinstants.com/media/sounds/mortal-kombat-finish-him.mp3" type="audio/mpeg">
     <source src="https://www.myinstants.com/media/sounds/finish-him_1.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 1. PORTRAIT WARNING OVERLAY (Always on top if phone is vertical) -->
+<!-- PORTRAIT WARNING OVERLAY -->
 <div id="orientation-warning">
     <div class="font-orbitron text-2xl sm:text-4xl font-black text-rose-500 mb-3 tracking-wider">ROTATE DEVICE TO LANDSCAPE</div>
-    <p class="text-slate-300 text-sm sm:text-base max-w-md mb-6">Turn your phone sideways, or tap below to force fullscreen landscape mode.</p>
-    <button id="btnForceLandscape" type="button" class="mk-btn font-orbitron text-sm sm:text-base font-black text-amber-300 px-6 py-3 rounded-xl border-2 border-amber-400">
-        FORCE FULLSCREEN LANDSCAPE
-    </button>
-</div>
-
-<!-- 2. LANDSCAPE START OVERLAY (Unlocks Audio + Enters Fullscreen on Tap) -->
-<div id="splash-screen">
-    <div class="font-orbitron text-3xl sm:text-5xl font-black text-amber-400 mb-2 tracking-wider">RUG ARENA</div>
-    <p class="text-slate-300 text-xs sm:text-sm max-w-md mb-5">Tap FIGHT to enter fullscreen and unlock Mortal Kombat audio.</p>
-    <button id="btnStartGame" type="button" class="mk-btn font-orbitron text-xl font-black text-amber-200 px-10 py-4 rounded-2xl border-4 border-amber-400">
-        FIGHT!
-    </button>
+    <p class="text-slate-300 text-sm sm:text-base max-w-md">Rug Arena requires landscape orientation so both fighters start at opposite ends of the arena.</p>
 </div>
 
 <div id="app-wrapper">
@@ -190,7 +160,7 @@
         </div>
     </header>
 
-    <!-- CLICKABLE FINISH HIM BUTTON (Restored!) -->
+    <!-- FINISH HIM BUTTON -->
     <button id="btnFinish" type="button" class="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 font-orbitron text-3xl sm:text-6xl font-black text-amber-300 px-6 py-3 rounded-2xl mk-panel border-4 border-amber-400 z-30 hidden animate-finish cursor-pointer pointer-events-auto">
         FINISH HIM!
     </button>
@@ -371,12 +341,12 @@ function createBodySprite(grid, scale = 4, flipX = false) {
 class SoundFX {
     constructor() {
         this.ctx = null;
-        this.audioUnlocked = false;
         this.finishAudio = document.getElementById('finishAudio');
     }
 
-    // Must be called inside a standard click/touch event to unlock mobile audio
-    unlock() {
+    init() {
+        // Never initialize or play sound while phone is in portrait orientation
+        if (window.innerHeight > window.innerWidth) return;
         try {
             if (!this.ctx) {
                 const AC = window.AudioContext || window.webkitAudioContext;
@@ -386,35 +356,10 @@ class SoundFX {
                 this.ctx.resume();
             }
         } catch (e) {}
-
-        if (!this.audioUnlocked && this.finishAudio) {
-            this.audioUnlocked = true;
-            this.finishAudio.volume = 1.0;
-            this.finishAudio.muted = true;
-            const p = this.finishAudio.play();
-            if (p !== undefined) {
-                p.then(() => {
-                    this.finishAudio.pause();
-                    this.finishAudio.currentTime = 0;
-                    this.finishAudio.muted = false;
-                }).catch(() => {
-                    this.finishAudio.muted = false;
-                });
-            } else {
-                this.finishAudio.muted = false;
-            }
-
-            // Prime speechSynthesis as backup
-            if ('speechSynthesis' in window) {
-                const warmUp = new SpeechSynthesisUtterance('');
-                warmUp.volume = 0;
-                window.speechSynthesis.speak(warmUp);
-            }
-        }
     }
 
     tone(freq, endFreq, dur, type = 'square', vol = 0.15) {
-        if (!this.ctx) return;
+        if (!this.ctx || window.innerHeight > window.innerWidth) return;
         try {
             const now = this.ctx.currentTime;
             const osc = this.ctx.createOscillator();
@@ -436,11 +381,11 @@ class SoundFX {
     }
 
     playFinishHim() {
-        // Dramatic MK gong/impact underneath
+        if (window.innerHeight > window.innerWidth) return;
         this.tone(95, 32, 0.7, 'sawtooth', 0.25);
 
         if (this.finishAudio) {
-            this.finishAudio.muted = false;
+            this.finishAudio.volume = 1.0;
             this.finishAudio.currentTime = 0;
             const playPromise = this.finishAudio.play();
             if (playPromise !== undefined) {
@@ -455,6 +400,7 @@ class SoundFX {
 
     speakFallback() {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance('Finish Him!');
             u.pitch = 0.2;
             u.rate = 0.75;
@@ -502,7 +448,6 @@ class RugArenaGame {
         this.shake = 0;
         this.introTimer = 1.4;
         this.walkCycle = 0;
-        this.started = false; // Pauses fight until splash screen is dismissed
 
         this.chad = {
             x: 0, y: 0, vx: 0, vy: 0,
@@ -537,17 +482,13 @@ class RugArenaGame {
                     docEl.webkitRequestFullscreen();
                 }
             }
-        } catch (err) {
-            console.log('Fullscreen request ignored:', err);
-        }
+        } catch (err) {}
 
         try {
             if (screen.orientation && screen.orientation.lock) {
                 await screen.orientation.lock('landscape');
             }
-        } catch (err) {
-            console.log('Orientation lock not supported on this device:', err);
-        }
+        } catch (err) {}
 
         setTimeout(() => this.handleResize(), 200);
     }
@@ -605,62 +546,37 @@ class RugArenaGame {
         this.matchState = 'FIGHTING';
         this.hasMoved = false;
         this.introTimer = 1.4;
-        this.started = true;
         document.getElementById('btnFinish').classList.add('hidden');
         this.resetPositions();
         this.updateHUD();
     }
 
     bindControls() {
-        // 1. Portrait "Force Fullscreen Landscape" button (uses standard click without preventDefault!)
-        const btnForceLandscape = document.getElementById('btnForceLandscape');
-        btnForceLandscape.addEventListener('click', () => {
-            this.sfx.unlock();
-            this.enterFullscreenLandscape();
-            document.getElementById('splash-screen').style.display = 'none';
-            this.started = true;
-            this.introTimer = 1.4;
-        });
-
-        // 2. Landscape Splash Screen "FIGHT!" button
-        const btnStartGame = document.getElementById('btnStartGame');
-        btnStartGame.addEventListener('click', () => {
-            this.sfx.unlock();
-            this.enterFullscreenLandscape();
-            document.getElementById('splash-screen').style.display = 'none';
-            this.started = true;
-            this.introTimer = 1.4;
-        });
-
-        // 3. Top HUD Fullscreen button
         const btnFullscreen = document.getElementById('btnFullscreen');
         btnFullscreen.addEventListener('click', () => {
-            this.sfx.unlock();
+            this.sfx.init();
             this.enterFullscreenLandscape();
         });
 
-        // 4. Rematch button
         const resetBtn = document.getElementById('btnReset');
         resetBtn.addEventListener('click', () => {
-            this.sfx.unlock();
-            this.enterFullscreenLandscape();
+            this.sfx.init();
             this.restartMatch();
         });
 
-        // 5. FINISH HIM! Button (Restored!)
         const finishBtn = document.getElementById('btnFinish');
         finishBtn.addEventListener('click', () => {
-            this.sfx.unlock();
+            this.sfx.init();
             this.triggerFatality();
         });
         finishBtn.addEventListener('touchstart', (e) => {
             if (e.cancelable) e.preventDefault();
-            this.sfx.unlock();
+            this.sfx.init();
             this.triggerFatality();
         }, { passive: false });
 
-        // 6. Keyboard Controls
         window.addEventListener('keydown', (e) => {
+            if (window.innerHeight > window.innerWidth) return;
             if (['ArrowLeft', 'KeyA'].includes(e.code)) { this.keys.left = true; this.hasMoved = true; }
             if (['ArrowRight', 'KeyD'].includes(e.code)) { this.keys.right = true; this.hasMoved = true; }
             if (['KeyZ', 'KeyJ', 'Space'].includes(e.code)) this.triggerAttack('punch');
@@ -671,12 +587,12 @@ class RugArenaGame {
             if (['ArrowRight', 'KeyD'].includes(e.code)) this.keys.right = false;
         });
 
-        // 7. Arcade Touch Controls
         const bindTouch = (id, action) => {
             const btn = document.getElementById(id);
             const start = (e) => {
+                if (window.innerHeight > window.innerWidth) return;
                 if (e.cancelable) e.preventDefault();
-                this.sfx.unlock();
+                this.sfx.init();
                 this.hasMoved = true;
                 if (action === 'left') this.keys.left = true;
                 if (action === 'right') this.keys.right = true;
@@ -703,7 +619,8 @@ class RugArenaGame {
     }
 
     triggerAttack(type) {
-        if (!this.started || this.matchState !== 'FIGHTING' || this.chad.state !== 'idle') return;
+        if (window.innerHeight > window.innerWidth) return;
+        if (this.matchState !== 'FIGHTING' || this.chad.state !== 'idle') return;
         this.chad.state = type;
 
         const dist = Math.abs(this.chad.x - this.otter.x);
@@ -717,7 +634,6 @@ class RugArenaGame {
 
             if (this.otter.hp <= 0) {
                 this.matchState = 'FINISH_AVAILABLE';
-                // Show the clickable FINISH HIM! button AND play the voice!
                 document.getElementById('btnFinish').classList.remove('hidden');
                 this.sfx.playFinishHim();
             }
@@ -770,10 +686,7 @@ class RugArenaGame {
     }
 
     update(dt) {
-        // Pause game logic if still in portrait mode or on start screen
-        if (!this.started || window.innerHeight > window.innerWidth) {
-            return;
-        }
+        if (window.innerHeight > window.innerWidth) return;
 
         if (this.shake > 0) this.shake -= dt;
         if (this.introTimer > 0) {
@@ -903,7 +816,7 @@ class RugArenaGame {
             }
         }
 
-        if (this.started && this.introTimer > 0) {
+        if (window.innerWidth > window.innerHeight && this.introTimer > 0) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
             ctx.fillRect(0, this.height * 0.35, this.width, 70);
             ctx.font = '900 32px Orbitron';
