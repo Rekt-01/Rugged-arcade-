@@ -92,16 +92,12 @@
             text-decoration: none;
             pointer-events: auto;
         }
-        @keyframes pulseFinish {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); text-shadow: 0 0 20px #ef4444; }
-            50% { transform: translate(-50%, -50%) scale(1.08); text-shadow: 0 0 40px #fbbf24, 0 0 60px #ef4444; }
-        }
-        .animate-finish {
-            animation: pulseFinish 0.4s infinite alternate ease-in-out;
-        }
     </style>
 </head>
 <body class="text-white antialiased">
+
+<!-- HIDDEN FINISH HIM AUDIO -->
+<audio id="finishAudio" src="https://www.myinstants.com/media/sounds/finish-him_1.mp3" preload="auto"></audio>
 
 <div id="orientation-warning">
     <div class="font-orbitron text-2xl sm:text-4xl font-black text-rose-500 mb-3 tracking-wider">ROTATE DEVICE TO LANDSCAPE</div>
@@ -144,11 +140,6 @@
             </div>
         </div>
     </header>
-
-    <!-- FINISH HIM BUTTON -->
-    <button id="btnFinish" type="button" class="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 font-orbitron text-3xl sm:text-6xl font-black text-amber-300 px-6 py-3 rounded-2xl mk-panel border-4 border-amber-400 z-30 hidden animate-finish cursor-pointer pointer-events-auto">
-        FINISH HIM!
-    </button>
 
     <!-- BOTTOM ARCADE CONTROLS -->
     <footer class="relative z-10 w-full max-w-5xl px-4 pb-3 flex items-center justify-between pointer-events-none">
@@ -415,6 +406,23 @@ class RugArenaGame {
         requestAnimationFrame((t) => this.loop(t));
     }
 
+    forceFullscreenLandscape() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => console.log("Fullscreen denied:", err));
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(err => {
+                console.log("Orientation lock not supported or denied:", err);
+            });
+        }
+    }
+
     resetPositions() {
         this.width = window.innerWidth;
         this.height = window.innerHeight;
@@ -468,7 +476,6 @@ class RugArenaGame {
         this.matchState = 'FIGHTING';
         this.hasMoved = false;
         this.introTimer = 1.4;
-        document.getElementById('btnFinish').classList.add('hidden');
         this.resetPositions();
         this.updateHUD();
     }
@@ -514,21 +521,15 @@ class RugArenaGame {
         bindTouch('btnPunch', 'punch');
         bindTouch('btnKick', 'kick');
 
-        const finishBtn = document.getElementById('btnFinish');
-        finishBtn.addEventListener('click', () => { this.sfx.init(); this.triggerFatality(); });
-        finishBtn.addEventListener('touchstart', (e) => {
-            if (e.cancelable) e.preventDefault();
-            this.sfx.init();
-            this.triggerFatality();
-        }, { passive: false });
-
         const resetBtn = document.getElementById('btnReset');
-        resetBtn.addEventListener('click', () => { this.sfx.init(); this.restartMatch(); });
-        resetBtn.addEventListener('touchstart', (e) => {
+        const handleRematch = (e) => {
             if (e.cancelable) e.preventDefault();
             this.sfx.init();
+            this.forceFullscreenLandscape();
             this.restartMatch();
-        }, { passive: false });
+        };
+        resetBtn.addEventListener('click', handleRematch);
+        resetBtn.addEventListener('touchstart', handleRematch, { passive: false });
     }
 
     triggerAttack(type) {
@@ -546,14 +547,26 @@ class RugArenaGame {
 
             if (this.otter.hp <= 0) {
                 this.matchState = 'FINISH_AVAILABLE';
-                document.getElementById('btnFinish').classList.remove('hidden');
+                
+                // Play the Finish Him audio automatically!
+                const finishAudio = document.getElementById('finishAudio');
+                if (finishAudio) {
+                    finishAudio.currentTime = 0;
+                    finishAudio.play().catch(e => console.log("Audio play blocked:", e));
+                }
+
+                // Automatically trigger Fatality after a brief dramatic pause
+                setTimeout(() => {
+                    if (this.matchState === 'FINISH_AVAILABLE') {
+                        this.triggerFatality();
+                    }
+                }, 1200);
             }
         }
         setTimeout(() => { if (this.matchState === 'FIGHTING') this.chad.state = 'idle'; }, 240);
     }
 
     triggerFatality() {
-        document.getElementById('btnFinish').classList.add('hidden');
         this.matchState = 'FATALITY';
         this.sfx.fatality();
         this.shake = 0.6;
@@ -647,7 +660,6 @@ class RugArenaGame {
             }
         }
 
-        // Hailey walks up right next to Chad, then they walk off side-by-side hand in hand
         if (this.hailey.active && !this.hailey.walkingAway) {
             this.walkCycle += dt * 10;
             if (this.hailey.x > c.x + 42) {
@@ -692,7 +704,6 @@ class RugArenaGame {
         const c = this.chad;
         const o = this.otter;
 
-        // Draw Captain Otter first so Chad & Hailey walk in front of his slumped body
         if (o.decapitated) {
             ctx.drawImage(this.sprites.otterBody, o.x, o.y + 24);
             if (o.headFly) {
@@ -704,22 +715,18 @@ class RugArenaGame {
             ctx.drawImage(otterSpr, o.x + otterLunge, o.y);
         }
 
-        // Subtle walking bounce when leaving together
         const chadBob = this.hailey.walkingAway ? Math.abs(Math.sin(this.walkCycle)) * 4 : 0;
         const haileyBob = this.hailey.active ? Math.abs(Math.cos(this.walkCycle)) * 4 : 0;
 
-        // Draw Chad
         const chadLunge = (c.state !== 'idle') ? (c.facing * 12) : 0;
         const chadSpr = (c.facing === -1) ? this.sprites.chadL : this.sprites.chadR;
         ctx.drawImage(chadSpr, c.x + chadLunge, c.y - chadBob);
 
-        // Draw Princess Hailey
         if (this.hailey.active) {
             const haileySpr = this.hailey.walkingAway ? this.sprites.haileyR : this.sprites.haileyL;
             ctx.drawImage(haileySpr, this.hailey.x, this.hailey.y - haileyBob);
 
             if (this.hailey.walkingAway) {
-                // Clasped pixel hands right between them (no weird red string!)
                 ctx.fillStyle = '#eac096';
                 ctx.fillRect(c.x + 48, c.y + 48 - chadBob, 10, 8);
 
@@ -730,7 +737,6 @@ class RugArenaGame {
             }
         }
 
-        // Round Start Banner
         if (this.introTimer > 0) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
             ctx.fillRect(0, this.height * 0.35, this.width, 70);
@@ -740,7 +746,6 @@ class RugArenaGame {
             ctx.fillText(this.introTimer > 0.6 ? 'ROUND 1' : 'FIGHT!', this.width / 2, this.height * 0.35 + 46);
         }
 
-        // Game Over Banner if Chad loses
         if (this.matchState === 'GAMEOVER') {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, this.height * 0.35, this.width, 80);
