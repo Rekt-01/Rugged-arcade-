@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RUG PINBALL - ARCADE EDITION</title>
+    <title>RUG PINBALL - PORTRAIT EDITION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -36,33 +36,15 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            overflow: hidden;
-            padding: 6px;
+            padding: env(safe-area-inset-top, 10px) 12px env(safe-area-inset-bottom, 16px) 12px;
         }
         canvas {
             display: block;
             background: #090a0f;
-            border: 2px solid rgba(220, 38, 38, 0.6);
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.25);
-            border-radius: 12px;
+            border: 3px solid rgba(220, 38, 38, 0.7);
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.35), inset 0 0 15px rgba(0, 0, 0, 0.9);
+            border-radius: 16px;
             image-rendering: pixelated;
-        }
-        #orientation-warning {
-            position: fixed;
-            inset: 0;
-            background: #050508;
-            z-index: 9999;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 24px;
-        }
-        @media screen and (orientation: portrait) {
-            #orientation-warning {
-                display: flex;
-            }
         }
         .mk-panel {
             background: rgba(15, 10, 15, 0.95);
@@ -73,7 +55,7 @@
         .mk-btn {
             background: linear-gradient(135deg, rgba(153, 27, 27, 0.5), rgba(69, 10, 10, 0.7));
             border: 2px solid rgba(239, 68, 68, 0.85);
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
             cursor: pointer;
             pointer-events: auto;
             -webkit-tap-highlight-color: transparent;
@@ -87,43 +69,38 @@
 </head>
 <body class="text-white antialiased">
 
-<div id="orientation-warning">
-    <div class="font-orbitron text-2xl sm:text-4xl font-black text-rose-500 mb-3 tracking-wider">ROTATE DEVICE TO LANDSCAPE</div>
-    <p class="text-slate-300 text-sm sm:text-base max-w-md">Rug Pinball requires landscape orientation to view the full arcade table.</p>
-</div>
-
 <div id="app-wrapper">
     <!-- TOP HUD BAR -->
-    <header class="w-full max-w-2xl px-2 pt-1 flex items-center justify-between mk-panel rounded-xl py-1.5 z-10">
-        <div class="flex items-center gap-3 text-xs font-orbitron font-black text-amber-400">
+    <header class="w-full max-w-md flex items-center justify-between mk-panel rounded-2xl px-4 py-2.5 z-10">
+        <div class="flex items-center gap-4 text-xs font-orbitron font-black text-amber-400">
             <div>SCORE: <span id="scoreVal" class="text-white">0</span></div>
             <div>MULT: <span id="multVal" class="text-rose-400">1x</span></div>
             <div>BALL: <span id="ballVal" class="text-amber-200">1/3</span></div>
         </div>
         <div class="flex items-center gap-2">
-            <a href="main.html" class="mk-btn rounded-lg px-3 py-1 font-orbitron text-[10px] font-black text-rose-200 tracking-wider">EXIT</a>
-            <button id="btnNew" type="button" class="mk-btn rounded-lg px-3 py-1 font-orbitron text-[10px] font-black text-amber-200 tracking-wider">NEW GAME</button>
+            <a href="main.html" class="mk-btn rounded-lg px-3 py-1 font-orbitron text-xs font-black text-rose-200 tracking-wider">EXIT</a>
+            <button id="btnNew" type="button" class="mk-btn rounded-lg px-3 py-1 font-orbitron text-xs font-black text-amber-200 tracking-wider">NEW</button>
         </div>
     </header>
 
-    <!-- PINBALL CANVAS AREA -->
-    <div class="relative flex-1 flex items-center justify-center w-full overflow-hidden my-1">
+    <!-- PORTRAIT PINBALL CANVAS AREA -->
+    <div class="relative flex-1 flex items-center justify-center w-full overflow-hidden my-2">
         <canvas id="pinballCanvas"></canvas>
     </div>
 
     <!-- BOTTOM ARCADE FLIPPER CONTROLS -->
-    <footer class="w-full max-w-2xl px-2 pb-1 flex items-center justify-between gap-4 z-10">
-        <button id="btnLeft" type="button" class="mk-btn flex-1 py-3 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-white text-sm">
+    <footer class="w-full max-w-md flex items-center justify-between gap-3 z-10">
+        <button id="btnLeft" type="button" class="mk-btn flex-1 py-4 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-white text-base">
             <span>LEFT FLIPPER</span>
-            <span class="text-[10px] text-amber-400 font-normal">[ A / LEFT ]</span>
+            <span class="text-[10px] text-amber-400 font-normal">[ A / TAP ]</span>
         </button>
-        <button id="btnLaunch" type="button" class="mk-btn w-32 py-3 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-amber-300 text-xs border-amber-500">
+        <button id="btnLaunch" type="button" class="mk-btn w-28 py-4 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-amber-300 text-xs border-amber-500">
             <span>PLUNGER</span>
-            <span class="text-[9px] text-slate-300 font-normal">[ HOLD SPACE ]</span>
+            <span class="text-[9px] text-slate-300 font-normal">[ HOLD ]</span>
         </button>
-        <button id="btnRight" type="button" class="mk-btn flex-1 py-3 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-white text-sm">
+        <button id="btnRight" type="button" class="mk-btn flex-1 py-4 rounded-2xl flex flex-col items-center justify-center font-orbitron font-black text-white text-base">
             <span>RIGHT FLIPPER</span>
-            <span class="text-[10px] text-amber-400 font-normal">[ D / RIGHT ]</span>
+            <span class="text-[10px] text-amber-400 font-normal">[ D / TAP ]</span>
         </button>
     </footer>
 </div>
@@ -140,7 +117,7 @@ class SoundFX {
             if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
         } catch (e) {}
     }
-    tone(freq, endFreq, dur, type = 'square', vol = 0.12) {
+    tone(freq, endFreq, dur, type = 'square', vol = 0.15) {
         if (!this.ctx) return;
         try {
             const now = this.ctx.currentTime;
@@ -157,10 +134,9 @@ class SoundFX {
             osc.stop(now + dur);
         } catch (e) {}
     }
-    bumper() { this.tone(440, 880, 0.1, 'sawtooth', 0.15); }
-    flip() { this.tone(150, 80, 0.06, 'sine', 0.1); }
-    score() { this.tone(587, 880, 0.08, 'triangle', 0.1); }
-    drain() { this.tone(120, 40, 0.4, 'sawtooth', 0.2); }
+    bumper() { this.tone(440, 880, 0.1, 'sawtooth', 0.18); }
+    flip() { this.tone(160, 80, 0.06, 'sine', 0.12); }
+    drain() { this.tone(120, 40, 0.4, 'sawtooth', 0.22); }
 }
 
 class RugPinballGame {
@@ -172,30 +148,25 @@ class RugPinballGame {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // Game stats
         this.score = 0;
         this.multiplier = 1;
         this.ballCount = 3;
-        this.gameState = 'READY'; // READY, PLAYING, GAMEOVER
+        this.gameState = 'READY';
 
-        // Ball physics object
-        this.ball = { x: 0, y: 0, vx: 0, vy: 0, r: 10, active: false };
-
-        // Plunger spring power
+        this.ball = { x: 0, y: 0, vx: 0, vy: 0, r: 12, active: false };
         this.plungerPower = 0;
         this.plungerCharging = false;
 
-        // Flipper states
-        this.leftFlipperAngle = 0.45;  // Resting angle (radians)
+        this.leftFlipperAngle = 0.45;
         this.rightFlipperAngle = Math.PI - 0.45;
         this.leftPressed = false;
         this.rightPressed = false;
 
         // Bumpers (Captain Otter, Chad, Hailey)
         this.bumpers = [
-            { x: 0, y: 0, r: 28, name: 'CAPTAIN OTTER', color: '#1ca3ec', score: 500, flash: 0 },
-            { x: 0, y: 0, r: 24, name: 'CHAD', color: '#ef4444', score: 350, flash: 0 },
-            { x: 0, y: 0, r: 24, name: 'HAILEY', color: '#eac096', score: 350, flash: 0 }
+            { x: 0, y: 0, r: 32, name: 'CAPTAIN OTTER', color: '#1ca3ec', score: 500, flash: 0 },
+            { x: 0, y: 0, r: 28, name: 'CHAD', color: '#ef4444', score: 350, flash: 0 },
+            { x: 0, y: 0, r: 28, name: 'HAILEY', color: '#eac096', score: 350, flash: 0 }
         ];
 
         this.bindControls();
@@ -206,17 +177,15 @@ class RugPinballGame {
     }
 
     resize() {
-        // Fit canvas neatly inside available height between HUD & Footer
-        const wrapper = document.getElementById('app-wrapper');
-        const availH = window.innerHeight - 120;
-        const availW = window.innerWidth - 16;
+        // Full portrait sizing that fills the vertical space comfortably
+        const availH = window.innerHeight - 130;
+        const availW = window.innerWidth - 24;
 
-        // Standard vertical pinball aspect ratio (~1:2)
-        let targetH = Math.min(availH, 700);
-        let targetW = targetH * 0.52;
+        let targetH = Math.max(450, Math.min(availH, 750));
+        let targetW = targetH * 0.54;
         if (targetW > availW) {
             targetW = availW;
-            targetH = targetW / 0.52;
+            targetH = targetW / 0.54;
         }
 
         this.width = Math.round(targetW);
@@ -224,16 +193,15 @@ class RugPinballGame {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
 
-        // Position bumpers relative to table dimensions
         if (this.bumpers) {
             this.bumpers[0].x = this.width * 0.5;
             this.bumpers[0].y = this.height * 0.28;
 
             this.bumpers[1].x = this.width * 0.3;
-            this.bumpers[1].y = this.height * 0.42;
+            this.bumpers[1].y = this.height * 0.44;
 
             this.bumpers[2].x = this.width * 0.7;
-            this.bumpers[2].y = this.height * 0.42;
+            this.bumpers[2].y = this.height * 0.44;
         }
 
         if (!this.ball.active && this.gameState === 'READY') {
@@ -242,8 +210,8 @@ class RugPinballGame {
     }
 
     resetBall() {
-        this.ball.x = this.width - 20;
-        this.ball.y = this.height - 100;
+        this.ball.x = this.width - 24;
+        this.ball.y = this.height - 120;
         this.ball.vx = 0;
         this.ball.vy = 0;
         this.ball.active = false;
@@ -254,7 +222,6 @@ class RugPinballGame {
         const setLeft = (val) => { this.leftPressed = val; if (val) this.sfx.flip(); };
         const setRight = (val) => { this.rightPressed = val; if (val) this.sfx.flip(); };
 
-        // Touch & Mouse buttons
         const bindBtn = (id, onDown, onUp) => {
             const el = document.getElementById(id);
             el.addEventListener('touchstart', (e) => { if(e.cancelable) e.preventDefault(); this.sfx.init(); onDown(); el.classList.add('touch-active'); }, {passive: false});
@@ -273,9 +240,8 @@ class RugPinballGame {
             if (!this.ball.active && this.gameState !== 'GAMEOVER') {
                 this.plungerCharging = true;
             } else {
-                // Table nudge if ball is in play
-                this.ball.vx += (Math.random() - 0.5) * 6;
-                this.ball.vy -= 4;
+                this.ball.vx += (Math.random() - 0.5) * 8;
+                this.ball.vy -= 6;
             }
         };
         const releaseCharge = (e) => {
@@ -283,7 +249,7 @@ class RugPinballGame {
             if (this.plungerCharging) {
                 this.plungerCharging = false;
                 this.ball.active = true;
-                this.ball.vy = -this.plungerPower;
+                this.ball.vy = -this.plungerPower * 1.2;
                 this.plungerPower = 0;
                 this.gameState = 'PLAYING';
             }
@@ -304,7 +270,6 @@ class RugPinballGame {
             this.updateHUD();
         });
 
-        // Keyboard Controls
         window.addEventListener('keydown', (e) => {
             this.sfx.init();
             if (['KeyA', 'ArrowLeft'].includes(e.code)) setLeft(true);
@@ -323,7 +288,7 @@ class RugPinballGame {
                 if (this.plungerCharging) {
                     this.plungerCharging = false;
                     this.ball.active = true;
-                    this.ball.vy = -this.plungerPower;
+                    this.ball.vy = -this.plungerPower * 1.2;
                     this.plungerPower = 0;
                     this.gameState = 'PLAYING';
                 }
@@ -339,10 +304,9 @@ class RugPinballGame {
 
     update(dt) {
         if (this.plungerCharging) {
-            this.plungerPower = Math.min(22, this.plungerPower + dt * 25);
+            this.plungerPower = Math.min(24, this.plungerPower + dt * 28);
         }
 
-        // Flipper rotation physics
         const targetLeftAngle = this.leftPressed ? -0.45 : 0.45;
         this.leftFlipperAngle += (targetLeftAngle - this.leftFlipperAngle) * 0.35;
 
@@ -351,34 +315,31 @@ class RugPinballGame {
 
         if (!this.ball.active) {
             if (!this.plungerCharging) {
-                this.ball.x = this.width - 20;
-                this.ball.y = this.height - 100;
+                this.ball.x = this.width - 24;
+                this.ball.y = this.height - 130;
             }
             return;
         }
 
-        // Sub-stepped physics for precise collision detection
         const substeps = 6;
         const sdt = dt / substeps;
 
         for (let step = 0; step < substeps; step++) {
-            // Gravity & friction
-            this.ball.vy += 350 * sdt;
-            this.ball.vx *= 0.992;
-            this.ball.vy *= 0.992;
+            this.ball.vy += 380 * sdt;
+            this.ball.vx *= 0.993;
+            this.ball.vy *= 0.993;
 
             this.ball.x += this.ball.vx * sdt;
             this.ball.y += this.ball.vy * sdt;
 
-            // Wall bounds (Left, Right, Top)
             const margin = this.ball.r + 8;
-            const rightWall = this.width - 28; // Shooter lane separator
+            const rightWall = this.width - 32;
 
             if (this.ball.x < margin) {
                 this.ball.x = margin;
                 this.ball.vx *= -0.75;
             }
-            if (this.ball.x > rightWall && this.ball.y > 60 && this.ball.y < this.height - 120) {
+            if (this.ball.x > rightWall && this.ball.y > 70 && this.ball.y < this.height - 140) {
                 this.ball.x = rightWall;
                 this.ball.vx *= -0.75;
             }
@@ -391,7 +352,6 @@ class RugPinballGame {
                 this.ball.vy *= -0.75;
             }
 
-            // Circular Bumpers Collision
             this.bumpers.forEach(b => {
                 if (b.flash > 0) b.flash -= sdt * 4;
                 const dx = this.ball.x - b.x;
@@ -415,16 +375,14 @@ class RugPinballGame {
                 }
             });
 
-            // Flippers Collision
-            const fLen = 54;
-            const leftPivot = { x: this.width * 0.34, y: this.height - 75 };
-            const rightPivot = { x: this.width * 0.66, y: this.height - 75 };
+            const fLen = 60;
+            const leftPivot = { x: this.width * 0.35, y: this.height - 85 };
+            const rightPivot = { x: this.width * 0.65, y: this.height - 85 };
 
             const checkFlipper = (pivot, angle, isLeft) => {
                 const tipX = pivot.x + Math.cos(angle) * fLen;
                 const tipY = pivot.y + Math.sin(angle) * fLen;
 
-                // Simple segment distance check
                 const baX = tipX - pivot.x;
                 const baY = tipY - pivot.y;
                 const paX = this.ball.x - pivot.x;
@@ -439,16 +397,14 @@ class RugPinballGame {
 
                 const dist = Math.hypot(this.ball.x - closestX, this.ball.y - closestY);
                 if (dist < this.ball.r + 6) {
-                    // Push ball out
                     const nx = (this.ball.x - closestX) / (dist || 1);
                     const ny = (this.ball.y - closestY) / (dist || 1);
                     this.ball.x = closestX + nx * (this.ball.r + 6);
                     this.ball.y = closestY + ny * (this.ball.r + 6);
 
-                    // Flipper velocity boost when swinging
-                    const swingSpeed = isLeft ? (this.leftPressed ? -18 : 0) : (this.rightPressed ? 18 : 0);
-                    this.ball.vx = nx * 320 + swingSpeed * 15;
-                    this.ball.vy = ny * 320 - 180;
+                    const swingSpeed = isLeft ? (this.leftPressed ? -20 : 0) : (this.rightPressed ? 20 : 0);
+                    this.ball.vx = nx * 340 + swingSpeed * 15;
+                    this.ball.vy = ny * 340 - 200;
                     this.sfx.flip();
                 }
             };
@@ -456,9 +412,8 @@ class RugPinballGame {
             checkFlipper(leftPivot, this.leftFlipperAngle, true);
             checkFlipper(rightPivot, this.rightFlipperAngle, false);
 
-            // Drain check (Bottom outlane)
-            if (this.ball.y > this.height - 35) {
-                if (this.ball.x < this.width - 35 || this.ball.x > this.width - 15) {
+            if (this.ball.y > this.height - 40) {
+                if (this.ball.x < this.width - 40 || this.ball.x > this.width - 15) {
                     this.sfx.drain();
                     this.ballCount--;
                     if (this.ballCount <= 0) {
@@ -476,47 +431,40 @@ class RugPinballGame {
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.width, this.height);
 
-        // Table Background
         ctx.fillStyle = '#0f050d';
         ctx.fillRect(0, 0, this.width, this.height);
 
-        // Outer Border Neon Glow
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 4;
         ctx.shadowColor = '#ef4444';
-        ctx.shadowBlur = 12;
-        ctx.strokeRect(10, 10, this.width - 20, this.height - 20);
+        ctx.shadowBlur = 14;
+        ctx.strokeRect(12, 12, this.width - 24, this.height - 24);
         ctx.shadowBlur = 0;
 
-        // Shooter Lane Divider
         ctx.strokeStyle = '#331111';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(this.width - 28, 60);
-        ctx.lineTo(this.width - 28, this.height - 110);
+        ctx.moveTo(this.width - 32, 70);
+        ctx.lineTo(this.width - 32, this.height - 125);
         ctx.stroke();
 
-        // Draw Bumpers (Captain Otter, Chad, Hailey)
         this.bumpers.forEach((b, idx) => {
             ctx.save();
             ctx.translate(b.x, b.y);
 
-            // Outer glow ring
             ctx.beginPath();
-            ctx.arc(0, 0, b.r + (b.flash > 0 ? 8 : 0), 0, Math.PI * 2);
+            ctx.arc(0, 0, b.r + (b.flash > 0 ? 10 : 0), 0, Math.PI * 2);
             ctx.fillStyle = b.flash > 0 ? '#ffffff' : b.color;
             ctx.shadowColor = b.color;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 18;
             ctx.fill();
 
-            // Inner core
             ctx.beginPath();
-            ctx.arc(0, 0, b.r * 0.7, 0, Math.PI * 2);
+            ctx.arc(0, 0, b.r * 0.72, 0, Math.PI * 2);
             ctx.fillStyle = '#090a0f';
             ctx.fill();
 
-            // Character Label
-            ctx.font = '900 8px Orbitron';
+            ctx.font = '900 9px Orbitron';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -525,54 +473,50 @@ class RugPinballGame {
             ctx.restore();
         });
 
-        // Draw Flippers
-        const drawFlipper = (pivot, angle, isLeft) => {
+        const drawFlipper = (pivot, angle) => {
             ctx.save();
             ctx.translate(pivot.x, pivot.y);
             ctx.rotate(angle);
             ctx.fillStyle = '#f5c71a';
             ctx.shadowColor = '#f5c71a';
-            ctx.shadowBlur = 8;
+            ctx.shadowBlur = 10;
             ctx.beginPath();
-            ctx.roundRect(0, -8, 54, 16, 8);
+            ctx.roundRect(0, -9, 60, 18, 9);
             ctx.fill();
             ctx.restore();
         };
 
-        drawFlipper({ x: this.width * 0.34, y: this.height - 75 }, this.leftFlipperAngle, true);
-        drawFlipper({ x: this.width * 0.66, y: this.height - 75 }, this.rightFlipperAngle, false);
+        drawFlipper({ x: this.width * 0.35, y: this.height - 85 }, this.leftFlipperAngle);
+        drawFlipper({ x: this.width * 0.65, y: this.height - 85 }, this.rightFlipperAngle);
 
-        // Draw Ball
         ctx.save();
         ctx.beginPath();
         ctx.arc(this.ball.x, this.ball.y, this.ball.r, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 15;
         ctx.fill();
         ctx.restore();
 
-        // Plunger Spring Indicator
         if (!this.ball.active && this.gameState !== 'GAMEOVER') {
             ctx.strokeStyle = '#f5c71a';
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 8;
             ctx.beginPath();
-            ctx.moveTo(this.width - 20, this.height - 110);
-            ctx.lineTo(this.width - 20, this.height - 110 + this.plungerPower * 3);
+            ctx.moveTo(this.width - 24, this.height - 125);
+            ctx.lineTo(this.width - 24, this.height - 125 + this.plungerPower * 3.5);
             ctx.stroke();
         }
 
-        // Game Over Banner
         if (this.gameState === 'GAMEOVER') {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
-            ctx.fillRect(0, this.height * 0.35, this.width, 90);
-            ctx.font = '900 22px Orbitron';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(0, this.height * 0.35, this.width, 100);
+            ctx.font = '900 24px Orbitron';
             ctx.fillStyle = '#ef4444';
             ctx.textAlign = 'center';
-            ctx.fillText('GAME OVER', this.width / 2, this.height * 0.35 + 35);
-            ctx.font = '700 12px Rajdhani';
+            ctx.fillText('GAME OVER', this.width / 2, this.height * 0.35 + 40);
+            ctx.font = '700 13px Rajdhani';
             ctx.fillStyle = '#fde047';
-            ctx.fillText('TAP NEW GAME TO RETRY', this.width / 2, this.height * 0.35 + 65);
+            ctx.fillText('TAP NEW TO RETRY', this.width / 2, this.height * 0.35 + 75);
         }
     }
 
