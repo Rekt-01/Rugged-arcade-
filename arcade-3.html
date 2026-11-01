@@ -145,9 +145,7 @@ class RugPinballGame {
         this.ctx = this.canvas.getContext('2d');
         this.sfx = new SoundFX();
 
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-
+        // Initialize everything BEFORE calling resize()
         this.score = 0;
         this.multiplier = 1;
         this.ballCount = 3;
@@ -168,6 +166,10 @@ class RugPinballGame {
             { x: 0, y: 0, r: 28, name: 'CHAD', color: '#ef4444', score: 350, flash: 0 },
             { x: 0, y: 0, r: 28, name: 'HAILEY', color: '#eac096', score: 350, flash: 0 }
         ];
+
+        // Must run AFTER ball / bumpers / gameState exist
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
 
         this.bindControls();
         this.resetBall();
@@ -204,7 +206,8 @@ class RugPinballGame {
             this.bumpers[2].y = this.height * 0.44;
         }
 
-        if (!this.ball.active && this.gameState === 'READY') {
+        // Guard: only reset when ball already exists and is idle
+        if (this.ball && !this.ball.active && this.gameState === 'READY') {
             this.resetBall();
         }
     }
@@ -224,10 +227,24 @@ class RugPinballGame {
 
         const bindBtn = (id, onDown, onUp) => {
             const el = document.getElementById(id);
-            el.addEventListener('touchstart', (e) => { if(e.cancelable) e.preventDefault(); this.sfx.init(); onDown(); el.classList.add('touch-active'); }, {passive: false});
-            el.addEventListener('touchend', (e) => { if(e.cancelable) e.preventDefault(); onUp(); el.classList.remove('touch-active'); }, {passive: false});
-            el.addEventListener('mousedown', () => { this.sfx.init(); onDown(); });
-            el.addEventListener('mouseup', () => onUp());
+            const down = (e) => {
+                if (e.cancelable) e.preventDefault();
+                this.sfx.init();
+                onDown();
+                el.classList.add('touch-active');
+            };
+            const up = (e) => {
+                if (e && e.cancelable) e.preventDefault();
+                onUp();
+                el.classList.remove('touch-active');
+            };
+            el.addEventListener('touchstart', down, {passive: false});
+            el.addEventListener('touchend', up, {passive: false});
+            el.addEventListener('touchcancel', up, {passive: false});
+            el.addEventListener('mousedown', down);
+            // Release even if pointer leaves the button
+            window.addEventListener('mouseup', up);
+            window.addEventListener('touchend', up, {passive: false});
         };
 
         bindBtn('btnLeft', () => setLeft(true), () => setLeft(false));
@@ -235,17 +252,19 @@ class RugPinballGame {
 
         const launchBtn = document.getElementById('btnLaunch');
         const startCharge = (e) => {
-            if(e.cancelable) e.preventDefault();
+            if (e && e.cancelable) e.preventDefault();
             this.sfx.init();
             if (!this.ball.active && this.gameState !== 'GAMEOVER') {
                 this.plungerCharging = true;
-            } else {
+                launchBtn.classList.add('touch-active');
+            } else if (this.ball.active) {
                 this.ball.vx += (Math.random() - 0.5) * 8;
                 this.ball.vy -= 6;
             }
         };
         const releaseCharge = (e) => {
-            if(e.cancelable) e.preventDefault();
+            if (e && e.cancelable) e.preventDefault();
+            launchBtn.classList.remove('touch-active');
             if (this.plungerCharging) {
                 this.plungerCharging = false;
                 this.ball.active = true;
@@ -256,9 +275,9 @@ class RugPinballGame {
         };
 
         launchBtn.addEventListener('touchstart', startCharge, {passive: false});
-        launchBtn.addEventListener('touchend', releaseCharge, {passive: false});
         launchBtn.addEventListener('mousedown', startCharge);
-        launchBtn.addEventListener('mouseup', releaseCharge);
+        window.addEventListener('touchend', releaseCharge, {passive: false});
+        window.addEventListener('mouseup', releaseCharge);
 
         document.getElementById('btnNew').addEventListener('click', () => {
             this.sfx.init();
@@ -480,8 +499,19 @@ class RugPinballGame {
             ctx.fillStyle = '#f5c71a';
             ctx.shadowColor = '#f5c71a';
             ctx.shadowBlur = 10;
+            // Compatible rounded rect (no roundRect dependency)
+            const w = 60, h = 18, r = 9;
             ctx.beginPath();
-            ctx.roundRect(0, -9, 60, 18, 9);
+            ctx.moveTo(r, -h/2);
+            ctx.lineTo(w - r, -h/2);
+            ctx.quadraticCurveTo(w, -h/2, w, -h/2 + r);
+            ctx.lineTo(w, h/2 - r);
+            ctx.quadraticCurveTo(w, h/2, w - r, h/2);
+            ctx.lineTo(r, h/2);
+            ctx.quadraticCurveTo(0, h/2, 0, h/2 - r);
+            ctx.lineTo(0, -h/2 + r);
+            ctx.quadraticCurveTo(0, -h/2, r, -h/2);
+            ctx.closePath();
             ctx.fill();
             ctx.restore();
         };
