@@ -48,37 +48,36 @@
             z-index: 1;
         }
         .mk-panel {
-            background: rgba(15, 10, 15, 0.92);
-            border: 2px solid rgba(220, 38, 38, 0.75);
-            box-shadow: 0 0 25px rgba(220, 38, 38, 0.35), inset 0 0 15px rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
+            background: rgba(12, 12, 18, 0.95);
+            border: 2px solid #5c1a1a;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
         .mk-btn {
-            background: linear-gradient(135deg, rgba(153, 27, 27, 0.55), rgba(69, 10, 10, 0.75));
-            border: 2px solid rgba(239, 68, 68, 0.9);
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(180deg, #5a1a1a, #2e0c0c);
+            border: 2px solid #8b2a2a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
             transition: transform 0.06s, background 0.12s;
             cursor: pointer;
             pointer-events: auto;
             -webkit-tap-highlight-color: transparent;
         }
         .mk-btn:active, .touch-active {
-            transform: scale(0.93);
-            background: rgba(220, 38, 38, 0.9);
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.9);
+            transform: scale(0.94);
+            background: #7a2222;
+            box-shadow: 0 0 8px rgba(139, 42, 42, 0.6);
         }
         .mk-launch-btn {
-            background: linear-gradient(135deg, rgba(217, 119, 6, 0.65), rgba(120, 53, 15, 0.85));
-            border: 2px solid #fbbf24;
-            box-shadow: 0 0 18px rgba(251, 191, 36, 0.45);
+            background: linear-gradient(180deg, #8b6914, #4a350a);
+            border: 2px solid #c9a227;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
             cursor: pointer;
             pointer-events: auto;
             -webkit-tap-highlight-color: transparent;
         }
         .mk-launch-btn:active, .launch-active {
-            transform: scale(0.93);
-            background: rgba(245, 158, 11, 0.95);
-            box-shadow: 0 0 28px rgba(251, 191, 36, 0.95);
+            transform: scale(0.94);
+            background: #a67c00;
+            box-shadow: 0 0 10px rgba(201, 162, 39, 0.5);
         }
     </style>
 </head>
@@ -306,7 +305,7 @@ class RugPinballGame {
         this.ballNum = 1;
         this.maxBalls = 3;
         this.jackpotMeter = 0;
-        this.jackpotLit = true;
+        this.jackpotLit = false;          // starts unlit like real 90s pinball
         this.shieldTimer = 0;
         this.shake = 0;
         this.gameState = 'PLAYING';
@@ -341,7 +340,8 @@ class RugPinballGame {
             { ch: 'G', x1: 70, y1: 136, x2: 90, y2: 110, hit: false, flash: 0 }
         ];
 
-        this.vortex = { x: 322, y: 185, r: 20, spin: 0 };
+        // Classic saucer â small, precise, only captures when lit
+        this.vortex = { x: 310, y: 340, r: 16, spin: 0 };
 
         this.walls = [];
         this.posts = [];
@@ -375,8 +375,7 @@ class RugPinballGame {
             this.walls.push({ x1, y1, x2, y2, bounce, color, sling, pts, flash: 0 });
         };
 
-        // 1. High Top Curved Arch: starts at y=140 and rises all the way to y=14!
-        // This leaves a huge 100px+ opening above the shooter lane divider (y=185)
+        // 1. High Top Curved Arch
         const cx = 210, cy = 140, rx = 196, ry = 126, steps = 28;
         for (let i = 0; i < steps; i++) {
             const a1 = Math.PI + (i / steps) * Math.PI;
@@ -384,39 +383,39 @@ class RugPinballGame {
             add(
                 cx + Math.cos(a1) * rx, cy + Math.sin(a1) * ry,
                 cx + Math.cos(a2) * rx, cy + Math.sin(a2) * ry,
-                0.8, '#ef4444'
+                0.8, '#a52a2a'
             );
         }
 
-        // 2. Outer Left Wall & Outer Right Shooter Wall
-        add(14, 140, 14, 530, 0.75, '#ef4444');
-        add(406, 140, 406, 655, 0.75, '#ef4444');
-        add(370, 655, 406, 655, 0.5, '#fbbf24'); // Plunger floor
+        // 2. Outer walls + plunger
+        add(14, 140, 14, 530, 0.75, '#a52a2a');
+        add(406, 140, 406, 655, 0.75, '#a52a2a');
+        add(370, 655, 406, 655, 0.5, '#c9a227'); // Plunger floor
 
-        // 3. Single Clean Shooter Lane Inner Wall (Stops at y=185 so top is wide open!)
-        add(370, 185, 370, 655, 0.75, '#b91c1c');
+        // 3. Shooter lane inner wall
+        add(370, 200, 370, 655, 0.75, '#7a1f1f');
 
-        // 4. Wide Left & Right Inlane Ramps (Feed directly to Left & Right Flippers)
-        add(14, 530, 112, 612, 0.65, '#f59e0b');
-        add(370, 530, 272, 612, 0.65, '#f59e0b');
+        // 4. Inlane ramps
+        add(14, 530, 112, 612, 0.65, '#b8860b');
+        add(370, 530, 272, 612, 0.65, '#b8860b');
 
-        // 5. Left Triangular Slingshot (Leaves a wide 44px lane on the left)
-        add(58, 445, 58, 515, 0.85, '#ec4899');
-        add(58, 515, 114, 560, 0.85, '#ec4899');
-        add(58, 445, 114, 560, 1.5, '#38bdf8', true, 250);
+        // 5. Left slingshot (classic red)
+        add(58, 445, 58, 515, 0.85, '#c41e3a');
+        add(58, 515, 114, 560, 0.85, '#c41e3a');
+        add(58, 445, 114, 560, 1.5, '#e8c547', true, 250);
 
-        // 6. Right Triangular Slingshot (Leaves a wide 44px lane on the right)
-        add(326, 445, 326, 515, 0.85, '#ec4899');
-        add(326, 515, 270, 560, 0.85, '#ec4899');
-        add(326, 445, 270, 560, 1.5, '#38bdf8', true, 250);
+        // 6. Right slingshot
+        add(326, 445, 326, 515, 0.85, '#c41e3a');
+        add(326, 515, 270, 560, 0.85, '#c41e3a');
+        add(326, 445, 270, 560, 1.5, '#e8c547', true, 250);
 
-        // 7. Mid-Side Neon Kickers
-        add(14, 320, 42, 365, 1.2, '#a855f7', true, 150);
-        add(370, 320, 342, 365, 1.2, '#a855f7', true, 150);
+        // 7. Side kickers (subtle)
+        add(14, 320, 42, 365, 1.2, '#8b4513', true, 150);
+        add(370, 320, 342, 365, 1.2, '#8b4513', true, 150);
 
-        // Corner Posts
+        // Corner Posts (moved the top-of-shooter post slightly left so the ball can clear the chute)
         this.posts = [
-            { x: 370, y: 185, r: 5 },
+            { x: 365, y: 188, r: 4 },
             { x: 58,  y: 445, r: 5 },
             { x: 58,  y: 515, r: 5 },
             { x: 114, y: 560, r: 5 },
@@ -460,10 +459,11 @@ class RugPinballGame {
         const shooterBall = this.balls.find(b => b.inShooter || (b.x > 368 && b.y > 500));
         if (shooterBall) {
             const pwr = Math.max(0.75, this.plungerCharge);
-            // Strong upward launch velocity guaranteed to reach the top arch
+            // Strong upward launch + slight left bias so the ball clears the chute
             shooterBall.x = 388;
-            shooterBall.vy = -(960 + pwr * 320);
-            shooterBall.vx = 0;
+            shooterBall.vy = -(980 + pwr * 340);
+            shooterBall.vx = -90 - Math.random() * 50;
+            shooterBall.inShooter = true;
             this.sfx.launch();
             this.shieldTimer = Math.max(this.shieldTimer, 10.0);
             const lbl = document.getElementById('launchText');
@@ -478,7 +478,7 @@ class RugPinballGame {
         this.multiplier = 1;
         this.ballNum = 1;
         this.jackpotMeter = 0;
-        this.jackpotLit = true;
+        this.jackpotLit = false;
         this.shieldTimer = 0;
         this.gameState = 'PLAYING';
         this.balls = [];
@@ -702,12 +702,12 @@ class RugPinballGame {
                 ball.y += ball.vy * sdt;
 
                 // GUARANTEED SHOOTER LANE EXIT CURVE:
-                // As soon as the launched ball reaches the top of the shooter chute (y < 155),
-                // smoothly curve it left out of the chute across the top arch!
-                if (ball.inShooter && ball.y < 155) {
-                    ball.vx = -380 - Math.random() * 90;
-                    ball.vy = -140;
-                    ball.x = 355;
+                // Trigger as soon as the ball clears the top of the inner shooter wall (y < 210)
+                // so it can't bounce back down the chute off the top arch.
+                if (ball.inShooter && ball.y < 210) {
+                    ball.vx = -420 - Math.random() * 100;
+                    ball.vy = Math.min(ball.vy, -160);
+                    ball.x = Math.min(ball.x, 348);
                     ball.inShooter = false;
                 }
 
@@ -719,7 +719,8 @@ class RugPinballGame {
                 if (!ball.inShooter && ball.x > 360 - ball.r) {
                     ball.x = 360 - ball.r;
                     if (ball.vx > 0) {
-                        ball.vx = -Math.abs(ball.vx) * 0.75;
+                        ball.vx = -Math.abs(ball.vx) * 0.8;
+                        ball.vy -= 40;
                     }
                 }
 
@@ -742,7 +743,7 @@ class RugPinballGame {
                             this.jackpotLit = true;
                             this.shieldTimer = Math.max(this.shieldTimer, 12.0);
                             this.addScore(5000, 90, 140, '#4ade80');
-                            this.showBanner('R-U-G CLEARED!', 'JACKPOT LIT + RUG SHIELD!', 2.2);
+                            this.showBanner('R-U-G COMPLETE!', 'JACKPOT LIT â SHOOT SAUCER!', 2.3);
                             this.sfx.jackpot();
                             setTimeout(() => { this.targets.forEach(tg => tg.hit = false); }, 1200);
                         }
@@ -755,15 +756,7 @@ class RugPinballGame {
                     this.collideCircle(ball, p.x, p.y, p.r, 0.8);
                 }
 
-                // Center Shield Post
-                if (this.shieldTimer > 0) {
-                    if (this.collideCircle(ball, 192, 626, 13, 1.45)) {
-                        ball.vy = -Math.max(480, Math.abs(ball.vy));
-                        this.sfx.lane();
-                        this.spawnSparks(192, 626, '#22d3ee', 12);
-                        this.addScore(250, 192, 605, '#22d3ee');
-                    }
-                }
+                // Center shield between flippers removed (user request)
 
                 // Character Pop Bumpers
                 for (let i = 0; i < this.bumpers.length; i++) {
@@ -788,10 +781,11 @@ class RugPinballGame {
                         this.spawnSparks(ball.x, ball.y, b.color, 15);
                         this.showBanner(b.callout, `${b.name} +${b.pts * this.multiplier}`, 1.1);
 
-                        this.jackpotMeter = Math.min(100, this.jackpotMeter + 12);
+                        // Bumpers slowly fill the meter â R-U-G is the main way to light jackpot
+                        this.jackpotMeter = Math.min(100, this.jackpotMeter + 7);
                         if (this.jackpotMeter >= 100 && !this.jackpotLit) {
                             this.jackpotLit = true;
-                            this.showBanner('JACKPOT READY!', 'SHOOT THE RIGHT VORTEX!', 2.0);
+                            this.showBanner('JACKPOT LIT!', 'SHOOT THE SAUCER', 2.0);
                         }
                     }
                 }
@@ -844,50 +838,53 @@ class RugPinballGame {
                 }
             });
 
-            // Vortex Pocket
-            if (Math.hypot(ball.x - this.vortex.x, ball.y - this.vortex.y) < ball.r + this.vortex.r * 0.75) {
-                if (this.jackpotLit) {
+            // Classic saucer / jackpot hole
+            // Only captures when lit. When unlit it is just a solid post.
+            const vdx = ball.x - this.vortex.x;
+            const vdy = ball.y - this.vortex.y;
+            const vdist = Math.hypot(vdx, vdy);
+            if (vdist < ball.r + this.vortex.r) {
+                if (this.jackpotLit && vdist < ball.r + this.vortex.r * 0.7) {
+                    // CAPTURE â proper jackpot
                     this.jackpotLit = false;
                     this.jackpotMeter = 0;
                     this.sfx.jackpot();
-                    this.shake = 0.35;
-                    this.addScore(10000, this.vortex.x, this.vortex.y, '#4ade80');
-                    this.spawnSparks(this.vortex.x, this.vortex.y, '#4ade80', 26);
-                    this.showBanner('MEGA RUG JACKPOT!', '10,000 PTS + MULTIBALL!', 2.5);
-                    this.spawnMultiball();
+                    this.shake = 0.28;
+                    this.addScore(15000, this.vortex.x, this.vortex.y, '#4ade80');
+                    this.spawnSparks(this.vortex.x, this.vortex.y, '#4ade80', 20);
+                    this.showBanner('JACKPOT!', '15,000 POINTS', 2.2);
+                    // classic eject out of the saucer
+                    ball.x = this.vortex.x - 28;
+                    ball.y = this.vortex.y + 30;
+                    ball.vx = -300 - Math.random() * 80;
+                    ball.vy = 220 + Math.random() * 60;
                 } else {
-                    this.sfx.lane();
-                    this.addScore(1000, this.vortex.x, this.vortex.y, '#a855f7');
+                    // solid post bounce when not lit (or glancing hit)
+                    const nx = vdx / (vdist || 1);
+                    const ny = vdy / (vdist || 1);
+                    ball.x = this.vortex.x + nx * (ball.r + this.vortex.r + 1.5);
+                    ball.y = this.vortex.y + ny * (ball.r + this.vortex.r + 1.5);
+                    const vn = ball.vx * nx + ball.vy * ny;
+                    if (vn < 0) {
+                        ball.vx -= 1.6 * vn * nx;
+                        ball.vy -= 1.6 * vn * ny;
+                    }
                 }
-                ball.x = this.vortex.x - 20;
-                ball.y = this.vortex.y + 20;
-                ball.vx = -320;
-                ball.vy = 260;
             }
 
-            // Bottom Drain
+            // Bottom Drain (no more free shield saves between flippers)
             if (ball.y > this.TH + 15) {
-                if (this.shieldTimer > 0 && this.balls.length === 1) {
-                    ball.x = 192;
-                    ball.y = 580;
-                    ball.vx = (Math.random() - 0.5) * 220;
-                    ball.vy = -780;
-                    ball.inShooter = false;
-                    this.sfx.launch();
-                    this.showBanner('RUG SHIELD SAVE!', 'BALL SAVED!', 1.8);
-                } else {
-                    this.balls.splice(bIdx, 1);
-                    if (this.balls.length === 0) {
-                        this.sfx.drain();
-                        if (this.ballNum < this.maxBalls) {
-                            this.ballNum++;
-                            this.spawnBallInShooter();
-                            this.showBanner(`BALL ${this.ballNum}`, 'TAP FIRE BALL TO SHOOT', 2.0);
-                            this.updateHUD();
-                        } else {
-                            this.gameState = 'GAMEOVER';
-                            this.updateHUD();
-                        }
+                this.balls.splice(bIdx, 1);
+                if (this.balls.length === 0) {
+                    this.sfx.drain();
+                    if (this.ballNum < this.maxBalls) {
+                        this.ballNum++;
+                        this.spawnBallInShooter();
+                        this.showBanner(`BALL ${this.ballNum}`, 'TAP FIRE BALL TO SHOOT', 2.0);
+                        this.updateHUD();
+                    } else {
+                        this.gameState = 'GAMEOVER';
+                        this.updateHUD();
                     }
                 }
             }
@@ -1044,91 +1041,81 @@ class RugPinballGame {
             ctx.translate((Math.random() - 0.5) * 9, (Math.random() - 0.5) * 9);
         }
 
-        // 1. Table Playfield Base
-        ctx.fillStyle = '#09040e';
-        drawBox(ctx, 4, 4, this.TW - 8, this.TH - 8, 22);
+        // 1. Table Playfield Base â classic dark retro look
+        ctx.fillStyle = '#0c0c12';
+        drawBox(ctx, 4, 4, this.TW - 8, this.TH - 8, 18);
         ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#8b1a1a';
         ctx.stroke();
 
-        // Grid
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.08)';
-        ctx.lineWidth = 1;
-        for (let x = 28; x < this.TW - 20; x += 28) {
-            ctx.beginPath(); ctx.moveTo(x, 16); ctx.lineTo(x, this.TH - 16); ctx.stroke();
-        }
-        for (let y = 28; y < this.TH - 20; y += 28) {
-            ctx.beginPath(); ctx.moveTo(16, y); ctx.lineTo(this.TW - 16, y); ctx.stroke();
-        }
+        // Subtle classic inset border
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#3a1515';
+        drawBox(ctx, 10, 10, this.TW - 20, this.TH - 20, 14);
+        ctx.stroke();
 
-        // 2. Center Jackpot Ring
+        // 2. Center status plate (clean, no neon ring)
         ctx.save();
         ctx.translate(192, 430);
         ctx.beginPath();
-        ctx.arc(0, 0, 50, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(15, 10, 24, 0.9)';
+        ctx.arc(0, 0, 48, 0, Math.PI * 2);
+        ctx.fillStyle = '#12121a';
         ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = this.jackpotLit ? '#c9a227' : '#444';
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(0, 0, 50, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2) * (this.jackpotLit ? 1 : this.jackpotMeter / 100));
-        ctx.strokeStyle = this.jackpotLit ? '#4ade80' : '#facc15';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
-        ctx.font = '900 12px Orbitron';
-        ctx.fillStyle = '#facc15';
+        ctx.font = '800 11px Orbitron';
+        ctx.fillStyle = '#e8c547';
         ctx.textAlign = 'center';
-        ctx.fillText('RUG PINBALL', 0, -8);
+        ctx.fillText('RUG PINBALL', 0, -10);
         ctx.font = '700 10px Orbitron';
-        ctx.fillStyle = this.jackpotLit ? '#4ade80' : '#f43f5e';
-        ctx.fillText(this.jackpotLit ? 'JACKPOT LIT!' : `METER ${this.jackpotMeter}%`, 0, 8);
-        ctx.font = '900 12px Orbitron';
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillText(`${this.multiplier}X MULT`, 0, 25);
+        ctx.fillStyle = this.jackpotLit ? '#4ade80' : '#888';
+        ctx.fillText(this.jackpotLit ? 'JACKPOT READY' : `METER ${this.jackpotMeter}%`, 0, 6);
+        ctx.font = '800 11px Orbitron';
+        ctx.fillStyle = '#d4d4d8';
+        ctx.fillText(`${this.multiplier}X`, 0, 22);
         ctx.restore();
 
-        // 3. WAGMI Top Lanes
+        // 3. WAGMI Top Lanes â clean classic lights
         this.wagmi.forEach(lane => {
             ctx.save();
             ctx.translate(lane.x, lane.y);
             ctx.beginPath();
             ctx.arc(0, 0, lane.r, 0, Math.PI * 2);
-            ctx.fillStyle = lane.lit ? 'rgba(56, 189, 248, 0.32)' : 'rgba(15, 23, 42, 0.85)';
+            ctx.fillStyle = lane.lit ? 'rgba(56, 160, 220, 0.35)' : '#1a1a24';
             ctx.fill();
             ctx.lineWidth = 2.5;
-            ctx.strokeStyle = lane.lit ? '#38bdf8' : '#475569';
+            ctx.strokeStyle = lane.lit ? '#38a0d0' : '#555';
             ctx.stroke();
 
-            ctx.font = '900 12px Orbitron';
-            ctx.fillStyle = lane.lit ? '#ffffff' : '#64748b';
+            ctx.font = '800 12px Orbitron';
+            ctx.fillStyle = lane.lit ? '#fff' : '#777';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(lane.ch, 0, 1);
             ctx.restore();
         });
 
-        // 4. Jackpot Vortex
+        // 4. Jackpot target (only lights up when ready â classic style)
         ctx.save();
         ctx.translate(this.vortex.x, this.vortex.y);
-        ctx.rotate(this.vortex.spin);
         ctx.beginPath();
         ctx.arc(0, 0, this.vortex.r, 0, Math.PI * 2);
-        ctx.fillStyle = this.jackpotLit ? 'rgba(74, 222, 128, 0.24)' : 'rgba(168, 85, 247, 0.18)';
+        ctx.fillStyle = this.jackpotLit ? 'rgba(74, 222, 128, 0.2)' : 'rgba(30, 30, 40, 0.9)';
         ctx.fill();
         ctx.lineWidth = 3;
-        ctx.setLineDash([7, 5]);
-        ctx.strokeStyle = this.jackpotLit ? '#4ade80' : '#a855f7';
+        ctx.setLineDash(this.jackpotLit ? [6, 4] : []);
+        ctx.strokeStyle = this.jackpotLit ? '#4ade80' : '#555';
         ctx.stroke();
+        ctx.setLineDash([]);
         ctx.restore();
 
-        ctx.font = '900 9px Orbitron';
-        ctx.fillStyle = this.jackpotLit ? '#4ade80' : '#c084fc';
+        ctx.font = '800 9px Orbitron';
+        ctx.fillStyle = this.jackpotLit ? '#4ade80' : '#555';
         ctx.textAlign = 'center';
-        ctx.fillText(this.jackpotLit ? 'JACKPOT!' : 'VORTEX', this.vortex.x, this.vortex.y + 3);
+        ctx.fillText(this.jackpotLit ? 'JACKPOT' : 'SAUCER', this.vortex.x, this.vortex.y + 3);
 
         // 5. R-U-G Drop Targets
         this.targets.forEach(t => {
@@ -1169,23 +1156,7 @@ class RugPinballGame {
             ctx.fill();
         });
 
-        // 8. Center Rug Shield Post
-        ctx.save();
-        ctx.translate(192, 626);
-        const shieldOn = this.shieldTimer > 0;
-        const blink = shieldOn && (this.shieldTimer > 3 || Math.floor(this.shieldTimer * 6) % 2 === 0);
-        ctx.beginPath();
-        ctx.arc(0, 0, 13, 0, Math.PI * 2);
-        ctx.fillStyle = blink ? 'rgba(34, 211, 238, 0.3)' : 'rgba(30, 41, 59, 0.5)';
-        ctx.fill();
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = blink ? '#22d3ee' : '#334155';
-        ctx.stroke();
-        ctx.font = '900 7px Orbitron';
-        ctx.fillStyle = blink ? '#67e8f9' : '#475569';
-        ctx.textAlign = 'center';
-        ctx.fillText(shieldOn ? 'SHIELD' : 'OFF', 0, 2.5);
-        ctx.restore();
+        // 8. Center shield between flippers removed (user request)
 
         // 9. Character Pop Bumpers (Captain Otter, Chad, Princess Hailey)
         this.bumpers.forEach(b => {
