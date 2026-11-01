@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RUG PINBALL - V2 FULLSCREEN</title>
+    <title>RUG PINBALL - ARCADE EDITION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -27,7 +27,6 @@
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
         }
-        /* Exact same wrapper & full-screen canvas setup as your working Rug Arena game */
         #app-wrapper {
             position: relative;
             width: 100vw;
@@ -86,7 +85,6 @@
 <body class="text-white antialiased">
 
 <div id="app-wrapper">
-    <!-- FULLSCREEN CANVAS (Renders Table, Borders, Bumpers & Balls) -->
     <canvas id="gameCanvas"></canvas>
 
     <!-- TOP HUD BAR -->
@@ -142,7 +140,6 @@
 </div>
 
 <script>
-// Universal rounded-rectangle helper (prevents browser compatibility crashes)
 function drawBox(ctx, x, y, w, h, r) {
     const rad = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -154,9 +151,6 @@ function drawBox(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
-/* ============================================================================
-   PIXEL ART GRIDS FOR CAPTAIN OTTER, CHAD, AND PRINCESS HAILEY
-   ============================================================================ */
 const PALETTE = {
     'K': '#090a0f', 'W': '#ffffff', 'Y': '#facc15', 'V': '#172554',
     'N': '#6b4226', 'C': '#0ea5e9', 'M': '#f5deb3', 'B': '#1d4ed8',
@@ -239,9 +233,6 @@ function createPixelSprite(grid, scale = 3) {
     return c;
 }
 
-/* ============================================================================
-   WEB AUDIO SYNTH SOUND EFFECTS
-   ============================================================================ */
 class SoundFX {
     constructor() { this.ctx = null; }
     init() {
@@ -271,7 +262,7 @@ class SoundFX {
         } catch (e) {}
     }
     flip() { this.tone(190, 340, 0.055, 'triangle', 0.15); }
-    launch() { this.tone(140, 680, 0.2, 'sawtooth', 0.18); }
+    launch() { this.tone(140, 720, 0.22, 'sawtooth', 0.18); }
     bumper(p = 1) {
         this.tone(350 * p, 760 * p, 0.09, 'square', 0.16);
         this.tone(160 * p, 80, 0.1, 'sawtooth', 0.12);
@@ -290,16 +281,12 @@ class SoundFX {
     }
 }
 
-/* ============================================================================
-   PINBALL GAME ENGINE
-   ============================================================================ */
 class RugPinballGame {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.sfx = new SoundFX();
 
-        // Virtual table dimensions (automatically scaled to fit screen)
         this.TW = 420;
         this.TH = 690;
 
@@ -311,10 +298,9 @@ class RugPinballGame {
 
         this.bestScore = 0;
         try {
-            this.bestScore = parseInt(localStorage.getItem('rugPinballBestV2') || '0', 10) || 0;
+            this.bestScore = parseInt(localStorage.getItem('rugPinballBestV3') || '0', 10) || 0;
         } catch (e) {}
 
-        // Initialize all state variables BEFORE calling handleResize
         this.score = 0;
         this.multiplier = 1;
         this.ballNum = 1;
@@ -331,31 +317,31 @@ class RugPinballGame {
         this.plungerCharge = 0;
 
         this.flippers = [
-            { side: 'left',  x: 114, y: 612, length: 68, r: 8, rest: 0.45, active: -0.52, angle: 0.45, omega: 0 },
-            { side: 'right', x: 266, y: 612, length: 68, r: 8, rest: Math.PI - 0.45, active: Math.PI + 0.52, angle: Math.PI - 0.45, omega: 0 }
+            { side: 'left',  x: 112, y: 612, length: 68, r: 8, rest: 0.44, active: -0.52, angle: 0.44, omega: 0 },
+            { side: 'right', x: 272, y: 612, length: 68, r: 8, rest: Math.PI - 0.44, active: Math.PI + 0.52, angle: Math.PI - 0.44, omega: 0 }
         ];
 
         this.bumpers = [
-            { id: 'otter',  name: 'CAPTAIN OTTER',   callout: 'ANCHOR SMASH!', x: 190, y: 205, r: 34, color: '#38bdf8', ring: '#facc15', pts: 500, pitch: 1.0,  pulse: 0 },
-            { id: 'chad',   name: 'CHAD',            callout: 'GIGA PUMP!',    x: 118, y: 288, r: 30, color: '#ef4444', ring: '#3b82f6', pts: 400, pitch: 1.2,  pulse: 0 },
-            { id: 'hailey', name: 'PRINCESS HAILEY', callout: '3D SMOKE!',     x: 262, y: 288, r: 30, color: '#ec4899', ring: '#facc15', pts: 400, pitch: 1.35, pulse: 0 }
+            { id: 'otter',  name: 'CAPTAIN OTTER',   callout: 'ANCHOR SMASH!', x: 192, y: 205, r: 34, color: '#38bdf8', ring: '#facc15', pts: 500, pitch: 1.0,  pulse: 0 },
+            { id: 'chad',   name: 'CHAD',            callout: 'GIGA PUMP!',    x: 118, y: 292, r: 30, color: '#ef4444', ring: '#3b82f6', pts: 400, pitch: 1.2,  pulse: 0 },
+            { id: 'hailey', name: 'PRINCESS HAILEY', callout: '3D SMOKE!',     x: 266, y: 292, r: 30, color: '#ec4899', ring: '#facc15', pts: 400, pitch: 1.35, pulse: 0 }
         ];
 
         this.wagmi = [
-            { ch: 'W', x: 96,  y: 94, r: 13, lit: false },
-            { ch: 'A', x: 143, y: 82, r: 13, lit: false },
-            { ch: 'G', x: 190, y: 78, r: 13, lit: false },
-            { ch: 'M', x: 237, y: 82, r: 13, lit: false },
-            { ch: 'I', x: 284, y: 94, r: 13, lit: false }
+            { ch: 'W', x: 96,  y: 78, r: 13, lit: false },
+            { ch: 'A', x: 144, y: 64, r: 13, lit: false },
+            { ch: 'G', x: 192, y: 58, r: 13, lit: false },
+            { ch: 'M', x: 240, y: 64, r: 13, lit: false },
+            { ch: 'I', x: 288, y: 78, r: 13, lit: false }
         ];
 
         this.targets = [
-            { ch: 'R', x1: 38, y1: 185, x2: 52, y2: 155, hit: false, flash: 0 },
-            { ch: 'U', x1: 55, y1: 150, x2: 72, y2: 124, hit: false, flash: 0 },
-            { ch: 'G', x1: 75, y1: 120, x2: 96, y2: 98,  hit: false, flash: 0 }
+            { ch: 'R', x1: 34, y1: 210, x2: 46, y2: 178, hit: false, flash: 0 },
+            { ch: 'U', x1: 50, y1: 172, x2: 66, y2: 142, hit: false, flash: 0 },
+            { ch: 'G', x1: 70, y1: 136, x2: 90, y2: 110, hit: false, flash: 0 }
         ];
 
-        this.vortex = { x: 325, y: 175, r: 20, spin: 0 };
+        this.vortex = { x: 322, y: 185, r: 20, spin: 0 };
 
         this.walls = [];
         this.posts = [];
@@ -389,8 +375,9 @@ class RugPinballGame {
             this.walls.push({ x1, y1, x2, y2, bounce, color, sling, pts, flash: 0 });
         };
 
-        // Top Curved Arch (guides ball from shooter lane x=406 around top to x=14)
-        const cx = 210, cy = 200, rx = 196, ry = 184, steps = 28;
+        // 1. High Top Curved Arch: starts at y=140 and rises all the way to y=14!
+        // This leaves a huge 100px+ opening above the shooter lane divider (y=185)
+        const cx = 210, cy = 140, rx = 196, ry = 126, steps = 28;
         for (let i = 0; i < steps; i++) {
             const a1 = Math.PI + (i / steps) * Math.PI;
             const a2 = Math.PI + ((i + 1) / steps) * Math.PI;
@@ -401,64 +388,53 @@ class RugPinballGame {
             );
         }
 
-        // Left & Right Outer Walls
-        add(14, 200, 14, 528, 0.75, '#ef4444');
-        add(406, 200, 406, 655, 0.75, '#ef4444');
-        add(372, 655, 406, 655, 0.5, '#fbbf24'); // Plunger floor
+        // 2. Outer Left Wall & Outer Right Shooter Wall
+        add(14, 140, 14, 530, 0.75, '#ef4444');
+        add(406, 140, 406, 655, 0.75, '#ef4444');
+        add(370, 655, 406, 655, 0.5, '#fbbf24'); // Plunger floor
 
-        // Shooter Lane Inner Divider
-        add(372, 130, 372, 655, 0.75, '#b91c1c');
-        add(372, 130, 356, 215, 0.8, '#ef4444');
-        add(356, 215, 364, 528, 0.75, '#ef4444');
+        // 3. Single Clean Shooter Lane Inner Wall (Stops at y=185 so top is wide open!)
+        add(370, 185, 370, 655, 0.75, '#b91c1c');
 
-        // Left & Right Inlane Guides (feed ball smoothly to flippers)
-        add(14, 528, 114, 612, 0.65, '#f59e0b');
-        add(48, 435, 48, 520, 0.75, '#ef4444');
-        add(48, 520, 114, 574, 0.65, '#ef4444');
+        // 4. Wide Left & Right Inlane Ramps (Feed directly to Left & Right Flippers)
+        add(14, 530, 112, 612, 0.65, '#f59e0b');
+        add(370, 530, 272, 612, 0.65, '#f59e0b');
 
-        add(364, 528, 266, 612, 0.65, '#f59e0b');
-        add(332, 435, 332, 520, 0.75, '#ef4444');
-        add(332, 520, 266, 574, 0.65, '#ef4444');
+        // 5. Left Triangular Slingshot (Leaves a wide 44px lane on the left)
+        add(58, 445, 58, 515, 0.85, '#ec4899');
+        add(58, 515, 114, 560, 0.85, '#ec4899');
+        add(58, 445, 114, 560, 1.5, '#38bdf8', true, 250);
 
-        // Left Triangular Slingshot
-        add(72, 435, 72, 515, 0.85, '#ec4899');
-        add(72, 515, 122, 552, 0.85, '#ec4899');
-        add(72, 435, 122, 552, 1.5, '#38bdf8', true, 250);
+        // 6. Right Triangular Slingshot (Leaves a wide 44px lane on the right)
+        add(326, 445, 326, 515, 0.85, '#ec4899');
+        add(326, 515, 270, 560, 0.85, '#ec4899');
+        add(326, 445, 270, 560, 1.5, '#38bdf8', true, 250);
 
-        // Right Triangular Slingshot
-        add(308, 435, 308, 515, 0.85, '#ec4899');
-        add(308, 515, 258, 552, 0.85, '#ec4899');
-        add(308, 435, 258, 552, 1.5, '#38bdf8', true, 250);
+        // 7. Mid-Side Neon Kickers
+        add(14, 320, 42, 365, 1.2, '#a855f7', true, 150);
+        add(370, 320, 342, 365, 1.2, '#a855f7', true, 150);
 
-        // Side Deflectors
-        add(14, 325, 45, 368, 1.15, '#a855f7', true, 150);
-        add(360, 325, 332, 368, 1.15, '#a855f7', true, 150);
-
+        // Corner Posts
         this.posts = [
-            { x: 372, y: 130, r: 5 },
-            { x: 48,  y: 435, r: 5 },
-            { x: 332, y: 435, r: 5 },
-            { x: 72,  y: 435, r: 6 },
-            { x: 72,  y: 515, r: 6 },
-            { x: 122, y: 552, r: 6 },
-            { x: 308, y: 435, r: 6 },
-            { x: 308, y: 515, r: 6 },
-            { x: 258, y: 552, r: 6 },
-            { x: 119, y: 86,  r: 5 },
-            { x: 166, y: 78,  r: 5 },
-            { x: 214, y: 78,  r: 5 },
-            { x: 261, y: 86,  r: 5 }
+            { x: 370, y: 185, r: 5 },
+            { x: 58,  y: 445, r: 5 },
+            { x: 58,  y: 515, r: 5 },
+            { x: 114, y: 560, r: 5 },
+            { x: 326, y: 445, r: 5 },
+            { x: 326, y: 515, r: 5 },
+            { x: 270, y: 560, r: 5 }
         ];
     }
 
     spawnBallInShooter() {
         this.balls.push({
-            x: 389,
+            x: 388,
             y: 625,
             vx: 0,
             vy: 0,
-            r: 10.5,
+            r: 10,
             inShooter: true,
+            stallTimer: 0,
             trail: []
         });
         const lbl = document.getElementById('launchText');
@@ -468,23 +444,26 @@ class RugPinballGame {
     spawnMultiball() {
         if (this.balls.length >= 3) return;
         this.balls.push({
-            x: 190 + (Math.random() - 0.5) * 30,
-            y: 125,
-            vx: (Math.random() - 0.5) * 260,
+            x: 192 + (Math.random() - 0.5) * 35,
+            y: 120,
+            vx: (Math.random() - 0.5) * 280,
             vy: 160,
-            r: 10.5,
+            r: 10,
             inShooter: false,
+            stallTimer: 0,
             trail: []
         });
         this.shieldTimer = Math.max(this.shieldTimer, 10);
     }
 
     firePlunger() {
-        const shooterBall = this.balls.find(b => b.x > 370 && b.y > 520);
+        const shooterBall = this.balls.find(b => b.inShooter || (b.x > 368 && b.y > 500));
         if (shooterBall) {
-            const pwr = Math.max(0.65, this.plungerCharge);
-            shooterBall.vy = -(820 + pwr * 420);
-            shooterBall.vx = (Math.random() - 0.5) * 16;
+            const pwr = Math.max(0.75, this.plungerCharge);
+            // Strong upward launch velocity guaranteed to reach the top arch
+            shooterBall.x = 388;
+            shooterBall.vy = -(960 + pwr * 320);
+            shooterBall.vx = 0;
             this.sfx.launch();
             this.shieldTimer = Math.max(this.shieldTimer, 10.0);
             const lbl = document.getElementById('launchText');
@@ -521,7 +500,7 @@ class RugPinballGame {
         this.score += gain;
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
-            try { localStorage.setItem('rugPinballBestV2', String(this.bestScore)); } catch (e) {}
+            try { localStorage.setItem('rugPinballBestV3', String(this.bestScore)); } catch (e) {}
         }
         if (x !== undefined && y !== undefined) {
             this.popups.push({ x, y, text: `+${gain.toLocaleString()}`, color, alpha: 1.0, vy: -45 });
@@ -574,16 +553,16 @@ class RugPinballGame {
                 this.restartMatch();
                 return;
             }
-            const shooterBall = this.balls.find(b => b.x > 370 && b.y > 520);
+            const shooterBall = this.balls.find(b => b.inShooter || (b.x > 368 && b.y > 500));
             if (shooterBall) {
                 this.plungerPulling = true;
-                this.plungerCharge = 0.7; // Instant base power even on a quick tap!
+                this.plungerCharge = 0.8;
                 btnLaunch.classList.add('launch-active');
             } else {
                 this.shake = 0.18;
                 this.balls.forEach(b => {
-                    b.vx += (Math.random() - 0.5) * 110;
-                    b.vy -= 55;
+                    b.vx += (Math.random() - 0.5) * 120;
+                    b.vy -= 65;
                 });
                 this.showBanner('TABLE NUDGE!', '', 0.7);
             }
@@ -619,7 +598,6 @@ class RugPinballGame {
         bindBtn(btnRight, () => setRight(true), () => setRight(false));
         bindBtn(btnLaunch, startLaunch, endLaunch);
 
-        // Tap directly on the canvas (left half = left flipper, right half = right flipper, shooter lane = launch)
         this.canvas.addEventListener('touchstart', (e) => {
             if (e.cancelable) e.preventDefault();
             this.sfx.init();
@@ -629,7 +607,7 @@ class RugPinballGame {
             }
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const t = e.changedTouches[i];
-                const shooterBall = this.balls.find(b => b.x > 370 && b.y > 520);
+                const shooterBall = this.balls.find(b => b.inShooter || (b.x > 368 && b.y > 500));
                 if (shooterBall && t.clientX > this.screenW * 0.72) {
                     startLaunch();
                 } else if (t.clientX < this.screenW * 0.5) {
@@ -692,7 +670,7 @@ class RugPinballGame {
 
         const SUBSTEPS = 12;
         const sdt = dt / SUBSTEPS;
-        const GRAVITY = 560;
+        const GRAVITY = 520;
 
         for (let step = 0; step < SUBSTEPS; step++) {
             // Flippers
@@ -711,25 +689,38 @@ class RugPinballGame {
                 const ball = this.balls[bIdx];
 
                 ball.vy += GRAVITY * sdt;
-                ball.vx *= Math.pow(0.996, sdt * 60);
-                ball.vy *= Math.pow(0.996, sdt * 60);
+                ball.vx *= Math.pow(0.997, sdt * 60);
+                ball.vy *= Math.pow(0.997, sdt * 60);
 
                 const spd = Math.hypot(ball.vx, ball.vy);
-                if (spd > 1280) {
-                    ball.vx = (ball.vx / spd) * 1280;
-                    ball.vy = (ball.vy / spd) * 1280;
+                if (spd > 1300) {
+                    ball.vx = (ball.vx / spd) * 1300;
+                    ball.vy = (ball.vy / spd) * 1300;
                 }
 
                 ball.x += ball.vx * sdt;
                 ball.y += ball.vy * sdt;
 
-                if (ball.inShooter && ball.x < 360) {
+                // GUARANTEED SHOOTER LANE EXIT CURVE:
+                // As soon as the launched ball reaches the top of the shooter chute (y < 155),
+                // smoothly curve it left out of the chute across the top arch!
+                if (ball.inShooter && ball.y < 155) {
+                    ball.vx = -380 - Math.random() * 90;
+                    ball.vy = -140;
+                    ball.x = 355;
                     ball.inShooter = false;
                 }
-                // One-way gate at top of shooter lane
-                if (!ball.inShooter && ball.x > 360 && ball.y < 145 && ball.vx > 0) {
-                    ball.x = 360;
-                    ball.vx = -Math.abs(ball.vx) * 0.7;
+
+                if (ball.inShooter && ball.x < 362) {
+                    ball.inShooter = false;
+                }
+
+                // ONE-WAY GATE: Once in playfield, ball can never re-enter the shooter lane (x > 360)
+                if (!ball.inShooter && ball.x > 360 - ball.r) {
+                    ball.x = 360 - ball.r;
+                    if (ball.vx > 0) {
+                        ball.vx = -Math.abs(ball.vx) * 0.75;
+                    }
                 }
 
                 // Walls & Slingshots
@@ -766,11 +757,11 @@ class RugPinballGame {
 
                 // Center Shield Post
                 if (this.shieldTimer > 0) {
-                    if (this.collideCircle(ball, 190, 626, 13, 1.45)) {
-                        ball.vy = -Math.max(460, Math.abs(ball.vy));
+                    if (this.collideCircle(ball, 192, 626, 13, 1.45)) {
+                        ball.vy = -Math.max(480, Math.abs(ball.vy));
                         this.sfx.lane();
-                        this.spawnSparks(190, 626, '#22d3ee', 12);
-                        this.addScore(250, 190, 605, '#22d3ee');
+                        this.spawnSparks(192, 626, '#22d3ee', 12);
+                        this.addScore(250, 192, 605, '#22d3ee');
                     }
                 }
 
@@ -812,12 +803,24 @@ class RugPinballGame {
             }
         }
 
-        // Sensors & Drain Check
+        // Sensors, Anti-Stall & Drain Check
         for (let bIdx = this.balls.length - 1; bIdx >= 0; bIdx--) {
             const ball = this.balls[bIdx];
 
             ball.trail.push({ x: ball.x, y: ball.y });
             if (ball.trail.length > 8) ball.trail.shift();
+
+            // Anti-Stall Protection: if ball ever stops moving on playfield, kick it free
+            if (!ball.inShooter && Math.hypot(ball.vx, ball.vy) < 25) {
+                ball.stallTimer = (ball.stallTimer || 0) + dt;
+                if (ball.stallTimer > 0.35) {
+                    ball.vx = (Math.random() - 0.5) * 240;
+                    ball.vy = -260;
+                    ball.stallTimer = 0;
+                }
+            } else {
+                ball.stallTimer = 0;
+            }
 
             // WAGMI Top Rollovers
             this.wagmi.forEach(lane => {
@@ -831,7 +834,7 @@ class RugPinballGame {
                         if (this.wagmi.every(l => l.lit)) {
                             this.multiplier = Math.min(10, this.multiplier + 1);
                             this.shieldTimer = Math.max(this.shieldTimer, 12.0);
-                            this.addScore(3500, 190, 95, '#facc15');
+                            this.addScore(3500, 192, 85, '#facc15');
                             this.sfx.jackpot();
                             this.showBanner('WAGMI MULTIBALL!', `MULTIPLIER UP TO ${this.multiplier}X!`, 2.6);
                             this.spawnMultiball();
@@ -856,8 +859,8 @@ class RugPinballGame {
                     this.sfx.lane();
                     this.addScore(1000, this.vortex.x, this.vortex.y, '#a855f7');
                 }
-                ball.x = this.vortex.x - 18;
-                ball.y = this.vortex.y + 18;
+                ball.x = this.vortex.x - 20;
+                ball.y = this.vortex.y + 20;
                 ball.vx = -320;
                 ball.vy = 260;
             }
@@ -865,13 +868,13 @@ class RugPinballGame {
             // Bottom Drain
             if (ball.y > this.TH + 15) {
                 if (this.shieldTimer > 0 && this.balls.length === 1) {
-                    ball.x = 389;
-                    ball.y = 560;
-                    ball.vx = (Math.random() - 0.5) * 20;
-                    ball.vy = -1080;
-                    ball.inShooter = true;
+                    ball.x = 192;
+                    ball.y = 580;
+                    ball.vx = (Math.random() - 0.5) * 220;
+                    ball.vy = -780;
+                    ball.inShooter = false;
                     this.sfx.launch();
-                    this.showBanner('RUG SHIELD SAVE!', 'BALL AUTO-LAUNCHED!', 1.8);
+                    this.showBanner('RUG SHIELD SAVE!', 'BALL SAVED!', 1.8);
                 } else {
                     this.balls.splice(bIdx, 1);
                     if (this.balls.length === 0) {
@@ -926,8 +929,8 @@ class RugPinballGame {
         if (dist < ball.r) {
             const nx = dx / (dist || 1);
             const ny = dy / (dist || 1);
-            ball.x = cx + nx * (ball.r + 0.4);
-            ball.y = cy + ny * (ball.r + 0.4);
+            ball.x = cx + nx * (ball.r + 0.5);
+            ball.y = cy + ny * (ball.r + 0.5);
 
             const vn = ball.vx * nx + ball.vy * ny;
             if (vn < 0) {
@@ -936,8 +939,8 @@ class RugPinballGame {
                 ball.vy -= (1 + bounce) * vn * ny;
 
                 if (w.sling) {
-                    ball.vx += nx * 210;
-                    ball.vy += ny * 210;
+                    ball.vx += nx * 220;
+                    ball.vy += ny * 220;
                     w.flash = 1.0;
                     this.sfx.sling();
                     this.addScore(w.pts || 200, cx, cy, '#38bdf8');
@@ -957,8 +960,8 @@ class RugPinballGame {
         if (dist < minDist) {
             const nx = dx / (dist || 1);
             const ny = dy / (dist || 1);
-            ball.x = cx + nx * (minDist + 0.4);
-            ball.y = cy + ny * (minDist + 0.4);
+            ball.x = cx + nx * (minDist + 0.5);
+            ball.y = cy + ny * (minDist + 0.5);
             const vn = ball.vx * nx + ball.vy * ny;
             if (vn < 0) {
                 ball.vx -= (1 + bounce) * vn * nx;
@@ -1010,7 +1013,7 @@ class RugPinballGame {
                 ball.vy -= 1.55 * relVn * ny;
                 if (Math.abs(f.omega) > 1.5) {
                     ball.vx += flpVx * 0.55 + (f.side === 'left' ? 45 : -45);
-                    ball.vy += flpVy * 0.55 - 260 * (0.45 + 0.55 * t);
+                    ball.vy += flpVy * 0.55 - 280 * (0.45 + 0.55 * t);
                 }
             }
         }
@@ -1021,7 +1024,6 @@ class RugPinballGame {
         ctx.fillStyle = '#050508';
         ctx.fillRect(0, 0, this.screenW, this.screenH);
 
-        // Calculate exact space between Top HUD and Bottom Controls
         const topEl = document.getElementById('topHud');
         const botEl = document.getElementById('bottomHud');
         const topH = topEl ? topEl.offsetHeight + 6 : 64;
@@ -1042,7 +1044,7 @@ class RugPinballGame {
             ctx.translate((Math.random() - 0.5) * 9, (Math.random() - 0.5) * 9);
         }
 
-        // 1. Table Playfield Base & Outer Neon Frame
+        // 1. Table Playfield Base
         ctx.fillStyle = '#09040e';
         drawBox(ctx, 4, 4, this.TW - 8, this.TH - 8, 22);
         ctx.fill();
@@ -1050,7 +1052,7 @@ class RugPinballGame {
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
         ctx.stroke();
 
-        // Subtle Cyber Grid
+        // Grid
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.08)';
         ctx.lineWidth = 1;
         for (let x = 28; x < this.TW - 20; x += 28) {
@@ -1062,7 +1064,7 @@ class RugPinballGame {
 
         // 2. Center Jackpot Ring
         ctx.save();
-        ctx.translate(190, 430);
+        ctx.translate(192, 430);
         ctx.beginPath();
         ctx.arc(0, 0, 50, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(15, 10, 24, 0.9)';
@@ -1169,7 +1171,7 @@ class RugPinballGame {
 
         // 8. Center Rug Shield Post
         ctx.save();
-        ctx.translate(190, 626);
+        ctx.translate(192, 626);
         const shieldOn = this.shieldTimer > 0;
         const blink = shieldOn && (this.shieldTimer > 3 || Math.floor(this.shieldTimer * 6) % 2 === 0);
         ctx.beginPath();
@@ -1234,12 +1236,12 @@ class RugPinballGame {
         // 10. Plunger Spring
         const pull = this.plungerCharge * 32;
         ctx.fillStyle = '#fbbf24';
-        ctx.fillRect(379, 636 + pull * 0.4, 20, 6);
+        ctx.fillRect(378, 636 + pull * 0.4, 20, 6);
         ctx.strokeStyle = '#d97706';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(389, 642 + pull * 0.4);
-        ctx.lineTo(389, 655);
+        ctx.moveTo(388, 642 + pull * 0.4);
+        ctx.lineTo(388, 655);
         ctx.stroke();
 
         // 11. Flippers
@@ -1306,19 +1308,19 @@ class RugPinballGame {
             ctx.fillStyle = 'rgba(9, 10, 15, 0.88)';
             ctx.strokeStyle = '#fbbf24';
             ctx.lineWidth = 2;
-            drawBox(ctx, 55, 335, 270, 44, 10);
+            drawBox(ctx, 57, 338, 270, 44, 10);
             ctx.fill();
             ctx.stroke();
 
             ctx.font = '900 13px Orbitron';
             ctx.fillStyle = '#fde047';
             ctx.textAlign = 'center';
-            ctx.fillText(this.banner.text, 190, 355);
+            ctx.fillText(this.banner.text, 192, 358);
 
             if (this.banner.sub) {
                 ctx.font = '700 10px Rajdhani';
                 ctx.fillStyle = '#38bdf8';
-                ctx.fillText(this.banner.sub, 190, 371);
+                ctx.fillText(this.banner.sub, 192, 374);
             }
             ctx.restore();
         }
